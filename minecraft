@@ -27,24 +27,24 @@ SERVICE="craftbukkit-0.0.1-SNAPSHOT.jar"
 # Name to use for the screen instance
 SCREEN="minecraft"
 # User that should run the server
-USERNAME="v"
+USERNAME="minecraft"
 # Path to minecraft directory 
-MCPATH="/home/${USERNAME}/minecraft"
+MCPATH=`cat /etc/passwd | grep "$USERNAME" | cut -d':' -f6`/bin
 # Number of CPUs/cores to use
 CPU_COUNT=2
 # Initial memory usage
 INITMEM="2048M"
 # Maximum amount of memory to use
-MAXMEM="2048M"
+MAXMEM="4096M"
 # Remember: give the ramdisk enough space, subtract from the total amount
 # of RAM available the size of your map and the RAM-consumption of your base system.
 INVOCATION="java -Xmx$MAXMEM -Xms$INITMEM -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_COUNT -XX:+AggressiveOpts -jar $SERVICE nogui"
 # Where the world backups should go
-BACKUPPATH="/home/${USERNAME}/minebak"
+BACKUPPATH="${MCPATH}/backup"
 # Where the logs are copied with log-roll 
 LOGPATH="${MCPATH}/logs"
 # Where the whole minecraft directory is copied when whole-backup is executed
-WHOLEBACKUP="/home/${USERNAME}/serverbak"
+WHOLEBACKUP="${MCPATH}/serverbak"
 # Where the worlds are located on the disk
 WORLDSTORAGE="${MCPATH}/worldstorage"
 # folder names of the world
