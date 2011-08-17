@@ -29,7 +29,8 @@ SCREEN="minecraft"
 # User that should run the server
 USERNAME="minecraft"
 # Path to minecraft directory 
-MCPATH=`cat /etc/passwd | grep "$USERNAME" | cut -d':' -f6`/bin
+MCHOME=`cat /etc/passwd | grep "$USERNAME" | cut -d':' -f6`
+MCPATH="${MCHOME}/bin"
 # Number of CPUs/cores to use
 CPU_COUNT=2
 # Initial memory usage
@@ -40,13 +41,13 @@ MAXMEM="4096M"
 # of RAM available the size of your map and the RAM-consumption of your base system.
 INVOCATION="java -Xmx$MAXMEM -Xms$INITMEM -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_COUNT -XX:+AggressiveOpts -jar $SERVICE nogui"
 # Where the world backups should go
-BACKUPPATH="${MCPATH}/backup"
+BACKUPPATH="${MCHOME}/backup"
 # Where the logs are copied with log-roll 
-LOGPATH="${MCPATH}/logs"
+LOGPATH="${MCHOME}/logs"
 # Where the whole minecraft directory is copied when whole-backup is executed
-WHOLEBACKUP="${MCPATH}/serverbak"
+WHOLEBACKUP="${MCHOME}/serverbak"
 # Where the worlds are located on the disk
-WORLDSTORAGE="${MCPATH}/worldstorage"
+WORLDSTORAGE="${MCHOME}/worldstorage"
 # folder names of the world
 WORLDNAME[1]="world"
 WORLDNAME[2]="world_nether"
