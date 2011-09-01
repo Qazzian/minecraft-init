@@ -316,6 +316,14 @@ case "$1" in
 			echo "$SERVICE is not running."
 		fi
 		;;
+	watchdog)
+		# Ensures server is still running
+		if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
+		then
+			mc_stop
+			mc_start
+		fi
+		;;
 	version)
 		echo Craftbukkit version `awk '/Craftbukkit/ {sub(/\)/, ""); print $12}' $MCPATH/server.log`
 		;;
@@ -335,6 +343,7 @@ case "$1" in
 		echo "to-disk - copies the worlds from the ramdisk to worldstorage"
 		echo "connected - lists connected users"
 		echo "status - Shows server status"
+		echo "watchdog - Ensures server is still running"
 		echo "version - returs Bukkit version"
 		echo "links - creates nessesary symlinks"
 		;;
