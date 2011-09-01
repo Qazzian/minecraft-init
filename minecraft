@@ -320,6 +320,8 @@ case "$1" in
 		# Ensures server is still running
 		if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
 		then
+			echo "$SERVICE is running."
+		else
 			mc_stop
 			mc_start
 		fi
