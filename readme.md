@@ -85,11 +85,11 @@ Manual Setup
 5. If you already have a world generated (and it is located, along with the rest of you server files, in `/home/minecraft/server`), move your world directory into `/home/minecraft/server/world_storage`:
 
 		cd /home/minecraft/server
-		sudo mv world world_storage
+		sudo mv world world_storage/world
 		
 	If your world folder has a unique name, like "foo", do this instead:
 	
-		sudo mv foo world_storage
+		sudo mv foo world_storage/foo
 
 6. Make sure permissions on ALL files and folders in /home/minecraft are owned by the `minecraft` user:
 
