@@ -10,13 +10,12 @@
 # Default-Start:	2 3 4 5
 # Default-Stop:		0 1 6
 # Short-Description: Minecraft server
-# Description:		Init script for Minecraft servers on Ubuntu/Debian,
-#					compatible with vanilla and CraftBukkit.
+# Description:		Init script for vanilla Minecraft servers on Ubuntu/Debian.
 #					Features rolling logs and use of ramdisk for less lag.
 ### END INIT INFO
 
 # == COPYRIGHT ================================================================
-# Version 1.3 (2012-09-10), Copyright (C) 2012
+# Version 1.3.1 (2012-11-11), Copyright (C) 2012
 # Author: cr0ybot (https://github.com/cr0ybot/minecraft-init)
 
 #   This script is free software: you can redistribute it and/or modify it 
@@ -44,6 +43,7 @@
 # Provide commands for restoring backups
 # Add/remove from whitelist/ops when server is not running
 # Automatically detect errors in java process and restart accordingly
+# Only perform world backup if change has been detected (players logged in, level.dat change in size, etc)
 
 # == SETTINGS =================================================================
 # Change these settings to fit you needs.
@@ -53,13 +53,9 @@
 # Name of server (not critical, just makes output neater)
 SERVERNAME='Minecraft Server'
 # Name of server jar file
-# If using CraftBukkit, rename jar file to 'craftbukkit.jar'
-# If using vanilla Minecraft server, use 'minecraft_server.jar'
-SERVICE='craftbukkit.jar'
+SERVICE='minecraft_server.jar'
 # URL for downloading service updates.
-# CraftBukkit recommended build URL is http://dl.bukkit.org/latest-rb/craftbukkit.jar
-# If using vanilla Minecraft server, URL is https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar (as of 9/9/12)
-UPDATE_URL='http://dl.bukkit.org/latest-rb/craftbukkit.jar'
+UPDATE_URL='https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar'
 # User that should run the server (default is 'minecraft')
 USERNAME='minecraft'
 # Name of the world folder (default is 'world', should be same as level-name in server.properties)
@@ -129,7 +125,7 @@ check_dir() {
 	fi
 }
 
-## Checks for symlinks on world dirs, creates if not set up
+## Checks for symlinks on world dir, creates if not set up
 check_links() {
 	echo " * Checking links to ramdisk..."
 	# Check link function (must be defined before use)
@@ -166,10 +162,6 @@ check_links() {
 	check_dir "$RAMDISK"
 	# World
 	check_link "$WORLDNAME"
-	# Nether
-	check_link "${WORLDNAME}_nether"
-	# The End
-	check_link "${WORLDNAME}_the_end"
 }
 
 ## Fixes permissions on entire minecraft directory tree (if root or sudo)
@@ -234,7 +226,6 @@ mc_setup() {
 		# Create all necessary dirs
 		if ask "Attempt to create all necessary directories?" ; then
 			as_user "mkdir -p $MCPATH $WORLDSTORAGE $BACKUPWORLD $BACKUPLOG $BACKUPFULL $RAMDISK"
-			# Can't get $WORLDSTORAGE/{$WORLDNAME,${WORLDNAME}_nether,${WORLDNAME}_the_end} to work...
 			echo " * Necessary directories created."
 		else
 			echo " * Skipping directory creation."
@@ -410,7 +401,7 @@ mc_full_backup() {
 	fi
 }
 
-## Do a backup of the worlds
+## Do a backup of the world
 mc_world_backup() {
 	TODAY=$(date +%F)
 	# Check folder dated today exists
@@ -423,22 +414,6 @@ mc_world_backup() {
 		echo " * Backup of $WORLDNAME performed successfully to $path."
 	else
 		logger -st minecraft "Failed to perform backup of $WORLDNAME to $path."
-	fi
-	# Nether
-	path=$(datepath $BACKUPWORLD/$TODAY/${WORLDNAME}_nether .tar.gz)
-	as_user "tar -chzf $path $MCPATH/${WORLDNAME}_nether"
-	if [ $? -eq 0 ] ; then
-		echo " * Backup of ${WORLDNAME}_nether performed successfully to $path."
-	else
-		logger -st minecraft "Failed to perform backup of ${WORLDNAME}_nether to $path."
-	fi
-	# The End
-	path=$(datepath $BACKUPWORLD/$TODAY/${WORLDNAME}_the_end .tar.gz)
-	as_user "tar -chzf $path $MCPATH/${WORLDNAME}_the_end"
-	if [ $? -eq 0 ] ; then
-		echo " * Backup of ${WORLDNAME}_the_end performed successfully to $path."
-	else
-		logger -st minecraft "Failed to perform backup of ${WORLDNAME}_the_end to $path."
 	fi
 }
 
@@ -465,10 +440,8 @@ to_ram() {
 	else
 		# Check that symlinks are set up first.
 		check_links
-		# Check that the dirs exist
+		# Check that the dir exists
 		check_dir "$RAMDISK/$WORLDNAME"
-		check_dir "$RAMDISK/${WORLDNAME}_nether"
-		check_dir "$RAMDISK/${WORLDNAME}_the_end"
 		# Sync world storage files to ramdisk (overwrite only if newer)
 		# Trailing slash is important on source for rsync, specifies syncing contents
 		# World
@@ -478,20 +451,6 @@ to_ram() {
 		else
 			logger -st minecraft "Failed to copy $WORLDNAME to ramdisk."
 		fi
-		# Nether
-		as_user "rsync -rtu $WORLDSTORAGE/${WORLDNAME}_nether/ $MCPATH/${WORLDNAME}_nether"
-		if [ $? -eq 0 ] ; then
-			echo " * ${WORLDNAME}_nether copied to ramdisk."
-		else
-			logger -st minecraft "Failed to copy ${WORLDNAME}_nether to ramdisk."
-		fi
-		# The End
-		as_user "rsync -rtu $WORLDSTORAGE/${WORLDNAME}_the_end/ $MCPATH/${WORLDNAME}_the_end"
-		if [ $? -eq 0 ] ; then
-			echo " * ${WORLDNAME}_the_end copied to ramdisk."
-		else
-			logger -st minecraft "Failed to copy ${WORLDNAME}the_end to ramdisk."
-		fi
 	fi
 }
 
@@ -499,10 +458,8 @@ to_ram() {
 to_disk() {
 	# Check world storage exists
 	check_dir "$WORLDSTORAGE"
-	# Check that the dirs exist
+	# Check that the dir exists
 	check_dir "$WORLDSTORAGE/$WORLDNAME"
-	check_dir "$WORLDSTORAGE/${WORLDNAME}_nether"
-	check_dir "$WORLDSTORAGE/${WORLDNAME}_the_end"
 	# Sync ramdisk files to world storage (overwrite only if newer)
 	# Trailing slash is important on source for rsync, specifies syncing contents
 	# World
@@ -511,20 +468,6 @@ to_disk() {
 		echo " * $WORLDNAME synced with world storage at $WORLDSTORAGE."
 	else
 		logger -st minecraft "Failed to copy $WORLDNAME to world storage at $WORLDSTORAGE."
-	fi
-	# Nether
-	as_user "rsync -rtu $MCPATH/${WORLDNAME}_nether/ $WORLDSTORAGE/${WORLDNAME}_nether"
-	if [ $? -eq 0 ] ; then
-		echo " * ${WORLDNAME}_nether synced with world storage at $WORLDSTORAGE."
-	else
-		logger -st minecraft "Failed to copy ${WORLDNAME}_nether to world storage at $WORLDSTORAGE."
-	fi
-	# The End
-	as_user "rsync -rtu $MCPATH/${WORLDNAME}_the_end/ $WORLDSTORAGE/${WORLDNAME}_the_end"
-	if [ $? -eq 0 ] ; then
-		echo " * ${WORLDNAME}_the_end synced with world storage at $WORLDSTORAGE."
-	else
-		logger -st minecraft "Failed to copy ${WORLDNAME}_nether to world storage at $WORLDSTORAGE."
 	fi
 }
 
@@ -535,18 +478,7 @@ mc_update() {
 	else
 		echo " * Updating $SERVICE..."
 		echo " * Downloading latest $SERVICE from $UPDATE_URL..."
-		as_user "cd $MCPATH && wget -q -O $MCPATH/$SERVICE.update $UPDATE_URL"
-		if [ -f $MCPATH/$SERVICE.update ] ; then
-			if $(diff $MCPATH/$SERVICE $MCPATH/$SERVICE.update > /dev/null) ; then
-				echo " * You are already running the latest version of $SERVICE."
-				as_user "rm $MCPATH/$SERVICE.update"
-			else
-				as_user "mv -f $MCPATH/$SERVICE.update $MCPATH/$SERVICE"
-				echo " * $SERVICE successfully updated."
-			fi
-		else
-			logger -st minecraft "$SERVICE update could not be downloaded."
-		fi
+		as_user "cd $MCPATH && wget -N $UPDATE_URL"
 	fi
 }
 

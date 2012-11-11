@@ -1,3 +1,11 @@
+## 1.3.1 (2012-11-11)
+
+Focus is now on vanilla Minecraft servers only. See https://github.com/cr0ybot/bukkit-init for Bukkit servers.
+
+ * Removed notes from readme and script about setting script up for Bukkit
+ * Removed all code related to the "world_nether" and "world_the_end" directories (used in Bukkit, not vanilla)
+ * Changed update function to use wget -N (timestamp) so no unnecessary downloading occurs
+
 ## 1.3.0 (2012-09-18)
 
 An almost total rewrite of the script.

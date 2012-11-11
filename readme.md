@@ -1,6 +1,6 @@
 Initscript for Minecraft servers on Ubuntu
 ==========================================
-This is a script for starting a single-world Minecraft server at boot, and comes with a bunch of other features that make maintaining a server fairly simple.
+This is a script for starting a single-world vanilla Minecraft server at boot, and comes with a bunch of other features that make maintaining a server fairly simple.
 
 Features
 --------
@@ -10,7 +10,7 @@ Features
 + Op commands (add, remove, and display). (NEW in 1.3.0)
 + Choose to use a ramdisk to speed up server read/write times to the world files. 
 + Specify max RAM the server process should use.
-+ Stop, start, restart, and update the server (Minecraft & CraftBukkit) with simple console commands.
++ Stop, start, restart, and update the server with simple console commands.
 + See who is currently connected, and all connects/disconnects since the last log-roll.
 + Easily push a message to people playing on the server.
 + Use Minecraft server commands without opening the server console screen.
@@ -80,20 +80,16 @@ Manual Setup
 
 		sudo mkdir /home/minecraft/server
 		cd /home/minecraft/server
-		sudo wget 'http://dl.bukkit.org/latest-rb/craftbukkit.jar' -O craftbukkit.jar
+		sudo wget 'https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar'
 	
-5. If you already have a world generated (and it is located, along with the rest of you server files, in `/home/minecraft/server`), move your world directories into `/home/minecraft/server/world_storage`:
+5. If you already have a world generated (and it is located, along with the rest of you server files, in `/home/minecraft/server`), move your world directory into `/home/minecraft/server/world_storage`:
 
 		cd /home/minecraft/server
-		sudo mv world world_storage/world
-		sudo mv world_nether world_storage/world_nether
-		sudo mv world_the_end world_storage/world_the_end
+		sudo mv world world_storage
 		
-	If your world folder has a unique name, like "Bobsworld", do this instead:
+	If your world folder has a unique name, like "foo", do this instead:
 	
-		sudo mv Bobsworld world_storage/Bobsworld
-		sudo mv Bobsworld_nether world_storage/Bobsworld_nether
-		sudo mv Bobsworld_the_end world_storage/Bobsworld_the_end
+		sudo mv foo world_storage
 
 6. Make sure permissions on ALL files and folders in /home/minecraft are owned by the `minecraft` user:
 
@@ -158,6 +154,9 @@ To Do List
 + Autodetect WORLDNAME
 + Provide commands for restoring backups
 + Remove backups older than a specified time period
++ Add/remove from whitelist/ops when server is not running
++ Automatically detect errors in java process and restart accordingly
++ Only perform world backup if change has been detected (players logged in, level.dat change in size, etc)
 
 
 `Tested on Ubuntu 12.04.1 server; may work on other flavors of Debian`
