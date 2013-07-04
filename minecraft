@@ -213,16 +213,19 @@ check_backup_settings() {
 			COMPRESSCMD="tar -hcjf"
 			STORECMD="tar -cpf"
 			ARCHIVEENDING=".tar.bz2"
+			STOREDENDING=".tar"
 			;;
 		zip)
 			COMPRESSCMD="zip -rq"
 			STORECMD="zip -rq -0"
 			ARCHIVEENDING=".zip"
+			STOREDENDING=".zip"
 			;;
 		*)
 			echo "$BACKUPFORMAT is not a supported backup format"
 			exit 1
 			;;
+	esac
 }
 
 log_roll() {
@@ -296,9 +299,9 @@ mc_whole_backup() {
 	fi
 	if [ "$COMPRESS_WHOLEBACKUP" ]
 	then
-		as_user "$COMPRESSCMD $path/whole-backup.tar.bz2 $MCPATH $exclude"
+		as_user "$COMPRESSCMD $path/whole-backup$ARCHIVEENDING $MCPATH $exclude"
 	else
-		as_user "STORECMD $path/whole-backup.tar $MCPATH $exclude"
+		as_user "STORECMD $path/whole-backup$STOREDENDING $MCPATH $exclude"
 	fi
 }
 
