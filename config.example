@@ -13,9 +13,6 @@ MC_JAR="minecraft_server.jar"
 # Name of craftbukkit jar 
 CB_JAR="craftbukkit.jar"
 
-# Define the release of CraftBukkit to use (stable or unstable)
-CB_RELEASE="stable"
-
 # Name of server.jar to use (either $MC_JAR or $CB_JAR)
 SERVICE=$CB_JAR
 
@@ -92,31 +89,6 @@ COMPRESS_WHOLEBACKUP=YES
 # Used by the log-roll command
 LOGPATH="/home/${USERNAME}/mcbackup/logs"
 
-# Whether or not to gzip logs (must be commented out for no - DO NOT CHANGE TO NO)
-#
-GZIPLOGS=YES
-
-# What to append to the logfile name (Leave blank for nothing)
-LOGFILEAPPEND="logfile_"
-
-
-# Settings for overviewer command
-# ===============================
-
-# Where the Map is generated
-OUTPUTMAP="/home/${USERNAME}/mc-overviewer/render"
-
-# Path to Minecraft-Overviewer
-OVPATH="/home/${USERNAME}/mc-overviewer/Minecraft-Overviewer"
-
-# Path for the config file of Overviewer
-OVCONFIGPATH="/home/${USERNAME}/mc-overviewer"
-
-# Name of Overviewer config file
-OVCONFIGNAME="config.py"
-
-# Path for backup worlds
-OVBACKUP="/home/${USERNAME}/mc-overviewer/overviewerbackups"
 
 # Things to leave alone ;)
 # =====================
