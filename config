@@ -7,23 +7,17 @@
 # and edit the variables to your needs.
 #
 
-# Name of vanilla server jar (no need to change if you're running craftbukkit and vice versa)
-MC_JAR="minecraft_server.jar"
-
-# Name of craftbukkit jar 
-CB_JAR="craftbukkit.jar"
-
-# Name of server.jar to use (either $MC_JAR or $CB_JAR)
-SERVICE=$CB_JAR
+# Name of jar file
+SERVICE="minecraft_server.jar"
 
 # Name to use for the screen instance
-SCREEN="server_screen"
+SCREEN="minecraft_screen"
 
 # User that should run the server
 USERNAME="minecraft"
 
 # Path to minecraft server directory 
-MCPATH="/home/${USERNAME}/minecraft"
+MCPATH="/opt/${USERNAME}"
 
 # Where the worlds are located on the disk. Can not be the same as MCPATH.
 # You need to move your worlds to this directory manually, the script
@@ -31,15 +25,15 @@ MCPATH="/home/${USERNAME}/minecraft"
 WORLDSTORAGE="${MCPATH}/worlds"
 
 # Number of CPUs/cores to use
-CPU_COUNT=2
+CPU_COUNT=1
 
 # Initial memory usage
-INITMEM="2048M"
+INITMEM="256M"
 
 # Maximum amount of memory to use
 # Remember: give the ramdisk enough space, subtract from the total amount
 # of RAM available the size of your map and the RAM-consumption of your base system.
-MAXMEM="2048M"
+MAXMEM="1024M"
 
 # Whether to output commands for the plugin ConsoleLikeChat ($1 is the command to run)
 FORMAT='$1'
@@ -48,14 +42,14 @@ FORMAT='$1'
 # ===============================
 
 # Location for world backups
-BACKUPPATH="/home/${USERNAME}/mcbackup/worlds"
+BACKUPPATH="/media/library/${USERNAME}/backup/worlds"
 
 # Where the whole minecraft directory is copied when whole-backup is executed
 # whole-backup is a complete uncompressed backup of the whole server folder.
-WHOLEBACKUP="/home/${USERNAME}/mcbackup/server"
+WHOLEBACKUP="/media/library/${USERNAME}/backup/whole"
 
 # Format for world backup (tar or zip).
-BACKUPFORMAT="tar" 
+BACKUPFORMAT="tar"
 
 # Normally backups will be put in a subfolder to $BACKUPPATH with todays date
 # and the backups themselves will have a timestamp.
@@ -64,12 +58,12 @@ BACKUPFORMAT="tar"
 # in $BACKUPPATH without timestamp to be compatible with
 # [backup rotation script](https://github.com/adamfeuer/rotate-backups)
 #
-BACKUPSCRIPTCOMPATIBLE=YES
+BACKUPSCRIPTCOMPATIBLE=NO
 
 # If WORLDEDITCOMPATIBLE is set the world backups will be created compatible to WorldEdit
 # in $BACKUPPATH as WORLD_NAME/DATE.(tar.bz2|zip) with the requested directory structure
 #
-# WORLDEDITCOMPATIBLE=YES
+# WORLDEDITCOMPATIBLE=NO
 
 # Compress the whole backup with bzip2?
 # Note that this may not save a lot of disk space since there can be a lot of files
