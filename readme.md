@@ -149,6 +149,7 @@ __Available commands:__
 
 To Do List
 ----------
++ Update updater for 1.6.2+
 + Autodetect WORLDNAME
 + Provide commands for restoring backups
 + Remove backups older than a specified time period
