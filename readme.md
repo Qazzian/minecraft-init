@@ -74,7 +74,7 @@ Manual Setup
 
 	See http://www.minecraftwiki.net/wiki/Tutorials/Ramdisk_enabled_server for more info on ramdisks.
 
-4. If you haven't already, download CraftBukkit to `/home/minecraft/server` (or move it if you are applying this script to an existing server).
+4. If you haven't already, download minecraft_server.jar to `/home/minecraft/server` (or move it if you are applying this script to an existing server).
 
 		sudo mkdir /home/minecraft/server
 		cd /home/minecraft/server
