@@ -783,7 +783,7 @@ case "$1" in
 			sleep 1s
 			# Get server log in reverse order, assume that response to 'list'
 			# command is already there.
-			tac $MCPATH/server.log | \
+			tac $MCPATH/logs/latest.log | \
 				# Extract two lines. 1) containing ASCII color code and comma-separated list
 				# of  player names and 2) the line saying "[...] players online:"
 				grep --before-context 1 --max-count 1 "players online" | \
@@ -818,12 +818,12 @@ case "$1" in
 		;;
 	log)
 		# Display server log using 'cat'.
-		cat $MCPATH/server.log
+		cat $MCPATH/logs/latest.log
 		;;
 	last)
 		# Greps for recently logged in users
 		echo Recently logged in users:
-		cat $MCPATH/server.log | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
+		cat $MCPATH/logs/latest.log | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
 		;;
 	status)
 		# Shows server status
