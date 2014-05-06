@@ -10,7 +10,7 @@
 # Default-Start:  2 3 4 5
 # Default-Stop:   0 1 6
 # Short-Description:    Minecraft server
-# Description:    Init script for minecraft/bukkit server, with rolling logs and use of ramdisk for less lag. 
+# Description:    Init script for minecraft/bukkit server, with rolling logs and use of ramdisk for less lag.
 ### END INIT INFO
 
 # Created by Ahtenus
@@ -50,13 +50,13 @@ is_running() {
 	# returns true if it exists.
 	pidfile=${MCPATH}/${SCREEN}.pid
 
-	if [ -r "$pidfile" ]
+	if [ -f "$pidfile" ]
 	then
 		pid=$(head -1 $pidfile)
 		if ps ax | grep -v grep | grep ${pid} | grep "${SCREEN}" > /dev/null
 		then
 			return 0
-		else 
+		else
 			if [ -z "$isInStop" ]
 			then
 				if [ -z "$roguePrinted" ]
@@ -72,7 +72,7 @@ is_running() {
 		then
 			echo "No pidfile found, but server's running."
 			echo "Re-creating the pidfile."
-			
+
 			pid=$(ps ax | grep -v grep | grep "${SCREEN} ${INVOCATION}" | cut -f1 -d' ')
 			check_permissions
 			as_user "echo $pid > $pidfile"
@@ -101,17 +101,24 @@ datepath() {
 }
 
 mc_start() {
+	servicejar=$MCPATH/$SERVICE
+	if [ ! -f "$servicejar" ]
+	then
+		echo "Failed to start: Can't find the specified Minecraft jar under $servicejar. Please check your config!"
+		exit 1
+	fi
+
 	pidfile=${MCPATH}/${SCREEN}.pid
 	check_permissions
 
 	as_user "cd $MCPATH && screen -dmS $SCREEN $INVOCATION"
-	as_user "screen -list | grep '\.$SCREEN' | cut -f1 -d'.' | tr -d -c 0-9 > $pidfile"
+	as_user "screen -list | grep "\.$SCREEN" | cut -f1 -d'.' | head -n 1 | tr -d -c 0-9 > $pidfile"
 
 	#
 	# Waiting for the server to start
 	#
 	seconds=0
-	until is_running 
+	until is_running
 	do
 		sleep 1
 		seconds=$seconds+1
@@ -124,7 +131,7 @@ mc_start() {
 			echo "Failed to start, aborting."
 			exit 1
 		fi
-	done	
+	done
 	echo "$SERVICE is running."
 }
 
@@ -188,7 +195,7 @@ mc_stop() {
 	isInStop=1
 	while is_running
 	do
-		sleep 1 
+		sleep 1
 		seconds=$seconds+1
 		if [[ $seconds -eq 5 ]]
 		then
@@ -252,7 +259,7 @@ log_roll() {
 				as_user "cp /dev/null $FILE"
 				as_user "echo \"Previous logs rolled to $path\" > $FILE"
 			fi
-		else    
+		else
 			echo "Failed to rotate log from $FILE into $path"
 		fi
 	done
@@ -292,7 +299,7 @@ mc_whole_backup() {
 	path=`datepath $WHOLEBACKUP/mine_`
 	locationOfScript=$(dirname "$(readlink -e "$0")")
 	as_user "mkdir -p $path"
-	
+
 	if [ -r "$locationOfScript/whole-exclude.list" ]
 	then
 		echo "...except the following files and/or dirs:"
@@ -316,7 +323,7 @@ mc_world_backup() {
 	get_worlds
 	today="`date +%F`"
 	as_user "mkdir -p $BACKUPPATH"
-	
+
 	# Check if the backup script compatibility is enabled
 	if [ "$BACKUPSCRIPTCOMPATIBLE" ]
 	then
@@ -324,7 +331,7 @@ mc_world_backup() {
 		echo "Detected that backup script compatibility is enabled, deleting old backups that are not necessary."
 		as_user "rm -r $BACKUPPATH/*"
 	fi
-	
+
 	for INDEX in ${!WORLDNAME[@]}
 	do
 		echo "Backing up minecraft ${WORLDNAME[$INDEX]}"
@@ -424,7 +431,7 @@ change_ramdisk_state() {
 		echo "World \"$1\" not found."
 		exit 1
 	fi
-	
+
 	if [ -e $WORLDSTORAGE/$1/ramdisk ]
 	then
 		rm $WORLDSTORAGE/$1/ramdisk
@@ -433,21 +440,21 @@ change_ramdisk_state() {
 		touch $WORLDSTORAGE/$1/ramdisk
 		echo "Added ramdisk flag to \"$1\""
 	fi
-	echo "Changes will only take effect after server is restarted."	
+	echo "Changes will only take effect after server is restarted."
 }
 
 whitelist(){
 	mc_command "whitelist list"
 	sleep 1s
-	whitelist=$(tac $MCPATH/server.log | grep -m 1 "White-listed players:")
-	
+	whitelist=$(tac $SERVERLOG | grep -m 1 "White-listed players:")
+
 	echo
 	echo "Currently there are the following players on your whitelist:"
 	echo
 	echo ${whitelist:49} | sed 's/, /\n/g'
 }
 
-force_exit() {	# Kill the server running (messily) in an emergency
+force_exit() {  # Kill the server running (messily) in an emergency
 	echo ""
 	echo "SIGINIT CALLED - FORCE EXITING!"
 	pidfile=${MCPATH}/${SCREEN}.pid
@@ -457,7 +464,7 @@ force_exit() {	# Kill the server running (messily) in an emergency
 		ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
 		ps aux | grep -e 'SCREEN -dmS minecraft java' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
 		ps aux | grep -e '/etc/init.d/minecraft' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
-		
+
 		# Kill the processes
 		ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i kill {}
 		ps aux | grep -e 'SCREEN -dmS minecraft java' | grep -v grep | awk '{print $2}' | xargs -i kill {}
@@ -472,7 +479,7 @@ get_script_location() {
 
 check_permissions() {
 	as_user "touch $pidfile"
-	if ! as_user "test -w '$pidfile'" ; then 
+	if ! as_user "test -w '$pidfile'" ; then
 		echo "Check Permissions. Cannot write to $pidfile. Correct the permissions and then excute: $0 status"
 	fi
 }
@@ -576,7 +583,7 @@ case "$1" in
 		fi
 		;;
 	to-disk)
-		# Writes from the ramdisk to disk, in case the server crashes. 
+		# Writes from the ramdisk to disk, in case the server crashes.
 		mc_saveoff
 		to_disk
 		mc_saveon
@@ -622,8 +629,35 @@ case "$1" in
 		# Lists connected users
 		if is_running; then
 			mc_command list
-			sleep 3s
-			tac $MCPATH/server.log | grep -m 1 "Connected"
+			sleep 1s
+			# Get server log in reverse order, assume that response to 'list'
+			# command is already there.
+			tac $SERVERLOG | \
+				# Extract two lines. 1) containing ASCII color code and comma-separated list
+				# of  player names and 2) the line saying "[...] players online:"
+				grep --before-context 1 --max-count 1 "players online" | \
+				# Throw away the latter line.
+				head -n 1 | \
+				# Remove any escape character and the following two bytes (color code).
+				sed 's/[\x01-\x1F\x7F]..//g' | \
+				# Only pass through lines that still have content (if no player online,
+				# then nothing's left over after this grep.
+				grep . | \
+				# Replace ", " separator with newline char.
+				sed 's/, /\n/g'
+		else
+			echo "No running server."
+		fi
+		;;
+	playercount)
+		# List number of connected users.
+		if is_running; then
+			mc_command list
+			sleep 1s
+			# Same as technique as 'connected' command, but count lines.
+			tac $SERVERLOG | \
+				grep --before-context 1 --max-count 1 "players online" | \
+				head -n 1 | sed 's/[\x01-\x1F\x7F]..//g' | grep . | sed 's/, /\n/g' | wc -l
 		else
 			echo "No running server."
 		fi
@@ -631,10 +665,14 @@ case "$1" in
 	log-roll)
 		log_roll
 		;;
+	log)
+		# Display server log using 'cat'.
+		cat $SERVERLOG
+		;;
 	last)
 		# Greps for recently logged in users
 		echo Recently logged in users:
-		cat $MCPATH/server.log | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
+		cat $SERVERLOG | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
 		;;
 	status)
 		# Shows server status
@@ -648,7 +686,7 @@ case "$1" in
 	version)
 		if is_running; then
 			mc_command version
-			tac $MCPATH/server.log | grep -m 1 "This server is running"
+			tac $SERVERLOG | grep -m 1 "This server is running"
 		else
 			echo "The server needs to be running to check version."
 		fi
@@ -705,21 +743,21 @@ case "$1" in
 	kill)
 		WIDTH=`stty size | cut -d ' ' -f 2`            # Get terminal's character width
 		pstree | grep MDSImporte | cut -c 1-${WIDTH}   # Chop output after WIDTH chars
-		
+
 		echo "Killing the server is an EMERGENCY procedure, and should not be used to perform a normal shutdown! All changes younger than 15 minutes could be permanantly lost and WORLD CORRUPTION is possible! Are you ABSOLUTELY POSITIVE this is what you want to do?"
 		echo "Please put \"Yes\", or \"No\": "
 		read KILL_SERVER
-		case "$KILL_SERVER" in	# Determine which option was specified
-			[Yy]|[Yy][Ee][Ss])	# If yes, kill the server
+		case "$KILL_SERVER" in  # Determine which option was specified
+			[Yy]|[Yy][Ee][Ss])      # If yes, kill the server
 				echo "KILLING SERVER PROCESSES!!!"
 				force_exit
 				exit 1
 				;;
-			[Nn]|[Nn][Oo])	# If no, abort and exit 1
+			[Nn]|[Nn][Oo])  # If no, abort and exit 1
 				echo "Aborting!"
 				exit 1
 				;;
-			*)	# If anything else, exit 1
+			*)      # If anything else, exit 1
 				echo "Error: Invalid Input!"
 				exit 1
 				;;
@@ -727,7 +765,7 @@ case "$1" in
 		;;
 	help|--help|-h)
 		echo "Usage: $0 COMMAND"
-		echo 
+		echo
 		echo "Available commands:"
 		echo -e "   start \t\t Starts the server"
 		echo -e "   stop \t\t Stops the server"
@@ -743,9 +781,11 @@ case "$1" in
 		echo -e "   whole-backup \t Backups the entire server folder"
 		echo -e "   rdiff-backup \t Backups the entire server folder using rdiff-backup"
 		echo -e "   log-roll \t\t Moves and compresses the logfiles"
+		echo -e "   log \t\t\t Prints the server log"
 		echo -e "   to-disk \t\t Copies the worlds from the ramdisk to worldstorage"
 		echo -e "   save-off \t\t Flushes the world to disk and then disables saving"
 		echo -e "   save-on \t\t Re-enables saving if it was previously disabled by save-off"
+		echo -e "   playercount \t\t Prints the number of connected users"
 		echo -e "   links \t\t Creates nessesary symlinks"
 		echo -e "   ramdisk WORLD \t Toggles ramdisk configuration for WORLD"
 		echo -e "   whitelist \t\t Prints the current whitelist"
