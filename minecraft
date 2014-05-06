@@ -293,17 +293,17 @@ mc_whole_backup() {
 	locationOfScript=$(dirname "$(readlink -e "$0")")
 	as_user "mkdir -p $path"
 	
-	if [ -r "$locationOfScript/exclude.list" ]
+	if [ -r "$locationOfScript/whole-exclude.list" ]
 	then
 		echo "...except the following files and/or dirs:"
-		cat $locationOfScript/exclude.list
-		exclude="$EXCLUDEARG$locationOfScript/exclude.list"
+		cat $locationOfScript/whole-exclude.list
+		exclude="$EXCLUDEARG$locationOfScript/whole-exclude.list"
 	fi
 	if [ "$COMPRESS_WHOLEBACKUP" ]
 	then
 		as_user "$COMPRESSCMD $path/whole-backup$ARCHIVEENDING $MCPATH $exclude"
 	else
-		as_user "STORECMD $path/whole-backup$STOREDENDING $MCPATH $exclude"
+		as_user "$STORECMD $path/whole-backup$STOREDENDING $MCPATH $exclude"
 	fi
 }
 
@@ -350,6 +350,13 @@ mc_world_backup() {
 			as_user "$COMPRESSCMD $path $MCPATH/${WORLDNAME[$INDEX]}"
 		fi
 	done
+}
+
+mc_rdiff_backup() {
+	as_user "mkdir -p $RDIFFBACKUP"
+	exclude="--exclude \"**/*.log\""
+	exclude="--exclude \"**/*.lck\" $exclude"
+	as_user "rdiff-backup $exclude $MCPATH $RDIFFBACKUP"
 }
 
 check_links() {
@@ -556,6 +563,18 @@ case "$1" in
 			mc_whole_backup
 		fi
 		;;
+	rdiff-backup)
+		if is_running; then
+			mc_say "Server rdiff backup."
+			mc_saveoff
+			to_disk
+			mc_rdiff_backup
+			mc_saveon
+			mc_say "Server backup complete."
+		else
+			mc_rdiff_backup
+		fi
+		;;
 	to-disk)
 		# Writes from the ramdisk to disk, in case the server crashes. 
 		mc_saveoff
@@ -722,6 +741,7 @@ case "$1" in
 		echo -e "   worlds \t\t Displays a list of available worlds"
 		echo -e "   backup \t\t Backups the worlds defined in the script"
 		echo -e "   whole-backup \t Backups the entire server folder"
+		echo -e "   rdiff-backup \t Backups the entire server folder using rdiff-backup"
 		echo -e "   log-roll \t\t Moves and compresses the logfiles"
 		echo -e "   to-disk \t\t Copies the worlds from the ramdisk to worldstorage"
 		echo -e "   save-off \t\t Flushes the world to disk and then disables saving"

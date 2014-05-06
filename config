@@ -8,7 +8,7 @@
 #
 
 # Name of jar file
-SERVICE="minecraft_server.jar"
+SERVICE="minecraft_mcpc_plus.jar"
 
 # Name to use for the screen instance
 SCREEN="minecraft_screen"
@@ -41,15 +41,21 @@ FORMAT='$1'
 # Settings for backups
 # ===============================
 
+# Backup base directory
+BACKUPBASE="/media/library/${USERNAME}/backup"
+
 # Location for world backups
-BACKUPPATH="/media/library/${USERNAME}/backup/worlds"
+BACKUPPATH="${BACKUPBASE}/worlds"
 
 # Where the whole minecraft directory is copied when whole-backup is executed
 # whole-backup is a complete uncompressed backup of the whole server folder.
-WHOLEBACKUP="/media/library/${USERNAME}/backup/whole"
+WHOLEBACKUP="${BACKUPBASE}/whole"
 
 # Format for world backup (tar or zip).
 BACKUPFORMAT="tar"
+
+# Location for rdiff-backup
+RDIFFBACKUP="${BACKUPBASE}/rdiff"
 
 # Normally backups will be put in a subfolder to $BACKUPPATH with todays date
 # and the backups themselves will have a timestamp.
@@ -81,7 +87,7 @@ COMPRESS_WHOLEBACKUP=YES
 
 # Location for old logs
 # Used by the log-roll command
-LOGPATH="/home/${USERNAME}/mcbackup/logs"
+LOGPATH="${BACKUPBASE}/logs"
 
 
 # Things to leave alone ;)
