@@ -45,9 +45,9 @@ fi
 ME=`whoami`
 as_user() {
 	if [ $ME == $USERNAME ] ; then
-		bash -c "$1"
+		"$BASH_PATH" -c "$1"
 	else
-		su $USERNAME -s /bin/bash -c "$1"
+		su $USERNAME -s "$BASH_PATH" -c "$1"
 	fi
 }
 

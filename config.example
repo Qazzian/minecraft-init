@@ -7,6 +7,10 @@
 # and edit the variables to your needs.
 #
 
+# Location of bash shell on your system, by default we grab the first entry
+# from which, however, you can manually set it to whatever you want.
+BASH_PATH=`which bash | cut -f3 -d' ' | sed -n 1p`
+
 # Name of vanilla server jar (no need to change if you're running craftbukkit and vice versa)
 MC_JAR="minecraft_server.jar"
 
