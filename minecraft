@@ -244,7 +244,7 @@ log_roll() {
 	as_user "mkdir -p $path"
 
 	shopt -s extglob
-	for FILE in $(ls $MCPATH/*.log)
+	for FILE in $(ls $MCPATH/logs/*.log) # Workaround, getting info from $SERVERLOG would be better
 	do
 		as_user "cp $FILE $path"
 		# only if previous command was successful
