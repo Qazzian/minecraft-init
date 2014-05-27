@@ -35,6 +35,12 @@ else
 	source `echo $0 | sed "s:[^/]*$:config:"`
 fi
 
+# Set bash to default if nothing was set
+if [ "$BASH_PATH" == "" ]
+then
+    BASH_PATH=/bin/bash
+fi
+
 if [ "$SERVICE" == "" ]
 then
 	echo "Couldn't load config file, please edit config.example and rename it to config"
