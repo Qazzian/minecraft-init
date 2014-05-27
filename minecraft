@@ -21,10 +21,16 @@
 # Option for killing server in an emergency by jbondhus
 
 # Loads config file
+OS=`uname`
 
 if [ -L $0 ]
 then
-	source `readlink -e $0 | sed "s:[^/]*$:config:"`
+	if [ "$OS" == "Darwin" ]
+	then
+		source `readlink $0 | sed "s:[^/]*$:config:"`
+	else
+		source `readlink -e $0 | sed "s:[^/]*$:config:"`
+	fi
 else
 	source `echo $0 | sed "s:[^/]*$:config:"`
 fi
