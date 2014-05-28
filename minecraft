@@ -261,7 +261,7 @@ log_roll() {
 		as_user "cp $FILE $path"
 		# only if previous command was successful
 		if [ $? -eq 0 ]; then
-			if [[ "$FILE" =~ @(*-+([0-9]).log) && "$FILE" =~ !(*-0.log) ]]
+			if [[ "$FILE" = @(*-+([0-9]).log) && "$FILE" = !(*-0.log) ]]
 			# some mods already roll logs. remove all but the most recent file
 			# which ends with -0.log
 			then
