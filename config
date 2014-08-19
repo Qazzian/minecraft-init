@@ -53,7 +53,8 @@ FORMAT='$1'
 # ===============================
 
 # Location for world backups
-BACKUPPATH="/home/${USERNAME}/mcbackup/worlds"
+#BACKUPPATH="/home/${USERNAME}/mcbackup/worlds"
+BACKUPPATH="${MCPATH}/backup/worlds"
 
 # Where the whole minecraft directory is copied when whole-backup is executed
 # whole-backup is a complete uncompressed backup of the whole server folder.
@@ -92,7 +93,8 @@ COMPRESS_WHOLEBACKUP=YES
 
 # Location for old logs
 # Used by the log-roll command
-LOGPATH="/home/${USERNAME}/mcbackup/logs"
+#LOGPATH="/home/${USERNAME}/mcbackup/logs"
+LOGPATH="${MCPATH}/backup/logs"
 
 # Whether or not to gzip logs (must be commented out for no - DO NOT CHANGE TO NO)
 #
