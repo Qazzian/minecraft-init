@@ -33,7 +33,9 @@ SERVERLOG="${MCPATH}/logs/latest.log"
 # Where the worlds are located on the disk. Can not be the same as MCPATH.
 # You need to move your worlds to this directory manually, the script
 # will then handle the nessessay symlinks.
-WORLDSTORAGE="${MCPATH}/worlds"
+## When dont use RAMDISK, can be the same as MCPATH (?)
+##WORLDSTORAGE="${MCPATH}/worlds"
+WORLDSTORAGE="${MCPATH}"
 
 # Number of CPUs/cores to use
 CPU_COUNT=2
