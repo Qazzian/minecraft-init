@@ -35,7 +35,7 @@ SERVERLOG="${MCPATH}/logs/latest.log"
 # will then handle the nessessay symlinks.
 ## When dont use RAMDISK, can be the same as MCPATH (?)
 ##WORLDSTORAGE="${MCPATH}/worlds"
-WORLDSTORAGE="${MCPATH}"
+WORLDSTORAGE="${MCPATH}/world"
 
 # Number of CPUs/cores to use
 CPU_COUNT=2
