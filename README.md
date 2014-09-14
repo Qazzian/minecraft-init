@@ -3,7 +3,7 @@ minecraft-init
 
 Init script for minecraft and bukkit servers
 
-##やることよてい
+##覚書
 
- - RAMDISK機能がいらないので削る
- - 上に関連して$MCPATH = $WORLDSTORAGE でも動作に支障はないかしらべる
+ - RAMDISK機能がいらない($WORLDSTORAGEを強制する仕組みも廃止する)
+ - CraftBukkitのアップデート機能は死んだ
