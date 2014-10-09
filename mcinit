@@ -1,8 +1,8 @@
 #!/bin/bash
-# /etc/init.d/minecraft
+# /etc/init.d/mcinit
 
 ### BEGIN INIT INFO
-# Provides:   minecraft
+# Provides:   mcinit
 # Required-Start: $local_fs $remote_fs
 # Required-Stop:  $local_fs $remote_fs
 # Should-Start:   $network
@@ -14,6 +14,7 @@
 ### END INIT INFO
 
 # Created by Ahtenus
+# Modified by aiwas
 
 # Based on http://www.minecraftwiki.net/wiki/Server_startup_script
 # Support for multiworld by Benni-chan
