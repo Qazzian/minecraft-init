@@ -1,8 +1,8 @@
 #!/bin/bash
-# /etc/init.d/mcinit
+# /etc/init.d/minecraft
 
 ### BEGIN INIT INFO
-# Provides:   mcinit
+# Provides:   minecraft
 # Required-Start: $local_fs $remote_fs
 # Required-Stop:  $local_fs $remote_fs
 # Should-Start:   $network
