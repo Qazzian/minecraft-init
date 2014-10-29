@@ -20,6 +20,9 @@
 # Log rolls without needing restarts by Solorvox
 # Option for killing server in an emergency by jbondhus
 
+# Function to pass errors to stderr
+echoerr() { echo "$@" 1>&2; }
+
 # Loads config file
 
 if [ -L $0 ]
@@ -31,7 +34,7 @@ fi
 
 if [ "$SERVICE" == "" ]
 then
-	echo "Couldn't load config file, please edit config.example and rename it to config"
+	echoerr "Couldn't load config file, please edit config.example and rename it to config"
 	logger -t minecraft-init "Couldn't load config file, please edit config.example and rename it to config"
 	exit
 fi
@@ -62,7 +65,7 @@ is_running() {
 				if [ -z "$roguePrinted" ]
 				then
 					roguePrinted=1
-					echo "Rogue pidfile found!"
+					echoerr "Rogue pidfile found!"
 				fi
 			fi
 			return 1
@@ -70,8 +73,8 @@ is_running() {
 	else
 		if ps ax | grep -v grep | grep "${SCREEN} ${INVOCATION}" > /dev/null
 		then
-			echo "No pidfile found, but server's running."
-			echo "Re-creating the pidfile."
+			echoerr "No pidfile found, but server's running."
+			echoerr "Re-creating the pidfile."
 
 			pid=$(ps ax | grep -v grep | grep "${SCREEN} ${INVOCATION}" | cut -f1 -d' ')
 			check_permissions
@@ -104,7 +107,7 @@ mc_start() {
 	servicejar=$MCPATH/$SERVICE
 	if [ ! -f "$servicejar" ]
 	then
-		echo "Failed to start: Can't find the specified Minecraft jar under $servicejar. Please check your config!"
+		echoerr "Failed to start: Can't find the specified Minecraft jar under $servicejar. Please check your config!"
 		exit 1
 	fi
 
@@ -128,7 +131,7 @@ mc_start() {
 		fi
 		if [[ $seconds -ge 120 ]]
 		then
-			echo "Failed to start, aborting."
+			echoerr "Failed to start, aborting."
 			exit 1
 		fi
 	done
@@ -140,7 +143,7 @@ mc_command() {
 	then
 			as_user "screen -p 0 -S $SCREEN -X eval 'stuff \"$(eval echo $FORMAT)\"\015'"
 	else
-			echo "$SERVICE was not running. Not able to run command."
+			echoerr "$SERVICE was not running. Not able to run command."
 	fi
 }
 
@@ -204,7 +207,7 @@ mc_stop() {
 		if [[ $seconds -ge 120 ]]
 		then
 			logger -t minecraft-init "Failed to shut down server, aborting."
-			echo "Failed to shut down, aborting."
+			echoerr "Failed to shut down, aborting."
 			exit 1
 		fi
 	done
@@ -236,7 +239,7 @@ check_backup_settings() {
 			EXCLUDEARG="-x@"
 			;;
 		*)
-			echo "$BACKUPFORMAT is not a supported backup format"
+			echoerr "$BACKUPFORMAT is not a supported backup format"
 			exit 1
 			;;
 	esac
@@ -265,7 +268,7 @@ log_roll() {
 				as_user "echo \"Previous logs rolled to $path\" > $FILE"
 			fi
 		else
-			echo "Failed to rotate log from $FILE into $path"
+			echoerr "Failed to rotate log from $FILE into $path"
 		fi
 	done
 
@@ -388,7 +391,7 @@ check_links() {
 				fi
 			fi
 		else
-			echo "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
+			echoerr "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
 
 			exit 1
 		fi
@@ -440,7 +443,7 @@ check_update_vanilla() {
 			return 0
 		fi
 	else
-		echo "Something went wrong. Couldn't download minecraft_server.jar"
+		echoerr "Something went wrong. Couldn't download minecraft_server.jar"
 	fi
 }
 
@@ -476,14 +479,14 @@ check_update_craftbukkit() {
 			return 0
 		fi
 	else
-		echo "Something went wrong. Couldn't download craftbukkit.jar"
+		echoerr "Something went wrong. Couldn't download craftbukkit.jar"
 	fi
 }
 
 mc_update() {
 	if is_running
 	then
-		echo "$SERVICE is running! Will not start update."
+		echoerr "$SERVICE is running! Will not start update."
 	else
 		if check_update_vanilla
 		then
@@ -492,7 +495,7 @@ mc_update() {
 				as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR"
 				echo "Thats it. Update of $MC_JAR done."
 			else
-				echo "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
+				echoerr "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
 			fi
 		else
 			echo "Not updating $MB_JAR. It's not necessary"
@@ -506,7 +509,7 @@ mc_update() {
 				as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR"
 				echo "Thats it. Update of $CB_JAR done."
 			else
-				echo "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
+				echoerr "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
 			fi
 		else
 			echo "Not updating $CB_JAR. It's not necessary"
@@ -518,7 +521,7 @@ mc_update() {
 change_ramdisk_state() {
 	if [ ! -e $WORLDSTORAGE/$1 ]
 	then
-		echo "World \"$1\" not found."
+		echoerr "World \"$1\" not found."
 		exit 1
 	fi
 
@@ -538,7 +541,7 @@ overviewer_start() {
 		then
 				if [ ! "$OVPATH" == "apt" ]
 				then
-						echo "Minecraft-Overviewer is not installed in \"$OVPATH\""
+						echoerr "Minecraft-Overviewer is not installed in \"$OVPATH\""
 						exit 1
 				else
 						echo "Using APT repository installed Minecraft-Overviewer"
@@ -603,7 +606,7 @@ whitelist(){
 
 force_exit() {  # Kill the server running (messily) in an emergency
 	echo ""
-	echo "SIGINIT CALLED - FORCE EXITING!"
+	echoerr "SIGINIT CALLED - FORCE EXITING!"
 	pidfile=${MCPATH}/${SCREEN}.pid
 	rm $pidfile
 	echo "KILLING SERVER PROCESSES!!!"
@@ -627,7 +630,7 @@ get_script_location() {
 check_permissions() {
 	as_user "touch $pidfile"
 	if ! as_user "test -w '$pidfile'" ; then
-		echo "Check Permissions. Cannot write to $pidfile. Correct the permissions and then excute: $0 status"
+		echoerr "Check Permissions. Cannot write to $pidfile. Correct the permissions and then excute: $0 status"
 	fi
 }
 
