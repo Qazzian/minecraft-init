@@ -33,7 +33,7 @@ SERVERLOG="${MCPATH}/logs/latest.log"
 
 # Where the worlds are located on the disk. Can not be the same as MCPATH.
 # You need to move your worlds to this directory manually, the script
-# will then handle the nessessay symlinks.
+# will then handle the necessary symlinks.
 WORLDSTORAGE="${MCPATH}/worlds"
 
 # Number of CPUs/cores to use
