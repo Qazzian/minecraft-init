@@ -8,7 +8,7 @@
 #
 
 # Name of jar file
-SERVICE="minecraft_mcpc_plus.jar"
+SERVICE="forge-1.7.10-universal.jar"
 
 # Name to use for the screen instance
 SCREEN="minecraft_screen"
