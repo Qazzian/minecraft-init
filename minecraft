@@ -214,6 +214,11 @@ mc_stop() {
 	echo "$SERVICE is now shut down."
 }
 
+mc_reload() {
+	echo "$SERVICE is running... reloading."
+	mc_command reload
+}
+
 check_backup_settings() {
 	case "$BACKUPFORMAT" in
 		tar)
@@ -520,6 +525,15 @@ case "$1" in
 		to_ram
 		mc_start
 		;;
+	reload)
+		# Reloads server configuration
+		if is_running; then
+			mc_say "Reloading server configuration.."
+				mc_reload
+		else
+			echo "No running server."
+		fi
+		;;
 	whitelist)
 		if is_running; then
 			whitelist
@@ -711,7 +725,7 @@ case "$1" in
 		;;
 	screen)
 		if is_running; then
-			as_user 'script /dev/null -q -c "screen -rx $SCREEN"'
+			as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
 		else
 		echo "Server is not running. Do you want to start it?"
 		echo "Please put \"Yes\", or \"No\": "
@@ -721,7 +735,7 @@ case "$1" in
 				check_links
 				to_ram
 				mc_start
-				as_user 'script /dev/null -q -c "screen -rx $SCREEN"'
+				as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
 				;;
 			[Nn]|[Nn][Oo])
 				clear
@@ -771,6 +785,7 @@ case "$1" in
 		echo -e "   stop \t\t Stops the server"
 		echo -e "   restart \t\t Restarts the server"
 		echo -e "   status \t\t Displays server status"
+		echo -e "   reload \t\t Reloads the server configuration"
 		echo -e "   kill \t\t Kills the server"
 		echo -e "   screen \t\t Shows the server screen"
 		echo -e "   say \t\t\t Prints the given string to the ingame chat."
