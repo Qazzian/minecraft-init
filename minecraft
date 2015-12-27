@@ -112,7 +112,7 @@ mc_start() {
 	check_permissions
 
 	as_user "cd $MCPATH && screen -dmS $SCREEN $INVOCATION"
-	as_user "screen -list | grep "\.$SCREEN" | cut -f1 -d'.' | head -n 1 | tr -d -c 0-9 > $pidfile"
+	as_user "screen -list | grep "\.$SCREEN" | cut -f1 -d'.' | tr -d -c 0-9 > $pidfile"
 
 	#
 	# Waiting for the server to start
@@ -326,7 +326,7 @@ mc_world_backup() {
 
 	check_backup_settings
 	get_worlds
-	today="`date +%F`"
+	today="`date +%F-%H-%M-%S`"
 	as_user "mkdir -p $BACKUPPATH"
 
 	# Check if the backup script compatibility is enabled
@@ -647,7 +647,7 @@ case "$1" in
 	stop)
 		# Stops the server
 		if is_running; then
-			mc_say "SERVER SHUTTING DOWN!"
+			mc_say "СЕРВЕР ВЫКЛЮЧАЕТСЯ!"
 			mc_stop
 			to_disk
 		else
@@ -657,7 +657,7 @@ case "$1" in
 	restart)
 		# Restarts the server
 		if is_running; then
-			mc_say "SERVER REBOOT IN 10 SECONDS!"
+			mc_say "ПЕРЕЗАГРУЗКА СЕРВЕРА В ТЕЧЕНИИ 10-и СЕКУНД!"
 			mc_stop
 			to_disk
 		else
@@ -667,15 +667,6 @@ case "$1" in
 		to_ram
 		mc_start
 		;;
-        reload)
-                # Reloads server configuration
-                if is_running; then
-                        mc_say "Reloading server configuration.."
-                        mc_reload
-                else
-                        echo "No running server."
-                fi
-                ;;
 	whitelist)
 		if is_running; then
 			whitelist
@@ -699,15 +690,23 @@ case "$1" in
 			echo "No running server."
 		fi
 		;;
+        authme-reload)
+                # Adds a player to the whitelist
+                if is_running; then
+                        mc_command "authme reload"
+                else
+                        echo "No running server."
+                fi
+                ;;
 	backup)
 		# Backups world
 		if is_running; then
-			mc_say "Backing up world."
+			mc_say "Создается резервная копия мира."
 			mc_saveoff
 			to_disk
 			mc_world_backup
 			mc_saveon
-			mc_say "Backup complete."
+			mc_say "Резервная копия создана."
 		else
 			mc_world_backup
 		fi
@@ -839,6 +838,16 @@ case "$1" in
 		echo Recently logged in users:
 		cat $SERVERLOG | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
 		;;
+    live)
+        # Check server status and start if it's down
+        if is_running
+        then
+            echo "$(date): All works!"
+        else
+            echo "$(date): Server crashed! Trying restart..."
+            mc_start
+        fi
+        ;;
 	status)
 		# Shows server status
 		if is_running
@@ -949,7 +958,6 @@ case "$1" in
 		echo -e "   stop \t\t Stops the server"
 		echo -e "   kill \t\t Kills the server"
 		echo -e "   restart \t\t Restarts the server"
-		echo -e "   reload \t\t Reloads the server configuration"
 		echo -e "   backup \t\t Backups the worlds defined in the script"
 		echo -e "   whole-backup \t Backups the entire server folder"
 		echo -e "   check-update \t Checks for updates of $CB_JAR and $MC_JAR"
