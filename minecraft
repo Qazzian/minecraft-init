@@ -424,7 +424,7 @@ to_disk() {
 }
 
 check_update_vanilla() {
-	MC_SERVER_URL=`wget -q -O - http://minecraft.net/download | grep minecraft_server.jar\ | cut -d \" -f 6`
+	MC_SERVER_URL=`wget -q -O - https://minecraft.net/download/server | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")'`
 
 	echo "Checking for update for minecraft_server.jar (Vanilla)"
 	as_user "cd $MCPATH && wget -q -O $MCPATH/minecraft_server.jar.update $MC_SERVER_URL"
