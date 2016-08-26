@@ -29,6 +29,11 @@ else
 	source `echo $0 | sed "s:[^/]*$:config:"`
 fi
 
+
+# easy way to echo to stderr
+echoerr() { echo "$@" 1>&2; }
+
+
 if [ "$SERVICE" == "" ]
 then
 	echo "Couldn't load config file, please edit config.example and rename it to config"
