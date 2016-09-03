@@ -36,7 +36,7 @@ echoerr() { echo "$@" 1>&2; }
 
 if [ "$SERVICE" == "" ]
 then
-	echo "Couldn't load config file, please edit config.example and rename it to config"
+	echoerr "Couldn't load config file, please edit config.example and rename it to config"
 	logger -t minecraft-init "Couldn't load config file, please edit config.example and rename it to config"
 	exit
 fi
@@ -67,7 +67,7 @@ is_running() {
 				if [ -z "$roguePrinted" ]
 				then
 					roguePrinted=1
-					echo "Rogue pidfile found!"
+					echoerr "Rogue pidfile found!"
 				fi
 			fi
 			return 1
@@ -75,8 +75,8 @@ is_running() {
 	else
 		if ps ax | grep -v grep | grep "${SCREEN} ${INVOCATION}" > /dev/null
 		then
-			echo "No pidfile found, but server's running."
-			echo "Re-creating the pidfile."
+			echoerr "No pidfile found, but server's running."
+			echoerr "Re-creating the pidfile."
 
 			pid=$(ps ax | grep -v grep | grep "${SCREEN} ${INVOCATION}" | cut -f1 -d' ')
 			check_permissions
@@ -109,7 +109,7 @@ mc_start() {
 	servicejar=$MCPATH/$SERVICE
 	if [ ! -f "$servicejar" ]
 	then
-		echo "Failed to start: Can't find the specified Minecraft jar under $servicejar. Please check your config!"
+		echoerr "Failed to start: Can't find the specified Minecraft jar under $servicejar. Please check your config!"
 		exit 1
 	fi
 
@@ -133,7 +133,7 @@ mc_start() {
 		fi
 		if [[ $seconds -ge 120 ]]
 		then
-			echo "Failed to start, aborting."
+			echoerr "Failed to start, aborting."
 			exit 1
 		fi
 	done
@@ -145,7 +145,7 @@ mc_command() {
 	then
 			as_user "screen -p 0 -S $SCREEN -X eval 'stuff \"$(eval echo $FORMAT)\"\015'"
 	else
-			echo "$SERVICE was not running. Not able to run command."
+			echoerr "$SERVICE was not running. Not able to run command."
 	fi
 }
 
@@ -178,7 +178,7 @@ mc_say() {
 		echo "Said: $1"
 		mc_command "say $1"
 	else
-		echo "$SERVICE was not running. Not able to say anything."
+		echoerr "$SERVICE was not running. Not able to say anything."
 	fi
 }
 
@@ -209,7 +209,7 @@ mc_stop() {
 		if [[ $seconds -ge 120 ]]
 		then
 			logger -t minecraft-init "Failed to shut down server, aborting."
-			echo "Failed to shut down, aborting."
+			echoerr "Failed to shut down, aborting."
 			exit 1
 		fi
 	done
@@ -241,7 +241,7 @@ check_backup_settings() {
 			EXCLUDEARG="-x@"
 			;;
 		*)
-			echo "$BACKUPFORMAT is not a supported backup format"
+			echoerr "$BACKUPFORMAT is not a supported backup format"
 			exit 1
 			;;
 	esac
@@ -270,7 +270,7 @@ log_roll() {
 				as_user "echo \"Previous logs rolled to $path\" > $FILE"
 			fi
 		else
-			echo "Failed to rotate log from $FILE into $path"
+			echoerr "Failed to rotate log from $FILE into $path"
 		fi
 	done
 
@@ -393,7 +393,7 @@ check_links() {
 				fi
 			fi
 		else
-			echo "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
+			echoerr "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
 
 			exit 1
 		fi
@@ -445,7 +445,7 @@ check_update_vanilla() {
 			return 0
 		fi
 	else
-		echo "Something went wrong. Couldn't download minecraft_server.jar"
+		echoerr "Something went wrong. Couldn't download minecraft_server.jar"
 	fi
 }
 
@@ -477,18 +477,18 @@ check_update_craftbukkit() {
 			echo "You are already running the latest version of craftbukkit.jar."
 			return 1
 		else
-			echo "Update of $CB_JAR is needed."
+			echoerr "Update of $CB_JAR is needed."
 			return 0
 		fi
 	else
-		echo "Something went wrong. Couldn't download craftbukkit.jar"
+		echoerr "Something went wrong. Couldn't download craftbukkit.jar"
 	fi
 }
 
 mc_update() {
 	if is_running
 	then
-		echo "$SERVICE is running! Will not start update."
+		echoerr "$SERVICE is running! Will not start update."
 	else
 		if check_update_vanilla
 		then
@@ -497,7 +497,7 @@ mc_update() {
 				as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR"
 				echo "Thats it. Update of $MC_JAR done."
 			else
-				echo "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
+				echoerr "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
 			fi
 		else
 			echo "Not updating $MB_JAR. It's not necessary"
@@ -511,7 +511,7 @@ mc_update() {
 				as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR"
 				echo "Thats it. Update of $CB_JAR done."
 			else
-				echo "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
+				echoerr "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
 			fi
 		else
 			echo "Not updating $CB_JAR. It's not necessary"
@@ -523,7 +523,7 @@ mc_update() {
 change_ramdisk_state() {
 	if [ ! -e $WORLDSTORAGE/$1 ]
 	then
-		echo "World \"$1\" not found."
+		echoerr "World \"$1\" not found."
 		exit 1
 	fi
 
@@ -543,7 +543,7 @@ overviewer_start() {
 		then
 				if [ ! "$OVPATH" == "apt" ]
 				then
-						echo "Minecraft-Overviewer is not installed in \"$OVPATH\""
+						echoerr "Minecraft-Overviewer is not installed in \"$OVPATH\""
 						exit 1
 				else
 						echo "Using APT repository installed Minecraft-Overviewer"
@@ -564,7 +564,7 @@ overviewer_start() {
 				fi
 				echo "Map generated."
 		else
-				echo "No config file found. Start with default config..."
+				echoerr "No config file found. Start with default config..."
 				if [ -z $1 ] || [ ! -e $OVBACKUP/$1 ]
 				then
 						echo "World \"$1\" not found."
@@ -632,7 +632,7 @@ get_script_location() {
 check_permissions() {
 	as_user "touch $pidfile"
 	if ! as_user "test -w '$pidfile'" ; then
-		echo "Check Permissions. Cannot write to $pidfile. Correct the permissions and then excute: $0 status"
+		echoerr "Check Permissions. Cannot write to $pidfile. Correct the permissions and then excute: $0 status"
 	fi
 }
 
@@ -816,7 +816,7 @@ case "$1" in
 				# Replace ", " separator with newline char.
 				sed 's/, /\n/g'
 		else
-			echo "No running server."
+			echoerr "No running server."
 		fi
 		;;
 	playercount)
@@ -829,7 +829,7 @@ case "$1" in
 				grep --before-context 1 --max-count 1 "players online" | \
 				head -n 1 | sed 's/[\x01-\x1F\x7F]..//g' | grep . | sed 's/, /\n/g' | wc -l
 		else
-			echo "No running server."
+			echoerr "No running server."
 		fi
 		;;
 	log-roll)
@@ -908,14 +908,14 @@ case "$1" in
 				;;
 			[Nn]|[Nn][Oo])
 				clear
-				echo "Aborting startup!"
+				echoerr "Aborting startup!"
 				sleep 1
 				clear
 				exit 1
 				;;
 			*)
 				clear
-				echo "Invalid input"
+				echoerr "Invalid input"
 				sleep 1
 				clear
 				exit 1
@@ -932,16 +932,16 @@ case "$1" in
 		read KILL_SERVER
 		case "$KILL_SERVER" in  # Determine which option was specified
 			[Yy]|[Yy][Ee][Ss])      # If yes, kill the server
-				echo "KILLING SERVER PROCESSES!!!"
+				echoerr "KILLING SERVER PROCESSES!!!"
 				force_exit
 				exit 1
 				;;
 			[Nn]|[Nn][Oo])  # If no, abort and exit 1
-				echo "Aborting!"
+				echoerr "Aborting!"
 				exit 1
 				;;
 			*)      # If anything else, exit 1
-				echo "Error: Invalid Input!"
+				echoerr "Error: Invalid Input!"
 				exit 1
 				;;
 		esac
@@ -980,7 +980,7 @@ case "$1" in
 		echo -e "   screen \t\t Shows the server screen"
 		;;
 	*)
-		echo "No such command, see $0 help"
+		echoerr "No such command, see $0 help"
 		exit 1
 		;;
 esac
