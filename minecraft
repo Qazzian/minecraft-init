@@ -1589,8 +1589,8 @@ function route_command() {
 
 
 		kill)
-			WIDTH=`stty size | cut -d ' ' -f 2`            # Get terminal's character width
-			pstree | grep MDSImporte | cut -c 1-${WIDTH}   # Chop output after WIDTH chars
+			WIDTH="$(stty size | cut -d ' ' -f 2)";           # Get terminal's character width
+			pstree | grep MDSImporte | cut -c "1-${WIDTH}";   # Chop output after WIDTH chars
 
 			echo_out "Killing the server is an EMERGENCY procedure, and should not be used to perform a normal shutdown! All changes younger than 15 minutes could be permanantly lost and WORLD CORRUPTION is possible! Are you ABSOLUTELY POSITIVE this is what you want to do?"
 			echo_quiet "Please put \"Yes\", or \"No\": "
