@@ -388,8 +388,8 @@ is_running() {
 
 	if [ -f "$pidfile" ]
 	then
-		pid=$(head -1 $pidfile)
-		if ps ax | grep -v grep | grep ${pid} | grep "${SCREEN}" > /dev/null
+		pid=$(head -1 "$pidfile")
+		if ps ax | grep -v grep | grep "${pid}" | grep "${SCREEN}" > /dev/null
 		then
 			return 0
 		else
@@ -429,11 +429,11 @@ datepath() {
 	# $2 file ending to check for uniqueness
 	# $3 file ending to return
 
-	if [ -e $1`date +%F`$2 ]
+	if [ -e "$1$(date +%F)$2" ]
 	then
-		echo_quiet $1`date +%FT%T`$3
+		echo_quiet "$1$(date +%FT%T)$3"
 	else
-		echo_quiet $1`date +%F`$3
+		echo_quiet "$1$(date +%F)$3"
 	fi
 }
 
@@ -653,11 +653,11 @@ check_backup_settings() {
 log_roll() {
 	# Moves the logfiles and compresses that backup directory
 	check_backup_settings
-	path=`datepath $LOGPATH/logs_ $ARCHIVEENDING`
+	path=$(datepath "$LOGPATH/logs_" $ARCHIVEENDING)
 	as_user "mkdir -p $path"
 
 	shopt -s extglob
-	for FILE in $(ls $MCPATH/*.log)
+	for FILE in $(ls "$MCPATH/*.log")
 	do
 		as_user "cp $FILE $path"
 		# only if previous command was successful
@@ -689,12 +689,12 @@ get_worlds() {
 	IFS=$(echo -en "\n\b")
 
 	a=1
-	for NAME in $(ls $WORLDSTORAGE)
+	for NAME in $(ls "$WORLDSTORAGE")
 	do
-		if [ -d $WORLDSTORAGE/$NAME ]
+		if [ -d "$WORLDSTORAGE/$NAME" ]
 		then
 			WORLDNAME[$a]=$NAME
-			if [ -e $WORLDSTORAGE/$NAME/ramdisk ]
+			if [ -e "$WORLDSTORAGE/$NAME/ramdisk" ]
 			then
 				WORLDRAM[$a]=true
 			else
@@ -711,14 +711,14 @@ get_worlds() {
 mc_whole_backup() {
 	check_backup_settings
 	echo_out "backing up entire setup into $WHOLEBACKUP"
-	path=`datepath $WHOLEBACKUP/mine_`
+	path=$(datepath "$WHOLEBACKUP/mine_")
 	locationOfScript=$(dirname "$(readlink -e "$0")")
 	as_user "mkdir -p $path"
 
 	if [ -r "$locationOfScript/exclude.list" ]
 	then
 		echo_out "...except the following files and/or dirs:"
-		cat $locationOfScript/exclude.list
+		cat "$locationOfScript/exclude.list"
 		exclude="$EXCLUDEARG$locationOfScript/exclude.list"
 	fi
 	if [ "$COMPRESS_WHOLEBACKUP" ]
@@ -737,7 +737,7 @@ mc_world_backup() {
 
 	check_backup_settings
 	get_worlds
-	today="`date +%F-%H-%M-%S`"
+	today="$(date +%F-%H-%M-%S)"
 	as_user "mkdir -p $BACKUPPATH"
 
 	# Check if the backup script compatibility is enabled
@@ -748,14 +748,14 @@ mc_world_backup() {
 		as_user "rm -r $BACKUPPATH/*"
 	fi
 
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in "${!WORLDNAME[@]}"
 	do
 		echo_out "Backing up minecraft ${WORLDNAME[$INDEX]}"
 		if [ "$WORLDEDITCOMPATIBLE" ]
 		# If this is set tars will be created compatible to WorldEdit
 		then
 			as_user "mkdir -p $BACKUPPATH/${WORLDNAME[$INDEX]}"
-			path=`datepath $BACKUPPATH/${WORLDNAME[$INDEX]}/ $ARCHIVEENDING $ARCHIVEENDING`
+			path=$(datepath "$BACKUPPATH/${WORLDNAME[$INDEX]}/" "$ARCHIVEENDING" "$ARCHIVEENDING")
 		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]
 		# If is set tars will be put in $BACKUPPATH without any timestamp to be compatible with
 		# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
@@ -763,7 +763,7 @@ mc_world_backup() {
 			path=$BACKUPPATH/${WORLDNAME[$INDEX]}$ARCHIVEENDING
 		else
 			as_user "mkdir -p $BACKUPPATH/${today}"
-			path=`datepath $BACKUPPATH/${today}/${WORLDNAME[$INDEX]}_ $ARCHIVEENDING $ARCHIVEENDING`
+			path=$(datepath "$BACKUPPATH/${today}/${WORLDNAME[$INDEX]}_" "$ARCHIVEENDING" "$ARCHIVEENDING")
 		fi
 		if [ "$WORLDEDITCOMPATIBLE" ]
 		# Don't store the complete path
@@ -778,11 +778,11 @@ mc_world_backup() {
 
 check_links() {
 	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in "${!WORLDNAME[@]}"
 	do
 		if [[ -L $MCPATH/${WORLDNAME[$INDEX]} || ! -a $MCPATH/${WORLDNAME[$INDEX]} ]]
 		then
-			link=`ls -l $MCPATH/${WORLDNAME[$INDEX]} | awk '{print $11}'`
+			link=$(ls -l "$MCPATH/${WORLDNAME[$INDEX]}" | awk '{print $11}')
 			if ${WORLDRAM[$INDEX]}
 			then
 				if [ "$link" != "$RAMDISK/${WORLDNAME[$INDEX]}" ]
@@ -810,11 +810,11 @@ check_links() {
 
 to_ram() {
 	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in "${!WORLDNAME[@]}"
 	do
 		if ${WORLDRAM[$INDEX]}
 		then
-			if [ -L $MCPATH/${WORLDNAME[$INDEX]} ]
+			if [ -L "$MCPATH/${WORLDNAME[$INDEX]}" ]
 			then
 				as_user "mkdir -p $RAMDISK"
 				as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}/ $RAMDISK/${WORLDNAME[$INDEX]}"
@@ -827,7 +827,7 @@ to_ram() {
 
 to_disk() {
 	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in "${!WORLDNAME[@]}"
 	do
 		if ${WORLDRAM[$INDEX]}
 		then
@@ -839,14 +839,15 @@ to_disk() {
 
 
 check_update_vanilla() {
-	MC_SERVER_URL=`wget -q -O - https://minecraft.net/download/server | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")'`
+	MC_SERVER_URL=$(wget -q -O - https://minecraft.net/download/server | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")')
 
 	echo_out "Checking for update for minecraft_server.jar (Vanilla)"
 	as_user "cd $MCPATH && wget -q -O $MCPATH/minecraft_server.jar.update $MC_SERVER_URL"
 
 	if [ -r "$MCPATH/minecraft_server.jar.update" ]
 	then
-		if `diff $MCPATH/$MC_JAR $MCPATH/minecraft_server.jar.update >/dev/null`
+		diff "$MCPATH/$MC_JAR" "$MCPATH/minecraft_server.jar.update" >/dev/null
+		if $?
 		then
 			echo_out "You are already running the latest version of minecraft_server.jar."
 			return 1
@@ -890,7 +891,8 @@ check_update_craftbukkit() {
 	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.jar.update $(get_cb_release_channel)"
 	if [ -r "$MCPATH/craftbukkit.jar.update" ]
 	then
-		if `diff $MCPATH/$CB_JAR $MCPATH/craftbukkit.jar.update >/dev/null`
+		diff "$MCPATH/$CB_JAR" "$MCPATH/craftbukkit.jar.update" >/dev/null
+		if $?
 		then
 			echo_info "You are already running the latest version of craftbukkit.jar."
 			return 1
@@ -941,18 +943,18 @@ mc_update() {
 
 
 change_ramdisk_state() {
-	if [ ! -e $WORLDSTORAGE/$1 ]
+	if [ ! -e "$WORLDSTORAGE/$1" ]
 	then
 		echo_err "World \"$1\" not found."
 		exit 1
 	fi
 
-	if [ -e $WORLDSTORAGE/$1/ramdisk ]
+	if [ -e "$WORLDSTORAGE/$1/ramdisk" ]
 	then
-		rm $WORLDSTORAGE/$1/ramdisk
+		rm "$WORLDSTORAGE/$1/ramdisk"
 		echo_out "Removed ramdisk flag from \"$1\""
 	else
-		touch $WORLDSTORAGE/$1/ramdisk
+		touch "$WORLDSTORAGE/$1/ramdisk"
 		echo_out "Added ramdisk flag to \"$1\""
 	fi
 	echo_out "Changes will only take effect after server is restarted."
@@ -960,7 +962,7 @@ change_ramdisk_state() {
 
 
 overviewer_start() {
-		if [ ! -e $OVPATH/overviewer.py ]
+		if [ ! -e "$OVPATH/overviewer.py" ]
 		then
 				if [ ! "$OVPATH" == "apt" ]
 				then
@@ -970,11 +972,11 @@ overviewer_start() {
 						echo_out "Using APT repository installed Minecraft-Overviewer"
 				fi
 		fi
-		if [ ! -e $OUTPUTMAP ]
+		if [ ! -e "$OUTPUTMAP" ]
 		then
 				as_user "mkdir -p $OUTPUTMAP"
 		fi
-		if [ -e $OVCONFIGPATH/$OVCONFIGNAME ]
+		if [ -e "$OVCONFIGPATH/$OVCONFIGNAME" ]
 		then
 				echo_out "Start generating map with Minecraft-Overviewer..."
 				if [ "$OVPATH" == "apt" ]
@@ -986,7 +988,7 @@ overviewer_start() {
 				echo_out "Map generated."
 		else
 				echo_err "No config file found. Start with default config..."
-				if [ -z $1 ] || [ ! -e $OVBACKUP/$1 ]
+				if [ -z "$1" ] || [ ! -e "$OVBACKUP/$1" ]
 				then
 						echo_err "World \"$1\" not found."
 				else
@@ -1009,7 +1011,7 @@ overviewer_copy_worlds() {
 	#
 
 	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in "${!WORLDNAME[@]}"
 	do
 		echo_out "Copying minecraft ${WORLDNAME[$INDEX]}."
 		as_user "mkdir -p $OVBACKUP"
@@ -1522,7 +1524,7 @@ function route_command() {
 
 		worlds)
 			get_worlds
-			for INDEX in ${!WORLDNAME[@]}
+			for INDEX in "${!WORLDNAME[@]}"
 			do
 				if ${WORLDRAM[$INDEX]}
 				then
