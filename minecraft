@@ -44,9 +44,9 @@ fi
 
 ## output supported commands
 function echo_usage {
-	echo "Usage: $0 COMMAND";
-	echo
-	echo "Available commands:";
+	echo "Usage: $(basename "$0") <command>";
+	echo;
+	echo "Where <command> is one of:";
 	echo -e "   start \t\t Starts the server";
 	echo -e "   stop \t\t Stops the server";
 	echo -e "   kill \t\t Kills the server";
