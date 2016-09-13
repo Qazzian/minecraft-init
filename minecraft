@@ -989,7 +989,9 @@ case "$1" in
 		echo_usage;
 		;;
 	*)
-		echoerr "No such command, see $0 help"
+		echoerr "No such command; quitting";
+		echo;
+		echo_usage;
 		exit 1
 		;;
 esac
