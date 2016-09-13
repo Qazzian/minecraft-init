@@ -272,6 +272,8 @@ check_backup_settings() {
 			STOREDENDING=".tar"
 			EXCLUDEARG="-X "
 			;;
+
+
 		zip)
 			COMPRESSCMD="zip -rq"
 			STORECMD="zip -rq -0"
@@ -279,10 +281,14 @@ check_backup_settings() {
 			STOREDENDING=".zip"
 			EXCLUDEARG="-x@"
 			;;
+
+
 		*)
 			echoerr "$BACKUPFORMAT is not a supported backup format"
 			exit 1
 			;;
+
+
 	esac
 }
 
@@ -495,12 +501,18 @@ get_cb_release_channel() {
 		unstable|UNSTABLE|Unstable|dev|development)
 			echo $CB_URL"dev/craftbukkit.jar"
 		;;
+
+
 		beta|Beta|BETA)
 			echo $CB_URL"beta/craftbukkit.jar"
 		;;
+
+
 		*)
 			echo $CB_URL"rb/craftbukkit.jar"
 		;;
+
+
 	esac
 }
 
@@ -688,6 +700,8 @@ case "$1" in
 			mc_start
 		fi
 		;;
+
+
 	stop)
 		# Stops the server
 		if is_running; then
@@ -698,6 +712,8 @@ case "$1" in
 			echo "No running server."
 		fi
 		;;
+
+
 	restart)
 		# Restarts the server
 		if is_running; then
@@ -720,6 +736,8 @@ case "$1" in
                         echo "No running server."
                 fi
                 ;;
+
+
 	whitelist)
 		if is_running; then
 			whitelist
@@ -727,6 +745,8 @@ case "$1" in
 			echo "Server not running."
 		fi
 		;;
+
+
 	whitelist-reload)
 		# Reloads the whitelist
 		if is_running; then
@@ -735,6 +755,8 @@ case "$1" in
 			echo "No running server."
 		fi
 		;;
+
+
 	whitelist-add)
 		# Adds a player to the whitelist
 		if is_running; then
@@ -743,6 +765,8 @@ case "$1" in
 			echo "No running server."
 		fi
 		;;
+
+
 	backup)
 		# Backups world
 		if is_running; then
@@ -756,6 +780,8 @@ case "$1" in
 			mc_world_backup
 		fi
 		;;
+
+
 	whole-backup)
 		# Backup everything
 		if is_running; then
@@ -770,12 +796,16 @@ case "$1" in
 			mc_whole_backup
 		fi
 		;;
+
+
 	check-update)
 		check_update_vanilla
 		check_update_craftbukkit
 		as_user "rm $MCPATH/minecraft_server.jar.update"
 		as_user "rm $MCPATH/craftbukkit.jar.update"
 		;;
+
+
 	update)
 		#update minecraft_server.jar and craftbukkit.jar (thanks karrth)
 		if is_running; then
@@ -791,12 +821,16 @@ case "$1" in
 			mc_update
 		fi
 		;;
+
+
 	to-disk)
 		# Writes from the ramdisk to disk, in case the server crashes.
 		mc_saveoff
 		to_disk
 		mc_saveon
 		;;
+
+
 	save-off)
 		# Flushes the state of the world to disk, and then disables
 		# saving until save-on is called (useful if you have your own
@@ -808,6 +842,8 @@ case "$1" in
 		fi
 		to_disk
 		;;
+
+
 	save-on)
 		# Re-enables saving if it was disabled by save-off.
 		if is_running; then
@@ -816,6 +852,8 @@ case "$1" in
 			echo "No running server."
 		fi
 		;;
+
+
 	say)
 		# Says something to the ingame chat
 		if is_running; then
@@ -825,6 +863,8 @@ case "$1" in
 			echo "No running server to say anything."
 		fi
 		;;
+
+
 	command)
 		if is_running; then
 			shift 1
@@ -834,6 +874,8 @@ case "$1" in
 			echo "No running server to send a command to."
 		fi
 		;;
+
+
 	connected)
 		# Lists connected users
 		if is_running; then
@@ -858,6 +900,8 @@ case "$1" in
 			echoerr "No running server."
 		fi
 		;;
+
+
 	playercount)
 		# List number of connected users.
 		if is_running; then
@@ -871,18 +915,26 @@ case "$1" in
 			echoerr "No running server."
 		fi
 		;;
+
+
 	log-roll)
 		log_roll
 		;;
+
+
 	log)
 		# Display server log using 'cat'.
 		cat $SERVERLOG
 		;;
+
+
 	last)
 		# Greps for recently logged in users
 		echo Recently logged in users:
 		cat $SERVERLOG | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
 		;;
+
+
 	status)
 		# Shows server status
 		if is_running
@@ -892,6 +944,8 @@ case "$1" in
 			echo "$SERVICE is not running."
 		fi
 		;;
+
+
 	version)
 		if is_running; then
 			mc_command version
@@ -900,12 +954,18 @@ case "$1" in
 			echo "The server needs to be running to check version."
 		fi
 		;;
+
+
 	links)
 		check_links
 		;;
+
+
 	ramdisk)
 		change_ramdisk_state $2
 		;;
+
+
 	worlds)
 		get_worlds
 		for INDEX in ${!WORLDNAME[@]}
@@ -918,6 +978,8 @@ case "$1" in
 			fi
 		done
 		;;
+
+
 	overviewer)
 		if is_running; then
 			mc_say "Generating overviewer map."
@@ -931,6 +993,8 @@ case "$1" in
 			overviewer_start $2
 		fi
 		;;
+
+
 	screen)
 		if is_running; then
 			as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
@@ -945,6 +1009,8 @@ case "$1" in
 				mc_start
 				as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
 				;;
+
+
 			[Nn]|[Nn][Oo])
 				clear
 				echoerr "Aborting startup!"
@@ -952,6 +1018,8 @@ case "$1" in
 				clear
 				exit 1
 				;;
+
+
 			*)
 				clear
 				echoerr "Invalid input"
@@ -959,9 +1027,13 @@ case "$1" in
 				clear
 				exit 1
 				;;
+
+
 		esac
 		fi
 		;;
+
+
 	kill)
 		WIDTH=`stty size | cut -d ' ' -f 2`            # Get terminal's character width
 		pstree | grep MDSImporte | cut -c 1-${WIDTH}   # Chop output after WIDTH chars
@@ -975,19 +1047,29 @@ case "$1" in
 				force_exit
 				exit 1
 				;;
+
+
 			[Nn]|[Nn][Oo])  # If no, abort and exit 1
 				echoerr "Aborting!"
 				exit 1
 				;;
+
+
 			*)      # If anything else, exit 1
 				echoerr "Error: Invalid Input!"
 				exit 1
 				;;
+
+
 		esac
 		;;
+
+
 	help|--help|-h)
 		echo_usage;
 		;;
+
+
 	*)
 		echoerr "No such command; quitting";
 		echo;
