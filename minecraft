@@ -3,7 +3,7 @@
 
 ### BEGIN INIT INFO
 # Provides:   minecraft
-# Required-Start: $local_fs $remote_fs
+# Required-Start: $local_fs $remote_fs $all
 # Required-Stop:  $local_fs $remote_fs
 # Should-Start:   $network
 # Should-Stop:    $network
