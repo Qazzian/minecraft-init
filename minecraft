@@ -54,6 +54,7 @@ function echo_usage {
 	echo -e "   reload \t\t Reloads the server configuration";
 	echo -e "   backup \t\t Backups the worlds defined in the script";
 	echo -e "   whole-backup \t Backups the entire server folder";
+	echo -e "   rdiff-backup \t Backups the entire server folder using rdiff-backup";
 	echo -e "   check-update \t Checks for updates of $CB_JAR and $MC_JAR";
 	echo -e "   update \t\t Fetches the latest version of minecraft.jar server and Bukkit";
 	echo -e "   log-roll \t\t Moves and compresses the logfiles";
@@ -368,6 +369,13 @@ mc_whole_backup() {
 	else
 		as_user "$STORECMD $path/whole-backup$STOREDENDING $MCPATH $exclude"
 	fi
+}
+
+mc_rdiff_backup() {
+	as_user "mkdir -p $RDIFFBACKUP"
+	exclude="--exclude \"**/*.log\""
+	exclude="--exclude \"**/*.lck\" $exclude"
+	as_user "rdiff-backup $exclude $MCPATH $RDIFFBACKUP"
 }
 
 mc_world_backup() {
@@ -818,6 +826,20 @@ case "$1" in
 		else
 			mc_whole_backup
 			mc_update
+		fi
+		;;
+
+
+	rdiff-backup)
+		if is_running; then
+			mc_say "Server rdiff backup."
+			mc_saveoff
+			to_disk
+			mc_rdiff_backup
+			mc_saveon
+			mc_say "Server backup complete."
+		else
+			mc_rdiff_backup
 		fi
 		;;
 
