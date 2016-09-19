@@ -10,7 +10,7 @@
 # Name of vanilla server jar (no need to change if you're running craftbukkit and vice versa)
 MC_JAR="minecraft_server.jar"
 
-# Name of craftbukkit jar 
+# Name of craftbukkit jar
 CB_JAR="craftbukkit.jar"
 
 # Define the release of CraftBukkit to use (stable or unstable)
@@ -25,7 +25,7 @@ SCREEN="minecraft_screen"
 # User that should run the server
 USERNAME="minecraft"
 
-# Path to minecraft server directory 
+# Path to minecraft server directory
 MCPATH="/home/${USERNAME}/minecraft"
 
 # Path to server log file ($MCPATH/server.log on older versions)
@@ -61,7 +61,7 @@ BACKUPPATH="/home/${USERNAME}/mcbackup/worlds"
 WHOLEBACKUP="/home/${USERNAME}/mcbackup/server"
 
 # Format for world backup (tar or zip).
-BACKUPFORMAT="tar" 
+BACKUPFORMAT="tar"
 
 # Normally backups will be put in a subfolder to $BACKUPPATH with todays date
 # and the backups themselves will have a timestamp.
