@@ -20,6 +20,9 @@
 # Log rolls without needing restarts by Solorvox
 # Option for killing server in an emergency by jbondhus
 
+# Function to pass errors to stderr
+echoerr() { echo "$@" 1>&2; }
+
 # Loads config file
 
 if [ -L $0 ]
@@ -668,7 +671,7 @@ whitelist(){
 
 force_exit() {  # Kill the server running (messily) in an emergency
 	echo ""
-	echo "SIGINIT CALLED - FORCE EXITING!"
+	echoerr "SIGINIT CALLED - FORCE EXITING!"
 	pidfile=${MCPATH}/${SCREEN}.pid
 	rm $pidfile
 	echo "KILLING SERVER PROCESSES!!!"
