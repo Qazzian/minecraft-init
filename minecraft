@@ -657,7 +657,7 @@ log_roll() {
 	as_user "mkdir -p $path"
 
 	shopt -s extglob
-	for FILE in $(ls $MCPATH/*.log)
+	for FILE in $(ls $MCPATH/logs/*.log)
 	do
 		as_user "cp $FILE $path"
 		# only if previous command was successful
