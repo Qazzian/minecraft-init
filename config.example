@@ -54,11 +54,11 @@ FORMAT='$1'
 # ===============================
 
 # Location for world backups
-BACKUPPATH="/home/${USERNAME}/mcbackup/worlds"
+BACKUPPATH="${MCPATH}/backup/worlds"
 
 # Where the whole minecraft directory is copied when whole-backup is executed
 # whole-backup is a complete uncompressed backup of the whole server folder.
-WHOLEBACKUP="/home/${USERNAME}/mcbackup/server"
+WHOLEBACKUP="${MCPATH}/backup/server"
 
 # Format for world backup (tar or zip).
 BACKUPFORMAT="tar"
@@ -93,7 +93,7 @@ COMPRESS_WHOLEBACKUP=YES
 
 # Location for old logs
 # Used by the log-roll command
-LOGPATH="/home/${USERNAME}/mcbackup/logs"
+LOGPATH="${MCPATH}/backup/logs"
 
 # Whether or not to gzip logs (must be commented out for no - DO NOT CHANGE TO NO)
 #
@@ -107,19 +107,19 @@ LOGFILEAPPEND="logfile_"
 # ===============================
 
 # Where the Map is generated
-OUTPUTMAP="/home/${USERNAME}/mc-overviewer/render"
+OUTPUTMAP="${MCPATH}/mc-overviewer/render"
 
 # Path to Minecraft-Overviewer
-OVPATH="/home/${USERNAME}/mc-overviewer/Minecraft-Overviewer"
+OVPATH="${MCPATH}/mc-overviewer/bin"
 
 # Path for the config file of Overviewer
-OVCONFIGPATH="/home/${USERNAME}/mc-overviewer"
+OVCONFIGPATH="${MCPATH}/overviewer"
 
 # Name of Overviewer config file
 OVCONFIGNAME="config.py"
 
 # Path for backup worlds
-OVBACKUP="/home/${USERNAME}/mc-overviewer/overviewerbackups"
+OVBACKUP="${MCPATH}/mc-overviewer/backups"
 
 # Things to leave alone ;)
 # =====================
