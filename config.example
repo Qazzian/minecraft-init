@@ -17,7 +17,7 @@ CB_JAR="craftbukkit.jar"
 CB_RELEASE="stable"
 
 # Name of server.jar to use (either $MC_JAR or $CB_JAR)
-SERVICE=$CB_JAR
+SERVICE=$MC_JAR
 
 # Name to use for the screen instance
 SCREEN="server_screen"
