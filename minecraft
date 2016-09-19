@@ -323,7 +323,10 @@ log_roll() {
 		fi
 	done
 
-	as_user "$COMPRESSCMD $path$ARCHIVEENDING $path"
+	# Don't archive full path
+	dirname=`dirname "$path"`
+	basename=`basename "$path"`
+	as_user "cd $dirname && $COMPRESSCMD $path$ARCHIVEENDING $basename" 
 	if [ $? -eq 0 ]; then
 		as_user "rm -r $path"
 	fi
@@ -365,11 +368,15 @@ mc_whole_backup() {
 		cat $locationOfScript/exclude.list
 		exclude="$EXCLUDEARG$locationOfScript/exclude.list"
 	fi
+
+	# Don't archive whole path
+        dirname=`dirname "$MCPATH"`
+        basename=`basename "$MCPATH"`
 	if [ "$COMPRESS_WHOLEBACKUP" ]
 	then
-		as_user "$COMPRESSCMD $path/whole-backup$ARCHIVEENDING $MCPATH $exclude"
+		as_user "cd $dirname && $COMPRESSCMD $path/whole-backup$ARCHIVEENDING $basename $exclude"
 	else
-		as_user "$STORECMD $path/whole-backup$STOREDENDING $MCPATH $exclude"
+		as_user "cd $dirname && $STORECMD $path/whole-backup$STOREDENDING $basename $exclude"
 	fi
 }
 
@@ -395,7 +402,8 @@ mc_world_backup() {
 	then
 		# If it is enabled, then delete the old backups to prevent errors
 		echo "Detected that backup script compatibility is enabled, deleting old backups that are not necessary."
-		as_user "rm -r $BACKUPPATH/*"
+		# Don't show message if old backups are non-existent
+		as_user "rm -rf $BACKUPPATH/*"
 	fi
 
 	for INDEX in ${!WORLDNAME[@]}
@@ -415,13 +423,9 @@ mc_world_backup() {
 			as_user "mkdir -p $BACKUPPATH/${today}"
 			path=`datepath $BACKUPPATH/${today}/${WORLDNAME[$INDEX]}_ $ARCHIVEENDING $ARCHIVEENDING`
 		fi
-		if [ "$WORLDEDITCOMPATIBLE" ]
-		# Don't store the complete path
-		then
-			as_user "cd $MCPATH && $COMPRESSCMD $path ${WORLDNAME[$INDEX]}"
-		else
-			as_user "$COMPRESSCMD $path $MCPATH/${WORLDNAME[$INDEX]}"
-		fi
+
+		# Never store complete path
+		as_user "cd $MCPATH && $COMPRESSCMD $path ${WORLDNAME[$INDEX]}"
 	done
 }
 
