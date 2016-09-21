@@ -20,14 +20,18 @@
 # Log rolls without needing restarts by Solorvox
 # Option for killing server in an emergency by jbondhus
 
-# Function to pass errors to stderr
-echoerr() { echo "$@" 1>&2; }
+OS=`uname`
+
 
 # Loads config file
-
 if [ -L $0 ]
 then
-	source `readlink -e $0 | sed "s:[^/]*$:config:"`
+	if [ "$OS" == "Darwin" ]
+	then
+		source `readlink $0 | sed "s:[^/]*$:config:"`
+	else
+		source `readlink -e $0 | sed "s:[^/]*$:config:"`
+	fi
 else
 	source `echo $0 | sed "s:[^/]*$:config:"`
 fi
@@ -35,6 +39,13 @@ fi
 
 # easy way to echo to stderr
 echoerr() { echo "$@" 1>&2; }
+
+
+# Set bash to default if nothing was set
+if [ "$BASH_PATH" == "" ]
+then
+    BASH_PATH=/bin/bash
+fi
 
 
 if [ "$SERVICE" == "" ]
@@ -87,9 +98,9 @@ function echo_usage {
 
 as_user() {
 	if [ "$(whoami)" == "$USERNAME" ] ; then
-		bash -c "$1"
+		"$BASH_PATH" -c "$1"
 	else
-		su $USERNAME -s /bin/bash -c "$1"
+		su $USERNAME -s "$BASH_PATH" -c "$1"
 	fi
 }
 
