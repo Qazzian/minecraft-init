@@ -12,7 +12,7 @@
 
 # Location of bash shell on your system, by default we grab the first entry
 # from which, however, you can manually set it to whatever you want.
-BASH_PATH=`which bash | cut -f3 -d' ' | sed -n 1p`
+BASH_PATH=$(which bash | cut -f3 -d' ' | sed -n 1p);
 
 # Name of server (not critical, just makes output neater)
 SERVERNAME='Minecraft Server'
@@ -70,7 +70,7 @@ INIT_RAM="2048M"
 MAX_RAM="2048M"
 
 # Whether to output commands for the plugin ConsoleLikeChat ($1 is the command to run)
-FORMAT='$1'
+FORMAT="\$1"
 
 
 # Settings for backups
