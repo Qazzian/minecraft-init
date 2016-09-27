@@ -69,9 +69,6 @@ INIT_RAM="2048M"
 # of RAM available the size of your map and the RAM-consumption of your base system.
 MAX_RAM="2048M"
 
-# Whether to output commands for the plugin ConsoleLikeChat ($1 is the command to run)
-FORMAT="\$1"
-
 
 # Settings for backups
 # ===============================
