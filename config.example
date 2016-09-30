@@ -21,7 +21,7 @@ SERVERNAME='Minecraft Server'
 MC_JAR='minecraft_server.jar'
 
 # Name of craftbukkit jar
-CB_JAR="craftbukkit.jar"
+CB_JAR='craftbukkit.jar'
 
 # URL for downloading service updates.
 UPDATE_URL='https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar'
@@ -30,16 +30,13 @@ UPDATE_URL='https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server
 CB_RELEASE="stable"
 
 # Name of server.jar to use (either $MC_JAR or $CB_JAR)
-MC_JAR=$MC_JAR
+SERVICE=$MC_JAR
 
 # Name to use for the screen instance
 SCREEN='minecraft_screen'
 
 # User that should run the server
 USERNAME='minecraft'
-
-# Path to minecraft server directory
-MCPATH="/home/${USERNAME}/minecraft"
 
 # Name of the world folder (default is 'world', should be same as level-name in server.properties)
 WORLDNAME='world'
@@ -81,15 +78,14 @@ WORLDBACKUP="$MCPATH/backups/worlds"
 FULLBACKUP="$MCPATH/backups/server"
 
 # Absolute path to server.log backup directory for log-roll command
-BACKUPLOG="$MCPATH/backups/logs"
-
+LOGBACKUP="$MCPATH/backups/logs"
 
 # Format for world backup (tar or zip).
 BACKUPFORMAT="tar"
 
 # Normally backups will be put in a subfolder to $WORLDBACKUP with todays date
 # and the backups themselves will have a timestamp.
-#
+
 # But if BACKUPSCRIPTCOMPATIBLE is set the world backups will be put directly
 # in $WORLDBACKUP without timestamp to be compatible with
 # [backup rotation script](https://github.com/adamfeuer/rotate-backups)
@@ -149,7 +145,7 @@ OVBACKUP="$MCPATH/mc-overviewer/backups"
 # =====================
 
 # Command string used for starting the server
-INVOCATION="java -Xmx$MAX_RAM -Xms$INIT_RAM -Xincgc -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_COUNT -XX:+AggressiveOpts -jar $MC_JAR nogui"
+INVOCATION="java -Xmx$MAX_RAM -Xms$INIT_RAM -Xincgc -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_COUNT -XX:+AggressiveOpts -jar $SERVICE nogui"
 
-# Absolute path to the the mounted ramdisk (default in Ubuntu: /dev/shm)
+# Path to the mounted ramdisk (the default will work in most senarios).
 RAMDISK="/dev/shm"
