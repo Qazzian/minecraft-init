@@ -51,6 +51,7 @@ function echo_usage {
 	echo -e "   stop \t\t Stops the server";
 	echo -e "   kill \t\t Kills the server";
 	echo -e "   restart \t\t Restarts the server";
+	echo -e "   watchdog \t Ensures server is still running";
 	echo -e "   reload \t\t Reloads the server configuration";
 	echo -e "   backup \t\t Backups the worlds defined in the script";
 	echo -e "   whole-backup \t Backups the entire server folder";
@@ -943,6 +944,18 @@ case "$1" in
 			echo "$SERVICE is running."
 		else
 			echo "$SERVICE is not running."
+		fi
+		;;
+
+
+	watchdog)
+		# Ensures server is still running
+		if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
+		then
+			echo "$SERVICE is running."
+		else
+			mc_stop
+			mc_start
 		fi
 		;;
 
