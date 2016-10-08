@@ -26,7 +26,7 @@ SCREEN="server_screen"
 USERNAME="minecraft"
 
 # Path to minecraft server directory 
-MCPATH="/home/${USERNAME}/minecraft"
+MCPATH="/usr/lib/minecraft"
 
 # Path to server log file ($MCPATH/server.log on older versions)
 SERVERLOG="${MCPATH}/logs/latest.log"
@@ -34,7 +34,7 @@ SERVERLOG="${MCPATH}/logs/latest.log"
 # Where the worlds are located on the disk. Can not be the same as MCPATH.
 # You need to move your worlds to this directory manually, the script
 # will then handle the nessessay symlinks.
-WORLDSTORAGE="${MCPATH}/worlds"
+WORLDSTORAGE="/var/lib/minecraft/data"
 
 # Number of CPUs/cores to use
 CPU_COUNT=2
@@ -54,11 +54,11 @@ FORMAT='$1'
 # ===============================
 
 # Location for world backups
-BACKUPPATH="/home/${USERNAME}/mcbackup/worlds"
+BACKUPPATH="/var/lib/minecraft/backup/world"
 
 # Where the whole minecraft directory is copied when whole-backup is executed
 # whole-backup is a complete uncompressed backup of the whole server folder.
-WHOLEBACKUP="/home/${USERNAME}/mcbackup/server"
+WHOLEBACKUP="/var/lib/minecraft/backup/server"
 
 # Format for world backup (tar or zip).
 BACKUPFORMAT="tar" 
@@ -93,7 +93,7 @@ COMPRESS_WHOLEBACKUP=YES
 
 # Location for old logs
 # Used by the log-roll command
-LOGPATH="/home/${USERNAME}/mcbackup/logs"
+LOGPATH="/var/log/minecraft"
 
 # Whether or not to gzip logs (must be commented out for no - DO NOT CHANGE TO NO)
 #
@@ -120,6 +120,7 @@ OVCONFIGNAME="config.py"
 
 # Path for backup worlds
 OVBACKUP="/home/${USERNAME}/mc-overviewer/overviewerbackups"
+
 
 # Things to leave alone ;)
 # =====================
