@@ -2080,7 +2080,7 @@ function route_command() {
 			fi;
 
 			if [ "$SERVICE" != "$CB_JAR" ]; then
-				echo_err "'$SELF $INIT_COMMAND' only works on CraftBukkit servers; skipping";
+				echo_out "'$SELF $INIT_COMMAND' only works on CraftBukkit servers; skipping";
 				return 0;
 			fi;
 
