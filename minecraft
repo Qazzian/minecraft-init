@@ -1804,13 +1804,10 @@ function route_command() {
 ## Run, tidy, quit
 ###############################################################################
 
-
 trap force_exit SIGINT
-
 
 handle_commandline_options "$@" || exit 1;
 config_load || exit 1;
 route_command "$@" || exit 1;	# need to inject $@ so route_command() can pass it on
 
-
-exit 0
+exit 0;
