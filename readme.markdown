@@ -24,7 +24,7 @@ Access server console
 	screen -r minecraft
 
 Exit the console
-	
+
 	Ctrl+A D
 
 
@@ -44,7 +44,7 @@ Setup
 4. Edit crontab
 
 	As the server user:
-	
+
 		crontab -e
 
 	Add these lines:
@@ -58,7 +58,7 @@ Setup
 5. To load a world from ramdisk run:
 
 		/etc/init.d/minecraft ramdisk WORLDNAME
-	
+
 	to disable ramdisk, run the same command again.
 
 
