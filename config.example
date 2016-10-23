@@ -16,6 +16,9 @@ CB_JAR="craftbukkit.jar"
 # Define the release of CraftBukkit to use (stable or unstable)
 CB_RELEASE="stable"
 
+# Link to latest $CB_JAR. 'RELEASE', if present, will be replaced with $CB_RELEASE
+CB_DOWNLOAD_URL='http://dl.bukkit.org/latest-RELEASE/craftbukkit.jar';
+
 # Name of server.jar to use (either $MC_JAR or $CB_JAR)
 SERVICE=$CB_JAR
 

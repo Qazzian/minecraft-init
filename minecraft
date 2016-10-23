@@ -1019,26 +1019,46 @@ check_update_vanilla() {
 }
 
 
-get_cb_release_channel() {
-	CB_URL="http://dl.bukkit.org/latest-"
 
-	case $CB_RELEASE in
+########
+# Output the URL of the latest CraftBukkit JAR
+#
+# Globals
+#	CB_DOWNLOAD_URL		URL of remote craftbukkit.jar. Optionally: with $CB_RELEASE replaced with 'RELEASE'
+#	CB_RELEASE			Branch to download, e.g. unstable, beta, stable
+#
+# Arguments
+#	None
+#
+# Returns
+# 	URL of file
+########
+get_cb_release_channel() {
+	local url="$CB_DOWNLOAD_URL";
+
+
+	case "$CB_RELEASE" in
 		unstable|UNSTABLE|Unstable|dev|development)
-			echo_quiet $CB_URL"dev/craftbukkit.jar"
-		;;
+			url=${url/RELEASE/dev};
+			;;
 
 
 		beta|Beta|BETA)
-			echo_quiet $CB_URL"beta/craftbukkit.jar"
-		;;
+			url=${url/RELEASE/beta};
+			;;
 
 
 		*)
-			echo_quiet $CB_URL"rb/craftbukkit.jar"
-		;;
+			url=${url/RELEASE/rb};
+			;;
 
 
-	esac
+	esac;
+
+
+	echo "$url";
+
+	return 0;
 }
 
 
