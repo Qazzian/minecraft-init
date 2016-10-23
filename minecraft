@@ -80,6 +80,7 @@ as_user() {
 	fi
 }
 
+
 is_running() {
 	# Checks for the minecraft servers screen session
 	# returns true if it exists.
@@ -119,6 +120,7 @@ is_running() {
 	fi
 }
 
+
 datepath() {
 	# datepath path filending-to-check returned-filending
 
@@ -134,6 +136,7 @@ datepath() {
 		echo $1`date +%F`$3
 	fi
 }
+
 
 mc_start() {
 	servicejar=$MCPATH/$SERVICE
@@ -170,6 +173,7 @@ mc_start() {
 	echo "$SERVICE is running."
 }
 
+
 mc_command() {
 	if is_running
 	then
@@ -178,6 +182,7 @@ mc_command() {
 			echoerr "$SERVICE was not running. Not able to run command."
 	fi
 }
+
 
 mc_saveoff() {
 	if is_running
@@ -192,6 +197,7 @@ mc_saveoff() {
 	fi
 }
 
+
 mc_saveon() {
 	if is_running
 	then
@@ -202,6 +208,7 @@ mc_saveon() {
 	fi
 }
 
+
 mc_say() {
 	if is_running
 	then
@@ -211,6 +218,7 @@ mc_say() {
 		echoerr "$SERVICE was not running. Not able to say anything."
 	fi
 }
+
 
 mc_stop() {
 	pidfile=${MCPATH}/${SCREEN}.pid
@@ -249,10 +257,12 @@ mc_stop() {
 	echo "$SERVICE is now shut down."
 }
 
+
 mc_reload() {
         echo "$SERVICE is running... reloading."
         mc_command reload
 }
+
 
 check_backup_settings() {
 	case "$BACKUPFORMAT" in
@@ -282,6 +292,7 @@ check_backup_settings() {
 
 	esac
 }
+
 
 log_roll() {
 	# Moves the logfiles and compresses that backup directory
@@ -316,6 +327,7 @@ log_roll() {
 	fi
 }
 
+
 get_worlds() {
 	SAVEIFS=$IFS
 	IFS=$(echo -en "\n\b")
@@ -339,6 +351,7 @@ get_worlds() {
 	IFS=$SAVEIFS
 }
 
+
 mc_whole_backup() {
 	check_backup_settings
 	echo "backing up entire setup into $WHOLEBACKUP"
@@ -359,6 +372,7 @@ mc_whole_backup() {
 		as_user "$STORECMD $path/whole-backup$STOREDENDING $MCPATH $exclude"
 	fi
 }
+
 
 mc_world_backup() {
 	#
@@ -405,6 +419,7 @@ mc_world_backup() {
 	done
 }
 
+
 check_links() {
 	get_worlds
 	for INDEX in ${!WORLDNAME[@]}
@@ -436,6 +451,7 @@ check_links() {
 	done
 }
 
+
 to_ram() {
 	get_worlds
 	for INDEX in ${!WORLDNAME[@]}
@@ -452,6 +468,7 @@ to_ram() {
 	done
 }
 
+
 to_disk() {
 	get_worlds
 	for INDEX in ${!WORLDNAME[@]}
@@ -463,6 +480,7 @@ to_disk() {
 		fi
 	done
 }
+
 
 check_update_vanilla() {
 	MC_SERVER_URL=`wget -q -O - https://minecraft.net/download/server | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")'`
@@ -484,6 +502,7 @@ check_update_vanilla() {
 		echoerr "Something went wrong. Couldn't download minecraft_server.jar"
 	fi
 }
+
 
 get_cb_release_channel() {
 	CB_URL="http://dl.bukkit.org/latest-"
@@ -507,6 +526,7 @@ get_cb_release_channel() {
 	esac
 }
 
+
 check_update_craftbukkit() {
 	echo "Checking for update for craftbukkit.jar"
 	echo "You are on release channel \"$CB_RELEASE\""
@@ -526,6 +546,7 @@ check_update_craftbukkit() {
 		echoerr "Something went wrong. Couldn't download craftbukkit.jar"
 	fi
 }
+
 
 mc_update() {
 	if is_running
@@ -562,6 +583,7 @@ mc_update() {
 	fi
 }
 
+
 change_ramdisk_state() {
 	if [ ! -e $WORLDSTORAGE/$1 ]
 	then
@@ -579,6 +601,7 @@ change_ramdisk_state() {
 	fi
 	echo "Changes will only take effect after server is restarted."
 }
+
 
 overviewer_start() {
 		if [ ! -e $OVPATH/overviewer.py ]
@@ -623,6 +646,7 @@ overviewer_start() {
 		fi
 }
 
+
 overviewer_copy_worlds() {
 	#
 	# Backup the worlds for overviewer
@@ -637,6 +661,7 @@ overviewer_copy_worlds() {
 	done
 }
 
+
 whitelist(){
 	mc_command "whitelist list"
 	sleep 1s
@@ -647,6 +672,7 @@ whitelist(){
 	echo
 	echo ${whitelist:49} | sed 's/, /\n/g'
 }
+
 
 force_exit() {  # Kill the server running (messily) in an emergency
 	echo ""
@@ -667,9 +693,11 @@ force_exit() {  # Kill the server running (messily) in an emergency
 	exit 1
 }
 
+
 get_script_location() {
 	echo $(dirname "$(readlink -e "$0")")
 }
+
 
 check_permissions() {
 	as_user "touch $pidfile"
