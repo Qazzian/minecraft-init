@@ -10,7 +10,10 @@
 # Name of vanilla server jar (no need to change if you're running craftbukkit and vice versa)
 MC_JAR="minecraft_server.jar"
 
-# Name of craftbukkit jar 
+# Official page containing download link for the current minecraft_server.jar
+MC_DOWNLOAD_PAGE='https://minecraft.net/download/server';
+
+# Name of craftbukkit jar
 CB_JAR="craftbukkit.jar"
 
 # Define the release of CraftBukkit to use (stable or unstable)
