@@ -689,8 +689,24 @@ check_permissions() {
 	fi
 }
 
+
 trap force_exit SIGINT
 
+
+
+########
+# Decide with function(s) to call, based on commandline call
+#
+# Globals
+#	None
+#
+# Arguments
+#	1	Command
+#	2	Sub-command
+#
+# Returns
+#	0|1
+########
 function route_command() {
 	case "$1" in
 		start)
