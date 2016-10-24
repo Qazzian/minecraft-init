@@ -20,26 +20,15 @@
 # Log rolls without needing restarts by Solorvox
 # Option for killing server in an emergency by jbondhus
 
-# Loads config file
 
-if [ -L $0 ]
-then
-	source `readlink -e $0 | sed "s:[^/]*$:config:"`
-else
-	source `echo $0 | sed "s:[^/]*$:config:"`
-fi
+
+###############################################################################
+## Functions
+###############################################################################
 
 
 # easy way to echo to stderr
 echoerr() { echo "$@" 1>&2; }
-
-
-if [ "$SERVICE" == "" ]
-then
-	echoerr "Couldn't load config file, please edit config.example and rename it to config"
-	logger -t minecraft-init "Couldn't load config file, please edit config.example and rename it to config"
-	exit
-fi
 
 
 ## output supported commands
@@ -690,9 +679,6 @@ check_permissions() {
 }
 
 
-trap force_exit SIGINT
-
-
 
 ########
 # Decide with function(s) to call, based on commandline call
@@ -1112,6 +1098,33 @@ function route_command() {
 	
 	return 0;
 }
+
+
+
+###############################################################################
+## Run, tidy, quit
+###############################################################################
+
+
+# Loads config file
+if [ -L $0 ]
+then
+	source `readlink -e $0 | sed "s:[^/]*$:config:"`
+else
+	source `echo $0 | sed "s:[^/]*$:config:"`
+fi
+
+if [ "$SERVICE" == "" ]
+then
+	echoerr "Couldn't load config file, please edit config.example and rename it to config"
+	logger -t minecraft-init "Couldn't load config file, please edit config.example and rename it to config"
+	exit
+fi
+
+
+trap force_exit SIGINT
+
+
 route_command "$@" || exit 1;
 
 
