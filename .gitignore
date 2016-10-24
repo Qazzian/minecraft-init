@@ -4,3 +4,6 @@
 
 # ignore local config (useful for testing)
 config
+
+# ignore file-with-extension (useful for IDEs that colour-code from extension)
+minecraft.sh
