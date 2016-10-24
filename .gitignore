@@ -1,1 +1,6 @@
+########
+# List of files NOT tracked by Git
+########
+
+# ignore local config (useful for testing)
 config
