@@ -1236,7 +1236,7 @@ function check_update_vanilla() {
 #	1					On failure
 #	stdout				URL of file
 ########
-function get_cb_release_channel() {
+function echo_cb_release_channel() {
 	local url="$CB_DOWNLOAD_URL";
 
 
@@ -1286,8 +1286,8 @@ function check_update_craftbukkit() {
 	echo_info "You are on release channel \"$CB_RELEASE\""
 
 
-	# fetch the JAR from get_cb_release_channel()
-	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.jar.update $(get_cb_release_channel)";
+	# fetch the JAR from echo_cb_release_channel()
+	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.jar.update $(echo_cb_release_channel)";
 
 
 	# if no downloaded file, quit
