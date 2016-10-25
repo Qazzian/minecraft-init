@@ -1425,6 +1425,30 @@ check_permissions() {
 
 
 ########
+# Parks and stops the server
+########
+function server_stop() {
+	if ! is_running; then
+		return 0;
+	fi;
+
+	mc_say "SERVER SHUTTING DOWN IN 10 SECS!";
+	sleep 10;
+
+	mc_stop;
+	to_disk;
+
+	if is_running; then
+		echo_err "Failed to stop server";
+		return 1;
+	fi;
+
+	return 0;
+}
+
+
+
+########
 # Decide with function(s) to call, based on commandline call
 #
 # Globals
@@ -1457,30 +1481,26 @@ function route_command() {
 
 
 		stop)
-			# Stops the server
-			if is_running; then
-				mc_say "SERVER SHUTTING DOWN!"
-				mc_stop
-				to_disk
-			else
-				echo_out "No running server."
-			fi
+			server_stop || return 1;
+			echo_out 'Server stopped';
 			;;
 
 
 		restart)
-			# Restarts the server
 			if is_running; then
-				mc_say "SERVER REBOOT IN 10 SECONDS!"
-				mc_stop
-				to_disk
-			else
-				echo_out "No running server, starting it..."
-			fi
+				mc_say "SERVER REBOOTING!";
+			fi;
+
+			server_stop || return 1;
+			echo_out 'Server stopped';
+
 			check_links
 			to_ram
-			mc_start
+			mc_start || return 1;
+			echo_out 'Server started';
 			;;
+
+
 			reload)
 					# Reloads server configuration
 					if is_running; then
@@ -1563,16 +1583,21 @@ function route_command() {
 		update)
 			#update minecraft_server.jar and craftbukkit.jar (thanks karrth)
 			if is_running; then
-				mc_say "SERVER UPDATE IN 10 SECONDS."
-				mc_stop
-				to_disk
-				mc_whole_backup
-				mc_update
+				was_running=true;
+				mc_say "SERVER UPDATE IN 10 SECONDS";
+			fi
+
+			if ! server_stop ; then
+				echoerr "Can't update a running server; quitting...";
+				return 1;
+			fi
+
+			mc_whole_backup
+			mc_update
+
+			if $was_running; then
 				check_links
 				mc_start
-			else
-				mc_whole_backup
-				mc_update
 			fi
 			;;
 
@@ -1676,6 +1701,8 @@ function route_command() {
 				mc_stop
 				mc_start
 			fi
+			server_stop || return 1;
+			mc_start
 			;;
 
 
