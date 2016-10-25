@@ -450,6 +450,8 @@ function config_load_defaults() {
 	COMPRESS_WHOLEBACKUP=YES;
 
 	## logging
+	# Location for archived logs
+	# Used by the log-roll command
 	LOGPATH="/var/log/minecraft";
 
 	## config MineCraft-Overviewer

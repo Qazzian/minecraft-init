@@ -89,7 +89,7 @@ COMPRESS_WHOLEBACKUP=YES
 # Settings for log rolling
 # ===============================
 
-# Location for old logs
+# Location for archived logs
 # Used by the log-roll command
 LOGPATH="/var/log/minecraft"
 
