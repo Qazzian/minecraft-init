@@ -1663,7 +1663,11 @@ function echo_whitelist() {
 #	0			On success
 #	1			On failure
 ########
-function force_exit() {
+function server_kill() {
+	echo_out;
+	echo_out "SIGINIT CALLED - FORCE EXITING!";
+
+
 	## init vars
 	local pid pidfile;
 
@@ -2155,14 +2159,16 @@ function route_command() {
 			read user_input; case "$user_input" in
 				# If yes, kill the server
 				[Yy]|[Yy][Ee][Ss])
-					if ! force_exit ; then
+					if ! server_kill ; then
 						echo_err "Failed to kill processes; quitting";
 						return 1;
 					fi;
+
 					if is_running ; then
 						echo_err "Killing completed okay, but server is still running; quitting";
 						return 1;
 					fi;
+
 					return 0;
 					;;
 
@@ -2243,6 +2249,6 @@ function main() {
 ## Run, tidy, quit
 ###############################################################################
 
-trap force_exit SIGINT;
+trap server_kill SIGINT;
 main "$@" || exit 1;
 exit 0;
