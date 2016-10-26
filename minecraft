@@ -1066,8 +1066,10 @@ function get_worlds() {
 
 
 function mc_whole_backup() {
-	check_backup_settings
+	check_backup_settings || return 1;
+
 	echo_out "backing up entire setup into $WHOLEBACKUP";
+
 	path="$(datepath "$WHOLEBACKUP/mine_")";
 	locationOfScript="$(dirname "$(readlink -e "$0")")";
 	as_user "mkdir -p $path"
