@@ -965,7 +965,7 @@ function log_roll() {
 	shopt -s extglob;
 	shopt -s nullglob;	# if no files, loop 0 times
 	local file;
-	for file in $MCPATH/*.log; do
+	for file in $MCPATH/logs/*.log; do
 
 
 		## copy
