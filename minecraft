@@ -73,6 +73,41 @@ function echo_mci_version() {
 }
 
 
+
+########
+# Output the given message as appropriate, if appropriate
+#
+# Globals
+#   VERBOSITY	Which level(s) of output to process, and which to discard
+#
+# Arguments
+#	1	Verbosity-level, e.g. VERBOSITY_QUIET
+#	2	Message
+#
+# Returns
+#	0|1
+########
+function echo_by_level {
+	if [ 2 -ne $# ]; then
+		echoerr "Cannot echo messages without 1) level; and 2) message; quitting";
+		return 1;
+	fi;
+
+	if [[ ! $1 =~ ^-?[0-9]+$ ]]; then
+		echoerr "Verbosity-level is not an integer; quitting";
+		return 1;
+	fi;
+
+	# if this message is high-verbosity, but we're too-quiet, finish
+	if [ "$1" -gt "$VERBOSITY" ]; then return 0; fi
+
+	# echo to stdout -- with date, level, function
+	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [${FUNCNAME[1]/echo_/}] [${FUNCNAME[2]}] $2";
+
+	return 0;
+}
+
+
 # easy way to echo to stderr
 echoerr() { echo "$@" 1>&2; }
 
