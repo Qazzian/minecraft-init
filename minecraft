@@ -23,6 +23,32 @@
 
 
 ###############################################################################
+## Define constants
+###############################################################################
+
+
+## Quiet		:= no output
+readonly export VERBOSITY_QUIET=-1;
+
+
+## Default		:= success messages; etc
+readonly export VERBOSITY_DEFAULT=0;
+
+
+## Info			:= values of subshells; function-calls, in prose
+readonly export VERBOSITY_INFO=1;
+
+
+## Verbose		:= final value of vars, in prose
+readonly export VERBOSITY_VERBOSE=2;
+
+
+## Debugging	:= all possible outputs, tersely
+readonly export VERBOSITY_DEBUG=3;
+
+
+
+###############################################################################
 ## Functions
 ###############################################################################
 
