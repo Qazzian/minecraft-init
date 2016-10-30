@@ -15,7 +15,7 @@ Features
 
 Requirements
 ------------
-screen, rsync
+screen, rsync, logrotate
 
 
 Access server console
