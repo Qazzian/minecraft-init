@@ -862,11 +862,10 @@ check_permissions() {
 # Decide with function(s) to call, based on commandline call
 #
 # Globals
-#	None
+#	INIT_COMMAND		(Main) command to run
+#	INIT_SUBCOMMAND		Variant of <command> to run
 #
 # Arguments
-#	1	Command
-#	2	Sub-command
 #	@					All parameters, to pass to e.g. redirect functions
 #
 # Returns
@@ -874,9 +873,11 @@ check_permissions() {
 ########
 function route_command() {
 	echo_debug "route_command::@=$*";
+	echo_debug "route_command::INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "route_command::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
-	case "$1" in
+	case "$INIT_COMMAND" in
 		start)
 			# Starts the server
 			if is_running; then
@@ -1045,7 +1046,7 @@ function route_command() {
 			# Says something to the ingame chat
 			if is_running; then
 				shift 1
-				mc_say "$*"
+				mc_say "$INIT_SUBCOMMAND"
 			else
 				echo "No running server to say anything."
 			fi
@@ -1055,8 +1056,8 @@ function route_command() {
 		command)
 			if is_running; then
 				shift 1
-				mc_command "$*"
-				echo "Sent command: $*"
+				mc_command "$INIT_SUBCOMMAND"
+				echo "Sent command: \"$INIT_SUBCOMMAND\"";
 			else
 				echo "No running server to send a command to."
 			fi
