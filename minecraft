@@ -116,6 +116,46 @@ function echo_verbose	{ echo_by_level "$VERBOSITY_VERBOSE" "$1";	return $?; }
 function echo_debug		{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 
 
+
+########
+# Extract commandline parameters from call
+#
+# Globals
+#   INIT_COMMAND		The command to run
+#   INIT_SUBCOMMAND	The sub-command to run and/or message to pass, etc
+#
+# Arguments
+#   @					All commandline parameters
+#
+# Returns
+#   0|1
+########
+function handle_commandline_options {
+	OPTIND=1;		# Reset in case getopts has been used previously in the shell.
+	local count=0;	# count the number of options we've processed, so we can skip them later
+	while getopts '' option; do
+		case $option in
+			*)	echoerr "Unrecognised parameter '$option'; quitting";
+				return 1;
+				;;
+
+
+		esac
+		count=$((count+1));
+	done
+
+
+	shift $count;	# skip the params we've already processed
+
+
+	export readonly INIT_COMMAND="${1-}";
+	export readonly INIT_SUBCOMMAND="${2-}";
+
+
+	return 0;
+}
+
+
 # easy way to echo to stderr
 echo_err() {
 	echo "$@" 1>&2;
