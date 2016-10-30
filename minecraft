@@ -1125,6 +1125,11 @@ function route_command() {
 			;;
 
 
+		mci-version|mci_version|script-version|script_version)
+			echo_mci_version;
+			;;
+
+
 		*)
 			echoerr "No such command; quitting";
 			echo;
