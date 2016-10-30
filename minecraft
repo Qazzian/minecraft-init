@@ -123,6 +123,7 @@ function echo_debug		{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 # Globals
 #   INIT_COMMAND		The command to run
 #   INIT_SUBCOMMAND	The sub-command to run and/or message to pass, etc
+#   VERBOSITY		Incremented by -v; reset by -q
 #
 # Arguments
 #   @					All commandline parameters
@@ -136,9 +137,17 @@ function handle_commandline_options {
 
 	OPTIND=1;		# Reset in case getopts has been used previously in the shell.
 	local count=0;	# count the number of options we've processed, so we can skip them later
-	while getopts '' option; do
+	while getopts 'qv' option; do
 		echo_debug "handle_commandline_options::option=$option";
 		case $option in
+			q)	VERBOSITY=$VERBOSITY_QUIET;
+				;;
+
+
+			v)	VERBOSITY=$((VERBOSITY+1));
+				;;
+
+
 			*)	echoerr "Unrecognised parameter '$option'; quitting";
 				return 1;
 				;;
@@ -148,6 +157,7 @@ function handle_commandline_options {
 		count=$((count+1));
 	done
 	echo_debug "handle_commandline_options::count=$count";
+	echo_debug "handle_commandline_options::VERBOSITY=$VERBOSITY";
 
 
 
