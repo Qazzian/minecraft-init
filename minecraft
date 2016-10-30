@@ -818,6 +818,7 @@ check_permissions() {
 # Arguments
 #	1	Command
 #	2	Sub-command
+#	@					All parameters, to pass to e.g. redirect functions
 #
 # Returns
 #	0|1
@@ -1259,7 +1260,7 @@ fi
 trap force_exit SIGINT
 
 
-route_command "$@" || exit 1;
+route_command "$@" || exit 1;	# need to inject $@ so route_command() can pass it on
 
 
 exit 0
