@@ -75,6 +75,7 @@ function echo_usage {
 	echo -e "   whitelist-add NAME \t Adds the specified player to the server whitelist";
 	echo -e "   whitelist-reload \t Reloads the whitelist";
 	echo -e "   screen \t\t Shows the server screen";
+	echo -e "   script-version        Show this script's version";
 	echo -e "   help \t\t Shows this text";
 
 	return 0;
