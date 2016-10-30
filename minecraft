@@ -27,6 +27,16 @@
 ###############################################################################
 
 
+
+########
+# Output the current version of MineCraft-Init
+########
+function echo_mci_version() {
+	echo '2.4.1';
+	return 0;
+}
+
+
 # easy way to echo to stderr
 echoerr() { echo "$@" 1>&2; }
 
