@@ -117,6 +117,13 @@ function echo_debug		{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 
 
 # easy way to echo to stderr
+echo_err() {
+	echo "$@" 1>&2;
+	return $?;
+}
+
+
+# easy way to echo to stderr
 echoerr() { echo "$@" 1>&2; }
 
 
