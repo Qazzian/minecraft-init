@@ -27,6 +27,16 @@
 ###############################################################################
 
 
+
+########
+# Output the current version of MineCraft-Init
+########
+function echo_mci_version() {
+	echo '2.5.0';
+	return 0;
+}
+
+
 # easy way to echo to stderr
 echoerr() { echo "$@" 1>&2; }
 
@@ -65,6 +75,7 @@ function echo_usage {
 	echo -e "   whitelist-add NAME \t Adds the specified player to the server whitelist";
 	echo -e "   whitelist-reload \t Reloads the whitelist";
 	echo -e "   screen \t\t Shows the server screen";
+	echo -e "   script-version        Show this script's version";
 	echo -e "   help \t\t Shows this text";
 
 	return 0;
@@ -1112,6 +1123,11 @@ function route_command() {
 
 		help|--help|-h)
 			echo_usage;
+			;;
+
+
+		mci-version|mci_version|script-version|script_version)
+			echo_mci_version;
 			;;
 
 
