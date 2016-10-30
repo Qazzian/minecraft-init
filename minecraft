@@ -131,9 +131,13 @@ function echo_debug		{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 #   0|1
 ########
 function handle_commandline_options {
+	echo_debug "handle_commandline_options::@=$*";
+
+
 	OPTIND=1;		# Reset in case getopts has been used previously in the shell.
 	local count=0;	# count the number of options we've processed, so we can skip them later
 	while getopts '' option; do
+		echo_debug "handle_commandline_options::option=$option";
 		case $option in
 			*)	echoerr "Unrecognised parameter '$option'; quitting";
 				return 1;
@@ -143,6 +147,8 @@ function handle_commandline_options {
 		esac
 		count=$((count+1));
 	done
+	echo_debug "handle_commandline_options::count=$count";
+
 
 
 	shift $count;	# skip the params we've already processed
@@ -150,6 +156,9 @@ function handle_commandline_options {
 
 	export readonly INIT_COMMAND="${1-}";
 	export readonly INIT_SUBCOMMAND="${2-}";
+	echo_debug "handle_commandline_options::INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "handle_commandline_options::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
+
 
 
 	return 0;
