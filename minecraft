@@ -862,11 +862,10 @@ check_permissions() {
 # Decide with function(s) to call, based on commandline call
 #
 # Globals
-#	None
+#	INIT_COMMAND		(Main) command to run
+#	INIT_SUBCOMMAND		Variant of <command> to run
 #
 # Arguments
-#	1	Command
-#	2	Sub-command
 #	@					All parameters, to pass to e.g. redirect functions
 #
 # Returns
@@ -874,9 +873,11 @@ check_permissions() {
 ########
 function route_command() {
 	echo_debug "route_command::@=$*";
+	echo_debug "route_command::INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "route_command::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
-	case "$1" in
+	case "$INIT_COMMAND" in
 		start)
 			# Starts the server
 			if is_running; then
@@ -947,7 +948,7 @@ function route_command() {
 		whitelist-add)
 			# Adds a player to the whitelist
 			if is_running; then
-				mc_command "whitelist add $2"
+				mc_command "whitelist add $INIT_SUBCOMMAND"
 			else
 				echo "No running server."
 			fi
@@ -1045,7 +1046,7 @@ function route_command() {
 			# Says something to the ingame chat
 			if is_running; then
 				shift 1
-				mc_say "$*"
+				mc_say "$INIT_SUBCOMMAND"
 			else
 				echo "No running server to say anything."
 			fi
@@ -1055,8 +1056,8 @@ function route_command() {
 		command)
 			if is_running; then
 				shift 1
-				mc_command "$*"
-				echo "Sent command: $*"
+				mc_command "$INIT_SUBCOMMAND"
+				echo "Sent command: \"$INIT_SUBCOMMAND\"";
 			else
 				echo "No running server to send a command to."
 			fi
@@ -1161,7 +1162,7 @@ function route_command() {
 
 
 		ramdisk)
-			change_ramdisk_state $2
+			change_ramdisk_state $INIT_SUBCOMMAND
 			;;
 
 
@@ -1186,10 +1187,10 @@ function route_command() {
 				to_disk
 				overviewer_copy_worlds
 				mc_saveon
-				overviewer_start $2
+				overviewer_start $INIT_SUBCOMMAND
 			else
 				overviewer_copy_worlds
-				overviewer_start $2
+				overviewer_start $INIT_SUBCOMMAND
 			fi
 			;;
 
@@ -1275,7 +1276,7 @@ function route_command() {
 
 
 		*)
-			echo_err "No such command; quitting";
+			echo_err "No such command as '$SELF $INIT_COMMAND'; quitting";
 			echo;
 			echo_usage;
 			exit 1
