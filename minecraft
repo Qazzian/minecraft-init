@@ -123,8 +123,12 @@ echo_err() {
 }
 
 
-# easy way to echo to stderr
-echoerr() { echo "$@" 1>&2; }
+## echoerr() is deprecated
+echoerr() {
+	echo_err "echoerr() is deprecated; use echo_err() instead";
+	echo_err "$@";
+	return $?;
+}
 
 
 ## output supported commands
