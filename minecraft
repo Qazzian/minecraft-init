@@ -23,6 +23,42 @@
 
 
 ###############################################################################
+## Define constants
+###############################################################################
+
+
+## Quiet		:= no output
+readonly export VERBOSITY_QUIET=-1;
+
+
+## Default		:= success messages; etc
+readonly export VERBOSITY_DEFAULT=0;
+
+
+## Info			:= values of subshells; function-calls, in prose
+readonly export VERBOSITY_INFO=1;
+
+
+## Verbose		:= final value of vars, in prose
+readonly export VERBOSITY_VERBOSE=2;
+
+
+## Debugging	:= all possible outputs, tersely
+readonly export VERBOSITY_DEBUG=3;
+
+
+
+###############################################################################
+## Init vars
+###############################################################################
+
+
+## Level of debugging-info to output
+VERBOSITY=$VERBOSITY_DEFAULT;
+
+
+
+###############################################################################
 ## Functions
 ###############################################################################
 
@@ -32,18 +68,135 @@
 # Output the current version of MineCraft-Init
 ########
 function echo_mci_version() {
-	echo '2.5.0';
+	echo '2.6.0';
+	return 0;
+}
+
+
+
+########
+# Output the given message as appropriate, if appropriate
+#
+# Globals
+#   VERBOSITY	Which level(s) of output to process, and which to discard
+#
+# Arguments
+#	1	Verbosity-level, e.g. VERBOSITY_QUIET
+#	2	Message
+#
+# Returns
+#	0|1
+########
+function echo_by_level {
+	if [ 2 -ne $# ]; then
+		echo_err "Cannot echo messages without 1) level; and 2) message; quitting";
+		return 1;
+	fi;
+
+	if [[ ! $1 =~ ^-?[0-9]+$ ]]; then
+		echo_err "Verbosity-level is not an integer; quitting";
+		return 1;
+	fi;
+
+	# if this message is high-verbosity, but we're too-quiet, finish
+	if [ "$1" -gt "$VERBOSITY" ]; then return 0; fi
+
+	# echo to stdout -- with date, level, function
+	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [${FUNCNAME[1]/echo_/}] [${FUNCNAME[2]}] $2";
+
+	return 0;
+}
+
+
+## wrappers for echo_by_level
+function echo_quiet		{ echo_by_level "$VERBOSITY_QUIET" "$1";	return $?; }
+function echo_out		{ echo_by_level "$VERBOSITY_DEFAULT" "$1";	return $?; }
+function echo_info		{ echo_by_level "$VERBOSITY_INFO" "$1";		return $?; }
+function echo_verbose	{ echo_by_level "$VERBOSITY_VERBOSE" "$1";	return $?; }
+function echo_debug		{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
+
+
+
+########
+# Extract commandline parameters from call
+#
+# Globals
+#   INIT_COMMAND		The command to run
+#   INIT_SUBCOMMAND	The sub-command to run and/or message to pass, etc
+#   VERBOSITY		Incremented by -v; reset by -q
+#
+# Arguments
+#   @					All commandline parameters
+#
+# Returns
+#   0|1
+########
+function handle_commandline_options {
+	echo_debug "handle_commandline_options::@=$*";
+
+
+	OPTIND=1;		# Reset in case getopts has been used previously in the shell.
+	local count=0;	# count the number of options we've processed, so we can skip them later
+	while getopts 'qv' option; do
+		echo_debug "handle_commandline_options::option=$option";
+		case $option in
+			q)	VERBOSITY=$VERBOSITY_QUIET;
+				;;
+
+
+			v)	VERBOSITY=$((VERBOSITY+1));
+				;;
+
+
+			*)	echoerr "Unrecognised parameter '$option'; quitting";
+				return 1;
+				;;
+
+
+		esac
+		count=$((count+1));
+	done
+	echo_debug "handle_commandline_options::count=$count";
+	echo_debug "handle_commandline_options::VERBOSITY=$VERBOSITY";
+
+
+
+	shift $count;	# skip the params we've already processed
+
+
+	export readonly INIT_COMMAND="${1-}";
+	export readonly INIT_SUBCOMMAND="${2-}";
+	echo_debug "handle_commandline_options::INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "handle_commandline_options::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
+
+
+
 	return 0;
 }
 
 
 # easy way to echo to stderr
-echoerr() { echo "$@" 1>&2; }
+echo_err() {
+	echo "$@" 1>&2;
+	return $?;
+}
+
+
+## echoerr() is deprecated
+echoerr() {
+	echo_err "echoerr() is deprecated; use echo_err() instead";
+	echo_err "$@";
+	return $?;
+}
 
 
 ## output supported commands
 function echo_usage {
-	echo "Usage: $(basename "$0") <command>";
+	echo "Usage: $(basename "$0") [<options>] <command>";
+	echo;
+	echo "Where <options> is zero or more of:";
+	echo -e "   -q            Quiet. Decreases the script's verbosity";
+	echo -e "   -v            Verbose. Increases the script's verbosity. May be repeated. Max is three";
 	echo;
 	echo "Where <command> is one of:";
 	echo -e "   start \t\t Starts the server";
@@ -109,7 +262,7 @@ is_running() {
 				if [ -z "$roguePrinted" ]
 				then
 					roguePrinted=1
-					echoerr "Rogue pidfile found!"
+					echo_err "Rogue pidfile found!"
 				fi
 			fi
 			return 1
@@ -117,8 +270,8 @@ is_running() {
 	else
 		if ps ax | grep -v grep | grep "${SCREEN} ${INVOCATION}" > /dev/null
 		then
-			echoerr "No pidfile found, but server's running."
-			echoerr "Re-creating the pidfile."
+			echo_err "No pidfile found, but server's running."
+			echo_err "Re-creating the pidfile."
 
 			pid=$(ps ax | grep -v grep | grep "${SCREEN} ${INVOCATION}" | cut -f1 -d' ')
 			check_permissions
@@ -153,7 +306,7 @@ mc_start() {
 	servicejar=$MCPATH/$SERVICE
 	if [ ! -f "$servicejar" ]
 	then
-		echoerr "Failed to start: Can't find the specified Minecraft jar under $servicejar. Please check your config!"
+		echo_err "Failed to start: Can't find the specified Minecraft jar under $servicejar. Please check your config!"
 		exit 1
 	fi
 
@@ -177,7 +330,7 @@ mc_start() {
 		fi
 		if [[ $seconds -ge 120 ]]
 		then
-			echoerr "Failed to start, aborting."
+			echo_err "Failed to start, aborting."
 			exit 1
 		fi
 	done
@@ -190,7 +343,7 @@ mc_command() {
 	then
 			as_user "screen -p 0 -S $SCREEN -X eval 'stuff \"$(eval echo $FORMAT)\"\015'"
 	else
-			echoerr "$SERVICE was not running. Not able to run command."
+			echo_err "$SERVICE was not running. Not able to run command."
 	fi
 }
 
@@ -226,7 +379,7 @@ mc_say() {
 		echo "Said: $1"
 		mc_command "say $1"
 	else
-		echoerr "$SERVICE was not running. Not able to say anything."
+		echo_err "$SERVICE was not running. Not able to say anything."
 	fi
 }
 
@@ -258,7 +411,7 @@ mc_stop() {
 		if [[ $seconds -ge 120 ]]
 		then
 			logger -t minecraft-init "Failed to shut down server, aborting."
-			echoerr "Failed to shut down, aborting."
+			echo_err "Failed to shut down, aborting."
 			exit 1
 		fi
 	done
@@ -296,7 +449,7 @@ check_backup_settings() {
 
 
 		*)
-			echoerr "$BACKUPFORMAT is not a supported backup format"
+			echo_err "$BACKUPFORMAT is not a supported backup format"
 			exit 1
 			;;
 
@@ -328,7 +481,7 @@ log_roll() {
 				as_user "echo \"Previous logs rolled to $path\" > $FILE"
 			fi
 		else
-			echoerr "Failed to rotate log from $FILE into $path"
+			echo_err "Failed to rotate log from $FILE into $path"
 		fi
 	done
 
@@ -455,7 +608,7 @@ check_links() {
 				fi
 			fi
 		else
-			echoerr "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
+			echo_err "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
 
 			exit 1
 		fi
@@ -510,7 +663,7 @@ check_update_vanilla() {
 			return 0
 		fi
 	else
-		echoerr "Something went wrong. Couldn't download minecraft_server.jar"
+		echo_err "Something went wrong. Couldn't download minecraft_server.jar"
 	fi
 }
 
@@ -550,11 +703,11 @@ check_update_craftbukkit() {
 			echo "You are already running the latest version of craftbukkit.jar."
 			return 1
 		else
-			echoerr "Update of $CB_JAR is needed."
+			echo_err "Update of $CB_JAR is needed."
 			return 0
 		fi
 	else
-		echoerr "Something went wrong. Couldn't download craftbukkit.jar"
+		echo_err "Something went wrong. Couldn't download craftbukkit.jar"
 	fi
 }
 
@@ -562,7 +715,7 @@ check_update_craftbukkit() {
 mc_update() {
 	if is_running
 	then
-		echoerr "$SERVICE is running! Will not start update."
+		echo_err "$SERVICE is running! Will not start update."
 	else
 		if check_update_vanilla
 		then
@@ -571,7 +724,7 @@ mc_update() {
 				as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR"
 				echo "Thats it. Update of $MC_JAR done."
 			else
-				echoerr "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
+				echo_err "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
 			fi
 		else
 			echo "Not updating $MB_JAR. It's not necessary"
@@ -585,7 +738,7 @@ mc_update() {
 				as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR"
 				echo "Thats it. Update of $CB_JAR done."
 			else
-				echoerr "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
+				echo_err "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
 			fi
 		else
 			echo "Not updating $CB_JAR. It's not necessary"
@@ -598,7 +751,7 @@ mc_update() {
 change_ramdisk_state() {
 	if [ ! -e $WORLDSTORAGE/$1 ]
 	then
-		echoerr "World \"$1\" not found."
+		echo_err "World \"$1\" not found."
 		exit 1
 	fi
 
@@ -619,7 +772,7 @@ overviewer_start() {
 		then
 				if [ ! "$OVPATH" == "apt" ]
 				then
-						echoerr "Minecraft-Overviewer is not installed in \"$OVPATH\""
+						echo_err "Minecraft-Overviewer is not installed in \"$OVPATH\""
 						exit 1
 				else
 						echo "Using APT repository installed Minecraft-Overviewer"
@@ -640,7 +793,7 @@ overviewer_start() {
 				fi
 				echo "Map generated."
 		else
-				echoerr "No config file found. Start with default config..."
+				echo_err "No config file found. Start with default config..."
 				if [ -z $1 ] || [ ! -e $OVBACKUP/$1 ]
 				then
 						echo "World \"$1\" not found."
@@ -713,7 +866,7 @@ get_script_location() {
 check_permissions() {
 	as_user "touch $pidfile"
 	if ! as_user "test -w '$pidfile'" ; then
-		echoerr "Check Permissions. Cannot write to $pidfile. Correct the permissions and then excute: $0 status"
+		echo_err "Check Permissions. Cannot write to $pidfile. Correct the permissions and then excute: $0 status"
 	fi
 }
 
@@ -723,17 +876,22 @@ check_permissions() {
 # Decide with function(s) to call, based on commandline call
 #
 # Globals
-#	None
+#	INIT_COMMAND		(Main) command to run
+#	INIT_SUBCOMMAND		Variant of <command> to run
 #
 # Arguments
-#	1	Command
-#	2	Sub-command
+#	@					All parameters, to pass to e.g. redirect functions
 #
 # Returns
 #	0|1
 ########
 function route_command() {
-	case "$1" in
+	echo_debug "route_command::@=$*";
+	echo_debug "route_command::INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "route_command::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
+
+
+	case "$INIT_COMMAND" in
 		start)
 			# Starts the server
 			if is_running; then
@@ -902,7 +1060,7 @@ function route_command() {
 			# Says something to the ingame chat
 			if is_running; then
 				shift 1
-				mc_say "$*"
+				mc_say "$INIT_SUBCOMMAND"
 			else
 				echo "No running server to say anything."
 			fi
@@ -912,8 +1070,8 @@ function route_command() {
 		command)
 			if is_running; then
 				shift 1
-				mc_command "$*"
-				echo "Sent command: $*"
+				mc_command "$INIT_SUBCOMMAND"
+				echo "Sent command: \"$INIT_SUBCOMMAND\"";
 			else
 				echo "No running server to send a command to."
 			fi
@@ -941,7 +1099,7 @@ function route_command() {
 					# Replace ", " separator with newline char.
 					sed 's/, /\n/g'
 			else
-				echoerr "No running server."
+				echo_err "No running server."
 			fi
 			;;
 
@@ -956,7 +1114,7 @@ function route_command() {
 					grep --before-context 1 --max-count 1 "players online" | \
 					head -n 1 | sed 's/[\x01-\x1F\x7F]..//g' | grep . | sed 's/, /\n/g' | wc -l
 			else
-				echoerr "No running server."
+				echo_err "No running server."
 			fi
 			;;
 
@@ -1069,7 +1227,7 @@ function route_command() {
 
 				[Nn]|[Nn][Oo])
 					clear
-					echoerr "Aborting startup!"
+					echo_err "Aborting startup!"
 					sleep 1
 					clear
 					exit 1
@@ -1078,7 +1236,7 @@ function route_command() {
 
 				*)
 					clear
-					echoerr "Invalid input"
+					echo_err "Invalid input"
 					sleep 1
 					clear
 					exit 1
@@ -1099,20 +1257,20 @@ function route_command() {
 			read KILL_SERVER
 			case "$KILL_SERVER" in  # Determine which option was specified
 				[Yy]|[Yy][Ee][Ss])      # If yes, kill the server
-					echoerr "KILLING SERVER PROCESSES!!!"
+					echo_err "KILLING SERVER PROCESSES!!!"
 					force_exit
 					exit 1
 					;;
 
 
 				[Nn]|[Nn][Oo])  # If no, abort and exit 1
-					echoerr "Aborting!"
+					echo_err "Aborting!"
 					exit 1
 					;;
 
 
 				*)      # If anything else, exit 1
-					echoerr "Error: Invalid Input!"
+					echo_err "Error: Invalid Input!"
 					exit 1
 					;;
 
@@ -1132,7 +1290,7 @@ function route_command() {
 
 
 		*)
-			echoerr "No such command; quitting";
+			echo_err "No such command; quitting";
 			echo;
 			echo_usage;
 			exit 1
@@ -1160,7 +1318,7 @@ fi
 
 if [ "$SERVICE" == "" ]
 then
-	echoerr "Couldn't load config file, please edit config.example and rename it to config"
+	echo_err "Couldn't load config file, please edit config.example and rename it to config"
 	logger -t minecraft-init "Couldn't load config file, please edit config.example and rename it to config"
 	exit
 fi
@@ -1169,7 +1327,8 @@ fi
 trap force_exit SIGINT
 
 
-route_command "$@" || exit 1;
+handle_commandline_options "$@" || exit 1;
+route_command "$@" || exit 1;	# need to inject $@ so route_command() can pass it on
 
 
 exit 0
