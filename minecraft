@@ -824,6 +824,9 @@ check_permissions() {
 #	0|1
 ########
 function route_command() {
+	echo_debug "route_command::@=$*";
+
+
 	case "$1" in
 		start)
 			# Starts the server
