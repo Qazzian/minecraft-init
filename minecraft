@@ -1312,6 +1312,7 @@ fi
 trap force_exit SIGINT
 
 
+handle_commandline_options "$@" || exit 1;
 route_command "$@" || exit 1;	# need to inject $@ so route_command() can pass it on
 
 
