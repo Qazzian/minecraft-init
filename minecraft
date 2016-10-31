@@ -1217,7 +1217,7 @@ force_exit() {  # Kill the server running (messily) in an emergency
 	echo_out ""
 	echo_out "SIGINIT CALLED - FORCE EXITING!"
 	pidfile=${MCPATH}/${SCREEN}.pid
-	rm $pidfile
+	rm "$pidfile"
 	echo_out "KILLING SERVER PROCESSES!!!"
 		# Display which processes are being killed
 		ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
@@ -1234,7 +1234,7 @@ force_exit() {  # Kill the server running (messily) in an emergency
 
 
 get_script_location() {
-	echo_quiet $(dirname "$(readlink -e "$0")")
+	echo_quiet "$(dirname "$(readlink -e "$0")")"
 }
 
 
@@ -1470,7 +1470,7 @@ function route_command() {
 
 		log)
 			# Display server log using 'cat'.
-			cat $SERVERLOG
+			cat "$SERVERLOG"
 			;;
 
 
@@ -1505,7 +1505,7 @@ function route_command() {
 		version)
 			if is_running; then
 				mc_command version
-				tac $SERVERLOG | grep -m 1 "This server is running"
+				tac "$SERVERLOG" | grep -m 1 "This server is running"
 			else
 				echo_out "The server needs to be running to check version."
 			fi
@@ -1518,7 +1518,7 @@ function route_command() {
 
 
 		ramdisk)
-			change_ramdisk_state $INIT_SUBCOMMAND
+			change_ramdisk_state "$INIT_SUBCOMMAND"
 			;;
 
 
@@ -1530,7 +1530,7 @@ function route_command() {
 				then
 					echo_quiet "${WORLDNAME[$INDEX]} (ramdisk)"
 				else
-					echo_quiet ${WORLDNAME[$INDEX]}
+					echo_quiet "${WORLDNAME[$INDEX]}"
 				fi
 			done
 			;;
@@ -1543,10 +1543,10 @@ function route_command() {
 				to_disk
 				overviewer_copy_worlds
 				mc_saveon
-				overviewer_start $INIT_SUBCOMMAND
+				overviewer_start "$INIT_SUBCOMMAND"
 			else
 				overviewer_copy_worlds
-				overviewer_start $INIT_SUBCOMMAND
+				overviewer_start "$INIT_SUBCOMMAND"
 			fi
 			;;
 
