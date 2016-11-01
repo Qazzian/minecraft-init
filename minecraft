@@ -422,18 +422,17 @@ is_running() {
 
 
 datepath() {
-	# datepath path filending-to-check returned-filending
+	# datepath path file-ending
 
 	# Returns an file path with added date between the filename and file ending.
 	# $1 filepath (not including file ending)
-	# $2 file ending to check for uniqueness
-	# $3 file ending to return
+	# $2 file ending
 
 	if [ -e $1`date +%F`$2 ]
 	then
-		echo_quiet $1`date +%FT%T`$3
+		echo_quiet $1`date +%FT%T`$2
 	else
-		echo_quiet $1`date +%F`$3
+		echo_quiet $1`date +%F`$2
 	fi
 }
 
@@ -711,7 +710,7 @@ get_worlds() {
 mc_whole_backup() {
 	check_backup_settings
 	echo_out "backing up entire setup into $WHOLEBACKUP"
-	path=`datepath $WHOLEBACKUP/mine_`
+	path=`datepath $WHOLEBACKUP/mine_ ""`
 	locationOfScript=$(dirname "$(readlink -e "$0")")
 	as_user "mkdir -p $path"
 
@@ -755,7 +754,7 @@ mc_world_backup() {
 		# If this is set tars will be created compatible to WorldEdit
 		then
 			as_user "mkdir -p $BACKUPPATH/${WORLDNAME[$INDEX]}"
-			path=`datepath $BACKUPPATH/${WORLDNAME[$INDEX]}/ $ARCHIVEENDING $ARCHIVEENDING`
+			path=`datepath $BACKUPPATH/${WORLDNAME[$INDEX]}/ $ARCHIVEENDING`
 		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]
 		# If is set tars will be put in $BACKUPPATH without any timestamp to be compatible with
 		# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
@@ -763,7 +762,7 @@ mc_world_backup() {
 			path=$BACKUPPATH/${WORLDNAME[$INDEX]}$ARCHIVEENDING
 		else
 			as_user "mkdir -p $BACKUPPATH/${today}"
-			path=`datepath $BACKUPPATH/${today}/${WORLDNAME[$INDEX]}_ $ARCHIVEENDING $ARCHIVEENDING`
+			path=`datepath $BACKUPPATH/${today}/${WORLDNAME[$INDEX]}_ $ARCHIVEENDING`
 		fi
 		if [ "$WORLDEDITCOMPATIBLE" ]
 		# Don't store the complete path
