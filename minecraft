@@ -89,19 +89,21 @@ function echo_mci_version() {
 ########
 function echo_by_level {
 	if [ 2 -ne $# ]; then
-		echo_err "Cannot echo messages without 1) level; and 2) message; quitting";
+		echo_err "Usage: ${FUNCNAME[0]} <level> <message>";
 		return 1;
 	fi;
+
 
 	if [[ ! $1 =~ ^-?[0-9]+$ ]]; then
 		echo_err "Verbosity-level is not an integer; quitting";
 		return 1;
 	fi;
 
-	# if this message is high-verbosity, but we're too-quiet, finish
+
+	# if this message is verbose, but we're quieter, stop here
 	if [ "$1" -gt "$VERBOSITY" ]; then return 0; fi
 
-	# echo to stdout -- with date, level, function
+	# put to stdout -- with date, level, function
 	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [${FUNCNAME[1]/echo_/}] [${FUNCNAME[2]}] $2";
 
 	return 0;
