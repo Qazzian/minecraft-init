@@ -2072,14 +2072,20 @@ function route_command() {
 			;;
 
 
+		## @todo	Fix: Vanilla doesn't understand "version"
 		version)
 			if ! is_running; then
 				echo_out "No running server; skipping";
 				return 0;
 			fi;
 
+			if [ "$SERVICE" != "$CB_JAR" ]; then
+				echo_err "'$SELF $INIT_COMMAND' only works on CraftBukkit servers; skipping";
+				return 0;
+			fi;
+
 			mc_command 'version' || return 1;
-			tac "$SERVERLOG" | grep -m 1 "This server is running"
+			tac "$SERVERLOG" | grep -m 1 "This server is running" || return 1;
 			;;
 
 
