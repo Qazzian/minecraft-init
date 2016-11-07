@@ -292,9 +292,10 @@ function echo_usage {
 # Extract commandline parameters from call
 #
 # Globals
+#   CONFIG_FILE			Set by -c
 #   INIT_COMMAND		The command to run
-#   INIT_SUBCOMMAND	The sub-command to run and/or message to pass, etc
-#   VERBOSITY		Incremented by -v; reset by -q
+#   INIT_SUBCOMMAND		The sub-command to run and/or message to pass, etc
+#   VERBOSITY			Incremented by -v; reset by -q
 #
 # Arguments
 #   @					All commandline parameters
@@ -304,12 +305,18 @@ function echo_usage {
 ########
 function handle_commandline_options {
 	echo_debug "@=$*";
+	echo_debug "#=$#";
 
 
 	OPTIND=1;		# Reset in case getopts has been used previously in the shell.
-	while getopts 'qv' option; do
+	while getopts 'c:qv' option; do
 		echo_debug "option=$option";
-		case $option in
+
+		case "$option" in
+			c)	CONFIG_FILE="$(echo "$OPTARG" | xargs)";	# strip whitespace
+				;;
+
+
 			q)	VERBOSITY=$VERBOSITY_QUIET;
 				;;
 
@@ -323,8 +330,9 @@ function handle_commandline_options {
 				;;
 
 
-		esac
-	done
+		esac;
+	done;
+	echo_debug "CONFIG_FILE=$CONFIG_FILE";
 	echo_debug "VERBOSITY=$VERBOSITY";
 
 
@@ -332,10 +340,10 @@ function handle_commandline_options {
 
 
 	export readonly INIT_COMMAND="${1-}";
-	export readonly INIT_SUBCOMMAND="${2-}";
 	echo_debug "INIT_COMMAND=$INIT_COMMAND";
-	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
+	export readonly INIT_SUBCOMMAND="${2-}";
+	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
 	return 0;
