@@ -160,6 +160,17 @@ function log_by_level() {
 	if [ "$1" -gt "$VERBOSITY" ]; then return 0; fi
 
 
+	# if can't write to file, crash
+	if [ ! -f "$MCPATH/logs/latest.log" ]; then
+		echo_err "Can't find latest.log in $MCPATH/logs/; crashing";
+		exit 1;
+	fi;
+	if [ ! -w "$MCPATH/logs/latest.log" ]; then
+		echo_err "Can't write to $MCPATH/logs/latest.log; crashing";
+		exit 1;
+	fi;
+
+
 	# log to file -- with date, level, function
 	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [${FUNCNAME[1]/log_/}] [${FUNCNAME[2]}] $2" >> "$MCPATH/logs/latest.log";
 
