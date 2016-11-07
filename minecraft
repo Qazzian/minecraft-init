@@ -1390,6 +1390,14 @@ function route_command() {
 
 		check)
 			case "$INIT_SUBCOMMAND" in
+				'update')
+					check_update_vanilla
+					check_update_craftbukkit
+					as_user "rm $MCPATH/minecraft_server.jar.update";
+					as_user "rm $MCPATH/craftbukkit.jar.update";
+					;;
+
+
 				'help')
 					echo_usage_check;
 					return 0;
