@@ -122,11 +122,11 @@ function echo_by_level {
 
 
 ## wrappers for echo_by_level
-function echo_quiet()	{ echo_by_level "$VERBOSITY_QUIET" "$1";	return $?; }
-function echo_out()		{ echo_by_level "$VERBOSITY_DEFAULT" "$1";	return $?; }
-function echo_info()	{ echo_by_level "$VERBOSITY_INFO" "$1";		return $?; }
-function echo_verbose()	{ echo_by_level "$VERBOSITY_VERBOSE" "$1";	return $?; }
-function echo_debug()	{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
+function echo_quiet()	{ echo_by_level "$VERBOSITY_QUIET"		"${1-}";	return $?; }
+function echo_out()		{ echo_by_level "$VERBOSITY_DEFAULT"	"${1-}";	return $?; }
+function echo_info()	{ echo_by_level "$VERBOSITY_INFO"		"${1-}";	return $?; }
+function echo_verbose()	{ echo_by_level "$VERBOSITY_VERBOSE"	"${1-}";	return $?; }
+function echo_debug()	{ echo_by_level "$VERBOSITY_DEBUG"		"${1-}";	return $?; }
 
 
 
