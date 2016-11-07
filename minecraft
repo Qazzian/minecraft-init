@@ -1390,6 +1390,12 @@ function route_command() {
 
 		check)
 			case "$INIT_SUBCOMMAND" in
+				'help')
+					echo_usage_check;
+					return 0;
+					;;
+
+
 				*)
 					echo_err "No such command as '$SELF $INIT_COMMAND $INIT_SUBCOMMAND'; quitting";
 					echo_out;
