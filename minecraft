@@ -186,6 +186,7 @@ function echo_usage_check {
 	echo_quiet "   Run '$SELF help' for more information";
 	echo_quiet;
 	echo_quiet "Where <command> is one of:";
+	echo_quiet "   update   Checks for updates to MineCraft and CraftBukkit";
 	echo_quiet "   help     Shows this text";
 
 	return 0;
