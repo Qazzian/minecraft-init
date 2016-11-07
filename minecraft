@@ -1391,6 +1391,13 @@ function route_command() {
 
 		check)
 			case "$INIT_SUBCOMMAND" in
+				'config')
+					check_permissions || return 1;
+					check_backup_settings || return 1;
+					check_links || return 1;
+					;;
+
+
 				'update')
 					check_update_vanilla
 					check_update_craftbukkit
