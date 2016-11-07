@@ -178,6 +178,21 @@ function echoerr() {
 
 
 
+## output supported commands
+function echo_usage_check {
+	echo_quiet "Usage: $SELF [options] check <command>";
+	echo_quiet;
+	echo_quiet "Options:";
+	echo_quiet "   Run '$SELF help' for more information";
+	echo_quiet;
+	echo_quiet "Where <command> is one of:";
+	echo_quiet "   help     Shows this text";
+
+	return 0;
+}
+
+
+
 ########
 # Output the given message as appropriate, if appropriate
 #
