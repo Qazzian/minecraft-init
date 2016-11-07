@@ -249,15 +249,41 @@ function handle_commandline_options {
 }
 
 
-# easy way to echo to stderr
-echo_err() {
+
+########
+# Send errors to stderr
+#
+# Globals
+#	None
+#
+# Arguments
+#	@			Message to output
+#
+# Returns
+#	?			As per echo()
+########
+function echo_err() {
 	echo "$@" 1>&2;
 	return $?;
 }
 
 
-## echoerr() is deprecated
-echoerr() {
+
+########
+# Send errors to stderr
+#
+# DEPRECATED by echo_err()
+#
+# Globals
+#	None
+#
+# Arguments
+#	@			Message to output
+#
+# Returns
+#	?			As per echo_err()
+########
+function echoerr() {
 	echo_err "echoerr() is deprecated; use echo_err() instead";
 	echo_err "$@";
 	return $?;
