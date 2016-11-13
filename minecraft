@@ -1290,7 +1290,7 @@ function route_command() {
 
 
 		*)
-			echo_err "No such command as '$SELF $INIT_COMMAND'; quitting";
+			echo_err "No such command as '$(basename "$0") $INIT_COMMAND'; quitting";
 			echo;
 			echo_usage;
 			exit 1
