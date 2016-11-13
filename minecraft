@@ -103,8 +103,13 @@ function echo_by_level {
 	# if this message is verbose, but we're quieter, stop here
 	if [ "$1" -gt "$VERBOSITY" ]; then return 0; fi
 
-	# put to stdout -- with date, level, function
-	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [${FUNCNAME[1]/echo_/}] [${FUNCNAME[2]}] $2";
+
+	local message="$2";
+
+
+	# put to stdout
+	echo "$message";
+
 
 	return 0;
 }
