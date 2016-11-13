@@ -136,7 +136,6 @@ function handle_commandline_options {
 
 
 	OPTIND=1;		# Reset in case getopts has been used previously in the shell.
-	local count=0;	# count the number of options we've processed, so we can skip them later
 	while getopts 'qv' option; do
 		echo_debug "handle_commandline_options::option=$option";
 		case $option in
@@ -154,14 +153,11 @@ function handle_commandline_options {
 
 
 		esac
-		count=$((count+1));
 	done
-	echo_debug "handle_commandline_options::count=$count";
 	echo_debug "handle_commandline_options::VERBOSITY=$VERBOSITY";
 
 
-
-	shift $count;	# skip the params we've already processed
+	shift $((OPTIND-1));	# skip the params we've already processed
 
 
 	export readonly INIT_COMMAND="${1-}";
