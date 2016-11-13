@@ -107,6 +107,12 @@ function echo_by_level {
 	local message="$2";
 
 
+	# if debugging, prefix with function
+	if [ "$1" -ge "$VERBOSITY_DEBUG" ]; then
+		message="[${FUNCNAME[2]}] $message";
+	fi;
+
+
 	# put to stdout
 	echo "$message";
 
@@ -139,12 +145,12 @@ function echo_debug()	{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 #   0|1
 ########
 function handle_commandline_options {
-	echo_debug "handle_commandline_options::@=$*";
+	echo_debug "@=$*";
 
 
 	OPTIND=1;		# Reset in case getopts has been used previously in the shell.
 	while getopts 'qv' option; do
-		echo_debug "handle_commandline_options::option=$option";
+		echo_debug "option=$option";
 		case $option in
 			q)	VERBOSITY=$VERBOSITY_QUIET;
 				;;
@@ -161,7 +167,7 @@ function handle_commandline_options {
 
 		esac
 	done
-	echo_debug "handle_commandline_options::VERBOSITY=$VERBOSITY";
+	echo_debug "VERBOSITY=$VERBOSITY";
 
 
 	shift $((OPTIND-1));	# skip the params we've already processed
@@ -169,8 +175,8 @@ function handle_commandline_options {
 
 	export readonly INIT_COMMAND="${1-}";
 	export readonly INIT_SUBCOMMAND="${2-}";
-	echo_debug "handle_commandline_options::INIT_COMMAND=$INIT_COMMAND";
-	echo_debug "handle_commandline_options::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
+	echo_debug "INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
 
@@ -889,9 +895,9 @@ check_permissions() {
 #	0|1
 ########
 function route_command() {
-	echo_debug "route_command::@=$*";
-	echo_debug "route_command::INIT_COMMAND=$INIT_COMMAND";
-	echo_debug "route_command::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
+	echo_debug "@=$*";
+	echo_debug "INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
 	case "$INIT_COMMAND" in
