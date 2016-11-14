@@ -68,7 +68,7 @@ VERBOSITY=$VERBOSITY_DEFAULT;
 # Output the current version of MineCraft-Init
 ########
 function echo_mci_version() {
-	echo '2.6.1';
+	echo '2.6.2';
 	return 0;
 }
 
@@ -89,31 +89,150 @@ function echo_mci_version() {
 ########
 function echo_by_level {
 	if [ 2 -ne $# ]; then
-		echo_err "Cannot echo messages without 1) level; and 2) message; quitting";
+		echo_err "Usage: ${FUNCNAME[0]} <level> <message>";
 		return 1;
 	fi;
+
 
 	if [[ ! $1 =~ ^-?[0-9]+$ ]]; then
 		echo_err "Verbosity-level is not an integer; quitting";
 		return 1;
 	fi;
 
-	# if this message is high-verbosity, but we're too-quiet, finish
+
+	# if this message is verbose, but we're quieter, stop here
 	if [ "$1" -gt "$VERBOSITY" ]; then return 0; fi
 
-	# echo to stdout -- with date, level, function
-	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [${FUNCNAME[1]/echo_/}] [${FUNCNAME[2]}] $2";
+
+	local message="$2";
+
+
+	# if debugging, prefix with function
+	if [ "$1" -ge "$VERBOSITY_DEBUG" ]; then
+		message="[${FUNCNAME[2]}] $message";
+	fi;
+
+
+	# put to stdout
+	echo "$message";
+
 
 	return 0;
 }
 
 
 ## wrappers for echo_by_level
-function echo_quiet		{ echo_by_level "$VERBOSITY_QUIET" "$1";	return $?; }
-function echo_out		{ echo_by_level "$VERBOSITY_DEFAULT" "$1";	return $?; }
-function echo_info		{ echo_by_level "$VERBOSITY_INFO" "$1";		return $?; }
-function echo_verbose	{ echo_by_level "$VERBOSITY_VERBOSE" "$1";	return $?; }
-function echo_debug		{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
+function echo_quiet()	{ echo_by_level "$VERBOSITY_QUIET"		"${1-}";	return $?; }
+function echo_out()		{ echo_by_level "$VERBOSITY_DEFAULT"	"${1-}";	return $?; }
+function echo_info()	{ echo_by_level "$VERBOSITY_INFO"		"${1-}";	return $?; }
+function echo_verbose()	{ echo_by_level "$VERBOSITY_VERBOSE"	"${1-}";	return $?; }
+function echo_debug()	{
+	local status=0;
+
+	echo_by_level "$VERBOSITY_DEBUG" "${1-}" || status=1;
+	log_by_level "$VERBOSITY_DEBUG" "${1-}" || status=1;
+
+	return $status;
+}
+
+
+
+########
+# Send errors to stderr
+#
+# Globals
+#	None
+#
+# Arguments
+#	@			Message to output
+#
+# Returns
+#	?			As per echo()
+########
+function echo_err() {
+	echo "$@" 1>&2;
+	return $?;
+}
+
+
+
+########
+# Send errors to stderr
+#
+# DEPRECATED by echo_err()
+#
+# Globals
+#	None
+#
+# Arguments
+#	@			Message to output
+#
+# Returns
+#	?			As per echo_err()
+########
+function echoerr() {
+	echo_err "echoerr() is deprecated; use echo_err() instead";
+	echo_err "$@";
+	return $?;
+}
+
+
+
+########
+# Output the given message as appropriate, if appropriate
+#
+# Globals
+#   VERBOSITY	Which level(s) of output to process, and which to discard
+#
+# Arguments
+#	1	Log-level := VERBOSITY_QUIET <-> VERBOSITY_DEBUG
+#	2	Message
+#
+# Returns
+#	0|1
+########
+function log_by_level() {
+	if [ 2 -ne $# ]; then
+		echo_err "Usage: ${FUNCNAME[0]} <level> <message>";
+		return 1;
+	fi;
+
+
+	if [[ ! $1 =~ ^-?[0-9]+$ ]]; then
+		echo_err "Log-level is not an integer; quitting";
+		return 1;
+	fi;
+
+
+	# if we're too quiet to show the message, finish
+	if [ "$1" -gt "$VERBOSITY" ]; then return 0; fi
+
+
+	# if can't write to file, crash
+	if [ ! -f "$MCPATH/logs/latest.log" ]; then
+		echo_err "Can't find latest.log in $MCPATH/logs/; crashing";
+		exit 1;
+	fi;
+	if [ ! -w "$MCPATH/logs/latest.log" ]; then
+		echo_err "Can't write to $MCPATH/logs/latest.log; crashing";
+		exit 1;
+	fi;
+
+
+	# log to file -- with date, level, function
+	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [${FUNCNAME[1]/log_/}] [${FUNCNAME[2]}] $2" >> "$MCPATH/logs/latest.log";
+
+
+	return 0;
+}
+
+
+## wrappers for log_by_level
+function log_quiet()	{ log_by_level "$VERBOSITY_QUIET" "$1";		return $?; }
+function log()			{ log_by_level "$VERBOSITY_DEFAULT" "$1";	return $?; }
+function log_info()		{ log_by_level "$VERBOSITY_INFO" "$1";		return $?; }
+function log_verbose()	{ log_by_level "$VERBOSITY_VERBOSE" "$1";	return $?; }
+function log_debug()	{ log_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 
 
 
@@ -132,13 +251,12 @@ function echo_debug		{ echo_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 #   0|1
 ########
 function handle_commandline_options {
-	echo_debug "handle_commandline_options::@=$*";
+	echo_debug "@=$*";
 
 
 	OPTIND=1;		# Reset in case getopts has been used previously in the shell.
-	local count=0;	# count the number of options we've processed, so we can skip them later
 	while getopts 'qv' option; do
-		echo_debug "handle_commandline_options::option=$option";
+		echo_debug "option=$option";
 		case $option in
 			q)	VERBOSITY=$VERBOSITY_QUIET;
 				;;
@@ -154,40 +272,23 @@ function handle_commandline_options {
 
 
 		esac
-		count=$((count+1));
 	done
-	echo_debug "handle_commandline_options::count=$count";
-	echo_debug "handle_commandline_options::VERBOSITY=$VERBOSITY";
+	echo_debug "VERBOSITY=$VERBOSITY";
 
 
-
-	shift $count;	# skip the params we've already processed
+	shift $((OPTIND-1));	# skip the params we've already processed
 
 
 	export readonly INIT_COMMAND="${1-}";
 	export readonly INIT_SUBCOMMAND="${2-}";
-	echo_debug "handle_commandline_options::INIT_COMMAND=$INIT_COMMAND";
-	echo_debug "handle_commandline_options::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
+	echo_debug "INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
 
 	return 0;
 }
 
-
-# easy way to echo to stderr
-echo_err() {
-	echo "$@" 1>&2;
-	return $?;
-}
-
-
-## echoerr() is deprecated
-echoerr() {
-	echo_err "echoerr() is deprecated; use echo_err() instead";
-	echo_err "$@";
-	return $?;
-}
 
 
 ## output supported commands
@@ -886,9 +987,9 @@ check_permissions() {
 #	0|1
 ########
 function route_command() {
-	echo_debug "route_command::@=$*";
-	echo_debug "route_command::INIT_COMMAND=$INIT_COMMAND";
-	echo_debug "route_command::INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
+	echo_debug "@=$*";
+	echo_debug "INIT_COMMAND=$INIT_COMMAND";
+	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
 	case "$INIT_COMMAND" in
@@ -1290,7 +1391,7 @@ function route_command() {
 
 
 		*)
-			echo_err "No such command as '$SELF $INIT_COMMAND'; quitting";
+			echo_err "No such command as '$(basename "$0") $INIT_COMMAND'; quitting";
 			echo;
 			echo_usage;
 			exit 1
