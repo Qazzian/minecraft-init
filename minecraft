@@ -477,7 +477,6 @@ mc_start() {
 #
 # Globals
 #	SCREEN		Name of Screen session to command
-#	FORMAT	Styling as per ConsoleLikeChat
 #
 # Arguments
 #	1			String to say
@@ -504,7 +503,7 @@ mc_command() {
 		return 1;
 	fi;
 
-	as_user "screen -p 0 -S $SCREEN -X eval 'stuff \"$(eval echo $FORMAT)\"\015'" || return 1;
+	as_user "screen -p 0 -S $SCREEN -X eval 'stuff \"$(eval echo $1)\"\015'" || return 1;
 
 	return 0;
 }
