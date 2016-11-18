@@ -150,7 +150,7 @@ function echo_debug()	{
 #	?			As per echo()
 ########
 function echo_err() {
-	echo "$@" 1>&2;
+	echo -e "$@" 1>&2;
 	return $?;
 }
 
