@@ -220,7 +220,10 @@ function log_by_level() {
 
 
 	# log to file -- with date, level, function
-	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [${FUNCNAME[1]/log_/}] [${FUNCNAME[2]}] $2" >> "$MCPATH/logs/latest.log";
+	local function_name="${FUNCNAME[1]}";	# get calling function
+	function_name="${function_name#log_}";	# if log_foo, remove prefix
+	function_name="${function_name#echo_}";	# if echo_foo, remove prefix
+	echo "[$(date +%Y-%m-%d:%H:%M:%S)] [$function_name] [${FUNCNAME[2]}] $2" >> "$MCPATH/logs/latest.log";
 
 
 	return 0;
