@@ -1036,9 +1036,17 @@ echo_whitelist(){
 	local whitelist;
 
 	# extract data from log
-	whitelist="$(tac "$SERVERLOG" | grep -m 1 'White-listed players:')";
-	whitelist="${whitelist:49}";	# remove the log-fluff
-	whitelist="${whitelist//, /\n}";	# change line to list
+	whitelist="$(tac "$SERVERLOG" | grep -m 1 -B 1 'whitelisted players:' | head -n 1)";
+	whitelist="${whitelist:33}";			# remove the log-fluff
+	whitelist="${whitelist// and /, }";		# remove ' and '
+	whitelist="${whitelist//, /\\n\\t}";	# change line to list
+
+	# Pre MC v1.8.8
+	if [ -z "$whitelist" ]; then
+		whitelist="$(tac "$SERVERLOG" | grep -m 1 'White-listed players:')";
+		whitelist="${whitelist:49}";	# remove the log-fluff
+		whitelist="${whitelist//, /\n}";	# change line to list
+	fi;
 
 	echo_out	"Your whitelist is:"
 	echo_quiet	"\t$whitelist";
