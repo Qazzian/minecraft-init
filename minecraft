@@ -1015,15 +1015,35 @@ overviewer_copy_worlds() {
 }
 
 
-whitelist(){
-	mc_command "whitelist list"
-	sleep 1s
-	whitelist=$(tac $SERVERLOG | grep -m 1 "White-listed players:")
 
-	echo
-	echo "Currently there are the following players on your whitelist:"
-	echo
-	echo ${whitelist:49} | sed 's/, /\n/g'
+########
+# Queries the Server Jar for the whitelist, then returns it
+#
+# Globals
+#	SERVERLOG	File that holds the server's output
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+########
+whitelist(){
+	# query server and wait for reply
+	mc_command "whitelist list" || return 1;
+	sleep 1s;
+
+	local whitelist;
+
+	# extract data from log
+	whitelist="$(tac "$SERVERLOG" | grep -m 1 'White-listed players:')";
+	whitelist="${whitelist:49}";	# remove the log-fluff
+	whitelist="${whitelist//, /\n}";	# change line to list
+
+	echo_out	"Your whitelist is:"
+	echo_quiet	"\t$whitelist";
+
+	return 0;
 }
 
 
