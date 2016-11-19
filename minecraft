@@ -1120,6 +1120,15 @@ function echo_playercount() {
 }
 
 
+function echo_recent_players() {
+			# Greps for recently logged in users
+			echo Recently logged in users:
+			cat $SERVERLOG | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
+
+	return 0;
+}
+
+
 
 ########
 # Queries the Server Jar for the whitelist, then returns it
@@ -1422,9 +1431,7 @@ function route_command() {
 
 
 		last)
-			# Greps for recently logged in users
-			echo Recently logged in users:
-			cat $SERVERLOG | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
+			echo_recent_players || return 1;
 			;;
 
 
