@@ -1015,7 +1015,7 @@ overviewer_copy_worlds() {
 }
 
 
-function echo_connected_users() {
+function echo_connected_players() {
 
 			# Lists connected users
 			if is_running; then
@@ -1325,7 +1325,7 @@ function route_command() {
 
 
 		connected)
-			echo_connected_users || return 1;
+			echo_connected_players || return 1;
 			;;
 
 
