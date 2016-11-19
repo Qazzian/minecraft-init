@@ -1028,7 +1028,7 @@ overviewer_copy_worlds() {
 # Returns
 #	0|1
 ########
-whitelist(){
+echo_whitelist(){
 	# query server and wait for reply
 	mc_command "whitelist list" || return 1;
 	sleep 1s;
@@ -1151,7 +1151,7 @@ function route_command() {
 
 		whitelist)
 			if is_running; then
-				whitelist
+				echo_whitelist || return 1;
 			else
 				echo "Server not running."
 			fi
