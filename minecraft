@@ -1076,6 +1076,21 @@ function echo_connected_players() {
 }
 
 
+function echo_playercount() {
+			# List number of connected users.
+			if is_running; then
+				mc_command list
+				sleep 1s
+				# Same as technique as 'connected' command, but count lines.
+				tac $SERVERLOG | \
+					grep --before-context 1 --max-count 1 "players online" | \
+					head -n 1 | sed 's/[\x01-\x1F\x7F]..//g' | grep . | sed 's/, /\n/g' | wc -l
+			else
+				echo_err "No running server."
+			fi
+}
+
+
 
 ########
 # Queries the Server Jar for the whitelist, then returns it
@@ -1362,17 +1377,7 @@ function route_command() {
 
 
 		playercount)
-			# List number of connected users.
-			if is_running; then
-				mc_command list
-				sleep 1s
-				# Same as technique as 'connected' command, but count lines.
-				tac $SERVERLOG | \
-					grep --before-context 1 --max-count 1 "players online" | \
-					head -n 1 | sed 's/[\x01-\x1F\x7F]..//g' | grep . | sed 's/, /\n/g' | wc -l
-			else
-				echo_err "No running server."
-			fi
+			echo_playercount || return 1;
 			;;
 
 
