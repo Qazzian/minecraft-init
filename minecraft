@@ -1015,31 +1015,63 @@ overviewer_copy_worlds() {
 }
 
 
+
+########
+# Queries the Server for the list of users, then outputs to stdout
+#
+# Globals
+#	SERVERLOG		The file that holds the Server's output
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+#	stdout			Formated list of users currently connected to the server
+########
 function echo_connected_players() {
+	if ! is_running; then
+		echo_info "No running server; skipping"
+		return 0;
+	fi;
 
-			# Lists connected users
-			if is_running; then
-				mc_command list
-				sleep 1s
-				# Get server log in reverse order, assume that response to 'list'
-				# command is already there.
-				tac $SERVERLOG | \
-					# Extract two lines. 1) containing ASCII color code and comma-separated list
-					# of  player names and 2) the line saying "[...] players online:"
-					grep --before-context 1 --max-count 1 "players online" | \
-					# Throw away the latter line.
-					head -n 1 | \
-					# Remove any escape character and the following two bytes (color code).
-					sed 's/[\x01-\x1F\x7F]..//g' | \
-					# Only pass through lines that still have content (if no player online,
-					# then nothing's left over after this grep.
-					grep . | \
-					# Replace ", " separator with newline char.
-					sed 's/, /\n/g'
-			else
-				echo_err "No running server."
-			fi
 
+	# query server & wait for response
+	mc_command list || return 1;
+	sleep 1s;
+
+
+	local players;
+
+
+	# get the list from log
+	players="$(tac "$SERVERLOG" | grep --before-context 1 --max-count 1 'players online' | head -n 1)";
+	echo_debug "players=$players";
+
+	if [ -z "$players" ]; then
+		echo_err "Can't find connected players in \$SERVER_LOG; quitting";
+		return 1;
+	fi;
+
+
+	# remove the log-fluff
+	players="${players:33}";
+
+
+	# handle zero-players
+	if [ -z "$players" ]; then
+		players='No players connected';
+	fi;
+	echo_debug "players=$players";
+
+
+	# change line to list
+	players="${players//, /\\n\\t}";
+
+
+	# print & return
+	echo_info	"These players are connected:"
+	echo_quiet	"\t$players";
 	return 0;
 }
 
