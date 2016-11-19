@@ -1076,18 +1076,47 @@ function echo_connected_players() {
 }
 
 
+
+########
+# Wraps echo_connected_players() to return a count
+#
+# Globals
+#	None
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+#	stdout			Integer count of players online
+########
 function echo_playercount() {
-			# List number of connected users.
-			if is_running; then
-				mc_command list
-				sleep 1s
-				# Same as technique as 'connected' command, but count lines.
-				tac $SERVERLOG | \
-					grep --before-context 1 --max-count 1 "players online" | \
-					head -n 1 | sed 's/[\x01-\x1F\x7F]..//g' | grep . | sed 's/, /\n/g' | wc -l
-			else
-				echo_err "No running server."
-			fi
+	if ! is_running; then
+		echo_info "No running server; skipping"
+		return 0;
+	fi;
+
+
+	local cache=$VERBOSITY;	# cache the current VERBOSITY
+	VERBOSITY=$VERBOSITY_QUIET;	# set to known level (quiet)
+	local player_list="$(echo_connected_players)";
+	VERBOSITY=$cache;	# reset VERBOSITY
+	echo_debug "player_list=$player_list";
+
+
+	# if no users; skip
+	if [ 'No users connected' = "$player_list" ]; then
+		echo_quiet 0;
+		return 0;
+	fi;
+
+
+	# count the words (usernames); output
+	echo_info	"There are this many players online:";
+	echo_quiet	"$(echo "$player_list" | wc -w)";
+
+
+	return 0;
 }
 
 
