@@ -1015,6 +1015,35 @@ overviewer_copy_worlds() {
 }
 
 
+function echo_connected_users() {
+
+			# Lists connected users
+			if is_running; then
+				mc_command list
+				sleep 1s
+				# Get server log in reverse order, assume that response to 'list'
+				# command is already there.
+				tac $SERVERLOG | \
+					# Extract two lines. 1) containing ASCII color code and comma-separated list
+					# of  player names and 2) the line saying "[...] players online:"
+					grep --before-context 1 --max-count 1 "players online" | \
+					# Throw away the latter line.
+					head -n 1 | \
+					# Remove any escape character and the following two bytes (color code).
+					sed 's/[\x01-\x1F\x7F]..//g' | \
+					# Only pass through lines that still have content (if no player online,
+					# then nothing's left over after this grep.
+					grep . | \
+					# Replace ", " separator with newline char.
+					sed 's/, /\n/g'
+			else
+				echo_err "No running server."
+			fi
+
+	return 0;
+}
+
+
 
 ########
 # Queries the Server Jar for the whitelist, then returns it
@@ -1296,28 +1325,7 @@ function route_command() {
 
 
 		connected)
-			# Lists connected users
-			if is_running; then
-				mc_command list
-				sleep 1s
-				# Get server log in reverse order, assume that response to 'list'
-				# command is already there.
-				tac $SERVERLOG | \
-					# Extract two lines. 1) containing ASCII color code and comma-separated list
-					# of  player names and 2) the line saying "[...] players online:"
-					grep --before-context 1 --max-count 1 "players online" | \
-					# Throw away the latter line.
-					head -n 1 | \
-					# Remove any escape character and the following two bytes (color code).
-					sed 's/[\x01-\x1F\x7F]..//g' | \
-					# Only pass through lines that still have content (if no player online,
-					# then nothing's left over after this grep.
-					grep . | \
-					# Replace ", " separator with newline char.
-					sed 's/, /\n/g'
-			else
-				echo_err "No running server."
-			fi
+			echo_connected_users || return 1;
 			;;
 
 
