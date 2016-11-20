@@ -1120,10 +1120,49 @@ function echo_playercount() {
 }
 
 
+
+########
+# Checks server-log for recent player activity
+#
+# Globals
+#	SERVERLOG	File containing player activity
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+#	stdout		Formatted list of recent player activity
+########
 function echo_recent_players() {
-			# Greps for recently logged in users
-			echo Recently logged in users:
-			cat $SERVERLOG | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
+	if ! is_running; then
+		echo_out "Server is not running; skipping";
+		return 0;
+	fi
+
+
+	# get the log & filter for player activity
+	echo_debug "SERVERLOG=$SERVERLOG";
+	if [ ! -f "$SERVERLOG" ]; then
+		echo_err "Can't find \$SERVERLOG ($SERVERLOG); quitting";
+		return 1;
+	fi;
+	local log="$(cat $SERVERLOG | grep 'joined the game\|left the game')";
+	echo_debug "log=$log";
+
+
+	# format for display
+	log="${log// \[Server thread\/INFO\]/}";
+	if [ -z "$log" ]; then
+		log="No recent players";
+	fi;
+	echo_debug "log=$log";
+
+
+	# output
+	echo_info "Recently player activity:";
+	echo_quiet "$log";
+
 
 	return 0;
 }
