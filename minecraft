@@ -247,6 +247,7 @@ function echo_usage {
 	echo_quiet "Usage: $(basename "$0") [<options>] <command>";
 	echo_out;
 	echo_out "Where <options> is zero or more of:";
+	echo_out "   -c <file>     Config. Loads the given config file. Default is $(dirname "$0")/config";
 	echo_out "   -q            Quiet. Decreases the script's verbosity";
 	echo_out "   -v            Verbose. Increases the script's verbosity. May be repeated. Max is three";
 	echo_out;
