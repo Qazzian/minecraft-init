@@ -68,7 +68,7 @@ VERBOSITY=$VERBOSITY_DEFAULT;
 # Output the current version of MineCraft-Init
 ########
 function echo_mci_version() {
-	echo_quiet '2.5.0';
+	echo_quiet '2.6.3';
 	return 0;
 }
 
@@ -339,13 +339,45 @@ function echo_usage {
 }
 
 
-ME=`whoami`
+
+########
+# Runs an arbitrary command as USERNAME
+#
+# Globals
+#	USERNAME
+#
+# Arguments
+#	1		Command to run
+#
+# Returns
+#	0|1
+########
 as_user() {
-	if [ $ME == $USERNAME ] ; then
-		bash -c "$1"
-	else
-		su $USERNAME -s /bin/bash -c "$1"
-	fi
+	echo_debug "1=$1";
+
+
+	if [ 1 -ne $# ] || [ -z "$1" ]; then
+		echo_err "Command is missing or invalid; quitting";
+		return 1;
+	fi;
+
+
+	local me="$(whoami)";
+	echo_debug "me=$me";
+	echo_debug "USERNAME=$USERNAME";
+
+
+	# if we're already USERNAME, run
+	if [ "$me" = "$USERNAME" ] ; then
+		bash -c "$1" || return 1;
+		return 0;
+	fi;
+
+
+	su "$USERNAME" -s /bin/bash -c "$1" || return 1;
+
+
+	return 0;
 }
 
 
@@ -442,13 +474,43 @@ mc_start() {
 }
 
 
+
+########
+# Passes a string to the Server Jar, as a command
+#
+# Globals
+#	SCREEN		Name of Screen session to command
+#
+# Arguments
+#	1			String to say
+#
+# Returns
+#	0|1
+########
 mc_command() {
-	if is_running
-	then
-			as_user "screen -p 0 -S $SCREEN -X eval 'stuff \"$(eval echo $FORMAT)\"\015'"
-	else
-			echo_err "$SERVICE was not running. Not able to run command."
+	echo_debug "1=$1";
+
+
+	if ! is_running; then
+		echo_out "Server is not running; skipping";
+		return 0;
 	fi
+
+
+	if [ 1 -ne $# ]; then
+		echo_err "Can't find command; quitting";
+		return 1;
+	fi;
+	if [ -z "$1" ]; then
+		echo_err "Command ($1) is empty; quitting";
+		return 1;
+	fi;
+
+
+	as_user "screen -p 0 -S $SCREEN -X stuff \"$1\"\\\015" || return 1;
+
+
+	return 0;
 }
 
 
@@ -477,14 +539,40 @@ mc_saveon() {
 }
 
 
+
+########
+# Broadcasts a message in-game
+#
+# Globals
+#	None
+#
+# Arguments
+#	1		String to say
+#
+# Returns
+#	0|1
+########
 mc_say() {
-	if is_running
-	then
-		echo_info "Said: $1"
-		mc_command "say $1"
-	else
-		echo_err "$SERVICE was not running. Not able to say anything."
+	echo_debug "1=$1";
+
+
+	if ! is_running; then
+		echo_out "Server is not running; skipping";
+		return 0;
 	fi
+
+
+	if [ -z "$1" ]; then
+		echo_err "Message ($1) is empty; quitting";
+		return 1;
+	fi;
+
+
+	mc_command "say $1" || return 1;
+	echo_out "Said: $1";
+
+
+	return 0;
 }
 
 
@@ -930,15 +1018,196 @@ overviewer_copy_worlds() {
 }
 
 
-whitelist(){
-	mc_command "whitelist list"
-	sleep 1s
-	whitelist=$(tac $SERVERLOG | grep -m 1 "White-listed players:")
 
-	echo_out
-	echo_out "Currently there are the following players on your whitelist:"
-	echo_out
-	echo_quiet ${whitelist:49} | sed 's/, /\n/g'
+########
+# Queries the Server for the list of users, then outputs to stdout
+#
+# Globals
+#	SERVERLOG		The file that holds the Server's output
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+#	stdout			Formated list of users currently connected to the server
+########
+function echo_connected_players() {
+	if ! is_running; then
+		echo_info "No running server; skipping"
+		return 0;
+	fi;
+
+
+	# query server & wait for response
+	mc_command list || return 1;
+	sleep 1s;
+
+
+	local players;
+
+
+	# get the list from log
+	players="$(tac "$SERVERLOG" | grep --before-context 1 --max-count 1 'players online' | head -n 1)";
+	echo_debug "players=$players";
+
+	if [ -z "$players" ]; then
+		echo_err "Can't find connected players in \$SERVER_LOG; quitting";
+		return 1;
+	fi;
+
+
+	# remove the log-fluff
+	players="${players:33}";
+
+
+	# handle zero-players
+	if [ -z "$players" ]; then
+		players='No players connected';
+	fi;
+	echo_debug "players=$players";
+
+
+	# change line to list
+	players="${players//, /\\n\\t}";
+
+
+	# print & return
+	echo_info	"These players are connected:"
+	echo_quiet	"\t$players";
+	return 0;
+}
+
+
+
+########
+# Wraps echo_connected_players() to return a count
+#
+# Globals
+#	None
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+#	stdout			Integer count of players online
+########
+function echo_playercount() {
+	if ! is_running; then
+		echo_info "No running server; skipping"
+		return 0;
+	fi;
+
+
+	local cache=$VERBOSITY;	# cache the current VERBOSITY
+	VERBOSITY=$VERBOSITY_QUIET;	# set to known level (quiet)
+	local player_list="$(echo_connected_players)";
+	VERBOSITY=$cache;	# reset VERBOSITY
+	echo_debug "player_list=$player_list";
+
+
+	# if no users; skip
+	if [ 'No users connected' = "$player_list" ]; then
+		echo_quiet 0;
+		return 0;
+	fi;
+
+
+	# count the words (usernames); output
+	echo_info	"There are this many players online:";
+	echo_quiet	"$(echo "$player_list" | wc -w)";
+
+
+	return 0;
+}
+
+
+
+########
+# Checks server-log for recent player activity
+#
+# Globals
+#	SERVERLOG	File containing player activity
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+#	stdout		Formatted list of recent player activity
+########
+function echo_recent_players() {
+	if ! is_running; then
+		echo_out "Server is not running; skipping";
+		return 0;
+	fi
+
+
+	# get the log & filter for player activity
+	echo_debug "SERVERLOG=$SERVERLOG";
+	if [ ! -f "$SERVERLOG" ]; then
+		echo_err "Can't find \$SERVERLOG ($SERVERLOG); quitting";
+		return 1;
+	fi;
+	local log="$(cat $SERVERLOG | grep 'joined the game\|left the game')";
+	echo_debug "log=$log";
+
+
+	# format for display
+	log="${log// \[Server thread\/INFO\]/}";
+	if [ -z "$log" ]; then
+		log="No recent players";
+	fi;
+	echo_debug "log=$log";
+
+
+	# output
+	echo_info "Recently player activity:";
+	echo_quiet "$log";
+
+
+	return 0;
+}
+
+
+
+########
+# Queries the Server Jar for the whitelist, then returns it
+#
+# Globals
+#	SERVERLOG	File that holds the server's output
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+########
+echo_whitelist(){
+	# query server and wait for reply
+	mc_command "whitelist list" || return 1;
+	sleep 1s;
+
+	local whitelist;
+
+	# extract data from log
+	whitelist="$(tac "$SERVERLOG" | grep -m 1 -B 1 'whitelisted players:' | head -n 1)";
+	whitelist="${whitelist:33}";			# remove the log-fluff
+	whitelist="${whitelist// and /, }";		# remove ' and '
+	whitelist="${whitelist//, /\\n\\t}";	# change line to list
+
+	# Pre MC v1.8.8
+	if [ -z "$whitelist" ]; then
+		whitelist="$(tac "$SERVERLOG" | grep -m 1 'White-listed players:')";
+		whitelist="${whitelist:49}";	# remove the log-fluff
+		whitelist="${whitelist//, /\n}";	# change line to list
+	fi;
+
+	echo_out	"Your whitelist is:"
+	echo_quiet	"\t$whitelist";
+
+	return 0;
 }
 
 
@@ -1046,7 +1315,7 @@ function route_command() {
 
 		whitelist)
 			if is_running; then
-				whitelist
+				echo_whitelist || return 1;
 			else
 				echo_out "Server not running."
 			fi
@@ -1183,43 +1452,12 @@ function route_command() {
 
 
 		connected)
-			# Lists connected users
-			if is_running; then
-				mc_command list
-				sleep 1s
-				# Get server log in reverse order, assume that response to 'list'
-				# command is already there.
-				tac $SERVERLOG | \
-					# Extract two lines. 1) containing ASCII color code and comma-separated list
-					# of  player names and 2) the line saying "[...] players online:"
-					grep --before-context 1 --max-count 1 "players online" | \
-					# Throw away the latter line.
-					head -n 1 | \
-					# Remove any escape character and the following two bytes (color code).
-					sed 's/[\x01-\x1F\x7F]..//g' | \
-					# Only pass through lines that still have content (if no player online,
-					# then nothing's left over after this grep.
-					grep . | \
-					# Replace ", " separator with newline char.
-					sed 's/, /\n/g'
-			else
-				echo_err "No running server."
-			fi
+			echo_connected_players || return 1;
 			;;
 
 
 		playercount)
-			# List number of connected users.
-			if is_running; then
-				mc_command list
-				sleep 1s
-				# Same as technique as 'connected' command, but count lines.
-				tac $SERVERLOG | \
-					grep --before-context 1 --max-count 1 "players online" | \
-					head -n 1 | sed 's/[\x01-\x1F\x7F]..//g' | grep . | sed 's/, /\n/g' | wc -l
-			else
-				echo_err "No running server."
-			fi
+			echo_playercount || return 1;
 			;;
 
 
@@ -1235,9 +1473,7 @@ function route_command() {
 
 
 		last)
-			# Greps for recently logged in users
-			echo_info "Recently logged in users:";
-			cat $SERVERLOG | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
+			echo_recent_players || return 1;
 			;;
 
 
