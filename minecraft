@@ -68,7 +68,7 @@ VERBOSITY=$VERBOSITY_DEFAULT;
 # Output the current version of MineCraft-Init
 ########
 function echo_mci_version() {
-	echo '2.5.0';
+	echo_quiet '2.5.0';
 	return 0;
 }
 
@@ -296,44 +296,44 @@ function handle_commandline_options {
 
 ## output supported commands
 function echo_usage {
-	echo "Usage: $(basename "$0") [<options>] <command>";
-	echo;
-	echo "Where <options> is zero or more of:";
-	echo -e "   -q            Quiet. Decreases the script's verbosity";
-	echo -e "   -v            Verbose. Increases the script's verbosity. May be repeated. Max is three";
-	echo;
-	echo "Where <command> is one of:";
-	echo -e "   start \t\t Starts the server";
-	echo -e "   stop \t\t Stops the server";
-	echo -e "   kill \t\t Kills the server";
-	echo -e "   restart \t\t Restarts the server";
-	echo -e "   watchdog \t Ensures server is still running";
-	echo -e "   reload \t\t Reloads the server configuration";
-	echo -e "   backup \t\t Backups the worlds defined in the script";
-	echo -e "   whole-backup \t Backups the entire server folder";
-	echo -e "   check-update \t Checks for updates of $CB_JAR and $MC_JAR";
-	echo -e "   update \t\t Fetches the latest version of minecraft.jar server and Bukkit";
-	echo -e "   log-roll \t\t Moves and compresses the logfiles";
-	echo -e "   log \t\t\t Prints the server log";
-	echo -e "   to-disk \t\t Copies the worlds from the ramdisk to worldstorage";
-	echo -e "   save-off \t\t Flushes the world to disk and then disables saving";
-	echo -e "   save-on \t\t Re-enables saving if it was previously disabled by save-off";
-	echo -e "   say \t\t\t Prints the given string to the ingame chat";
-	echo -e "   connected \t\t Lists connected users";
-	echo -e "   playercount \t\t Prints the number of connected users";
-	echo -e "   status \t\t Displays server status";
-	echo -e "   version \t\t Displays Bukkit version and then exits";
-	echo -e "   links \t\t Creates nessesary symlinks";
-	echo -e "   last \t\t Displays recently connected users";
-	echo -e "   worlds \t\t Displays a list of available worlds";
-	echo -e "   ramdisk WORLD \t Toggles ramdisk configuration for WORLD";
-	echo -e "   overviewer WORLD \t Creates a map of the WORLD with Minecraft-Overviewer";
-	echo -e "   whitelist \t\t Prints the current whitelist";
-	echo -e "   whitelist-add NAME \t Adds the specified player to the server whitelist";
-	echo -e "   whitelist-reload \t Reloads the whitelist";
-	echo -e "   screen \t\t Shows the server screen";
-	echo -e "   script-version        Show this script's version";
-	echo -e "   help \t\t Shows this text";
+	echo_quiet "Usage: $(basename "$0") [<options>] <command>";
+	echo_out;
+	echo_out "Where <options> is zero or more of:";
+	echo_out "   -q            Quiet. Decreases the script's verbosity";
+	echo_out "   -v            Verbose. Increases the script's verbosity. May be repeated. Max is three";
+	echo_out;
+	echo_out "Where <command> is one of:";
+	echo_out "   start \t\t Starts the server";
+	echo_out "   stop \t\t Stops the server";
+	echo_out "   kill \t\t Kills the server";
+	echo_out "   restart \t\t Restarts the server";
+	echo_out "   watchdog \t Ensures server is still running";
+	echo_out "   reload \t\t Reloads the server configuration";
+	echo_out "   backup \t\t Backups the worlds defined in the script";
+	echo_out "   whole-backup \t Backups the entire server folder";
+	echo_out "   check-update \t Checks for updates of $CB_JAR and $MC_JAR";
+	echo_out "   update \t\t Fetches the latest version of minecraft.jar server and Bukkit";
+	echo_out "   log-roll \t\t Moves and compresses the logfiles";
+	echo_out "   log \t\t\t Prints the server log";
+	echo_out "   to-disk \t\t Copies the worlds from the ramdisk to worldstorage";
+	echo_out "   save-off \t\t Flushes the world to disk and then disables saving";
+	echo_out "   save-on \t\t Re-enables saving if it was previously disabled by save-off";
+	echo_out "   say \t\t\t Prints the given string to the ingame chat";
+	echo_out "   connected \t\t Lists connected users";
+	echo_out "   playercount \t\t Prints the number of connected users";
+	echo_out "   status \t\t Displays server status";
+	echo_out "   version \t\t Displays Bukkit version and then exits";
+	echo_out "   links \t\t Creates nessesary symlinks";
+	echo_out "   last \t\t Displays recently connected users";
+	echo_out "   worlds \t\t Displays a list of available worlds";
+	echo_out "   ramdisk WORLD \t Toggles ramdisk configuration for WORLD";
+	echo_out "   overviewer WORLD \t Creates a map of the WORLD with Minecraft-Overviewer";
+	echo_out "   whitelist \t\t Prints the current whitelist";
+	echo_out "   whitelist-add NAME \t Adds the specified player to the server whitelist";
+	echo_out "   whitelist-reload \t Reloads the whitelist";
+	echo_out "   screen \t\t Shows the server screen";
+	echo_out "   script-version        Show this script's version";
+	echo_out "   help \t\t Shows this text";
 
 	return 0;
 }
@@ -399,9 +399,9 @@ datepath() {
 
 	if [ -e $1`date +%F`$2 ]
 	then
-		echo $1`date +%FT%T`$3
+		echo_quiet $1`date +%FT%T`$3
 	else
-		echo $1`date +%F`$3
+		echo_quiet $1`date +%F`$3
 	fi
 }
 
@@ -430,7 +430,7 @@ mc_start() {
 		seconds=$seconds+1
 		if [[ $seconds -eq 5 ]]
 		then
-			echo "Still not running, waiting a while longer..."
+			echo_info "Still not running, waiting a while longer..."
 		fi
 		if [[ $seconds -ge 120 ]]
 		then
@@ -438,7 +438,7 @@ mc_start() {
 			exit 1
 		fi
 	done
-	echo "$SERVICE is running."
+	echo_out "$SERVICE is running."
 }
 
 
@@ -455,13 +455,13 @@ mc_command() {
 mc_saveoff() {
 	if is_running
 	then
-		echo "$SERVICE is running... suspending saves"
+		echo_out "$SERVICE is running... suspending saves"
 		mc_command save-off
 		mc_command save-all
 		sync
 		sleep 10
 	else
-		echo "$SERVICE was not running. Not suspending saves."
+		echo_info "$SERVICE was not running. Not suspending saves."
 	fi
 }
 
@@ -469,10 +469,10 @@ mc_saveoff() {
 mc_saveon() {
 	if is_running
 	then
-		echo "$SERVICE is running... re-enabling saves"
+		echo_out "$SERVICE is running... re-enabling saves"
 		mc_command save-on
 	else
-		echo "$SERVICE was not running. Not resuming saves."
+		echo_out "$SERVICE was not running. Not resuming saves."
 	fi
 }
 
@@ -480,7 +480,7 @@ mc_saveon() {
 mc_say() {
 	if is_running
 	then
-		echo "Said: $1"
+		echo_info "Said: $1"
 		mc_command "say $1"
 	else
 		echo_err "$SERVICE was not running. Not able to say anything."
@@ -493,10 +493,10 @@ mc_stop() {
 	#
 	# Stops the server
 	#
-	echo "Saving worlds..."
+	echo_info "Saving worlds..."
 	mc_command save-all
 	sleep 10
-	echo "Stopping server..."
+	echo_out "Stopping server..."
 	mc_command stop
 	sleep 0.5
 	#
@@ -510,7 +510,7 @@ mc_stop() {
 		seconds=$seconds+1
 		if [[ $seconds -eq 5 ]]
 		then
-			echo "Still not shut down, waiting a while longer..."
+			echo_info "Still not shut down, waiting a while longer..."
 		fi
 		if [[ $seconds -ge 120 ]]
 		then
@@ -522,12 +522,12 @@ mc_stop() {
 	as_user "rm $pidfile"
 	unset isInStop
 	is_running
-	echo "$SERVICE is now shut down."
+	echo_out "$SERVICE is now shut down."
 }
 
 
 mc_reload() {
-        echo "$SERVICE is running... reloading."
+        echo_out "$SERVICE is running... reloading."
         mc_command reload
 }
 
@@ -622,14 +622,14 @@ get_worlds() {
 
 mc_whole_backup() {
 	check_backup_settings
-	echo "backing up entire setup into $WHOLEBACKUP"
+	echo_out "backing up entire setup into $WHOLEBACKUP"
 	path=`datepath $WHOLEBACKUP/mine_`
 	locationOfScript=$(dirname "$(readlink -e "$0")")
 	as_user "mkdir -p $path"
 
 	if [ -r "$locationOfScript/exclude.list" ]
 	then
-		echo "...except the following files and/or dirs:"
+		echo_out "...except the following files and/or dirs:"
 		cat $locationOfScript/exclude.list
 		exclude="$EXCLUDEARG$locationOfScript/exclude.list"
 	fi
@@ -656,13 +656,13 @@ mc_world_backup() {
 	if [ "$BACKUPSCRIPTCOMPATIBLE" ]
 	then
 		# If it is enabled, then delete the old backups to prevent errors
-		echo "Detected that backup script compatibility is enabled, deleting old backups that are not necessary."
+		echo_out "Detected that backup script compatibility is enabled, deleting old backups that are not necessary."
 		as_user "rm -r $BACKUPPATH/*"
 	fi
 
 	for INDEX in ${!WORLDNAME[@]}
 	do
-		echo "Backing up minecraft ${WORLDNAME[$INDEX]}"
+		echo_out "Backing up minecraft ${WORLDNAME[$INDEX]}"
 		if [ "$WORLDEDITCOMPATIBLE" ]
 		# If this is set tars will be created compatible to WorldEdit
 		then
@@ -701,14 +701,14 @@ check_links() {
 				then
 					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
 					as_user "ln -s $RAMDISK/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
-					echo "Created link for ${WORLDNAME[$INDEX]}"
+					echo_out "Created link for ${WORLDNAME[$INDEX]}"
 				fi
 			else
 				if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$INDEX]}" ]
 				then
 					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
 					as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
-					echo "Created link for ${WORLDNAME[$INDEX]}"
+					echo_out "Created link for ${WORLDNAME[$INDEX]}"
 				fi
 			fi
 		else
@@ -730,7 +730,7 @@ to_ram() {
 			then
 				as_user "mkdir -p $RAMDISK"
 				as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}/ $RAMDISK/${WORLDNAME[$INDEX]}"
-				echo "${WORLDNAME[$INDEX]} copied to ram"
+				echo_out "${WORLDNAME[$INDEX]} copied to ram"
 			fi
 		fi
 	done
@@ -744,7 +744,7 @@ to_disk() {
 		if ${WORLDRAM[$INDEX]}
 		then
 			as_user "rsync -rt --exclude 'ramdisk' $MCPATH/${WORLDNAME[$INDEX]}/ ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}"
-			echo "${WORLDNAME[$INDEX]} copied to disk"
+			echo_out "${WORLDNAME[$INDEX]} copied to disk"
 		fi
 	done
 }
@@ -753,17 +753,17 @@ to_disk() {
 check_update_vanilla() {
 	MC_SERVER_URL=`wget -q -O - https://minecraft.net/download/server | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")'`
 
-	echo "Checking for update for minecraft_server.jar (Vanilla)"
+	echo_out "Checking for update for minecraft_server.jar (Vanilla)"
 	as_user "cd $MCPATH && wget -q -O $MCPATH/minecraft_server.jar.update $MC_SERVER_URL"
 
 	if [ -r "$MCPATH/minecraft_server.jar.update" ]
 	then
 		if `diff $MCPATH/$MC_JAR $MCPATH/minecraft_server.jar.update >/dev/null`
 		then
-			echo "You are already running the latest version of minecraft_server.jar."
+			echo_out "You are already running the latest version of minecraft_server.jar."
 			return 1
 		else
-			echo "Update of $MC_JAR is needed."
+			echo_out "Update of $MC_JAR is needed."
 			return 0
 		fi
 	else
@@ -777,17 +777,17 @@ get_cb_release_channel() {
 
 	case $CB_RELEASE in
 		unstable|UNSTABLE|Unstable|dev|development)
-			echo $CB_URL"dev/craftbukkit.jar"
+			echo_quiet $CB_URL"dev/craftbukkit.jar"
 		;;
 
 
 		beta|Beta|BETA)
-			echo $CB_URL"beta/craftbukkit.jar"
+			echo_quiet $CB_URL"beta/craftbukkit.jar"
 		;;
 
 
 		*)
-			echo $CB_URL"rb/craftbukkit.jar"
+			echo_quiet $CB_URL"rb/craftbukkit.jar"
 		;;
 
 
@@ -796,18 +796,18 @@ get_cb_release_channel() {
 
 
 check_update_craftbukkit() {
-	echo "Checking for update for craftbukkit.jar"
-	echo "You are on release channel \"$CB_RELEASE\""
+	echo_info "Checking for update for craftbukkit.jar"
+	echo_info "You are on release channel \"$CB_RELEASE\""
 
 	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.jar.update $(get_cb_release_channel)"
 	if [ -r "$MCPATH/craftbukkit.jar.update" ]
 	then
 		if `diff $MCPATH/$CB_JAR $MCPATH/craftbukkit.jar.update >/dev/null`
 		then
-			echo "You are already running the latest version of craftbukkit.jar."
+			echo_info "You are already running the latest version of craftbukkit.jar."
 			return 1
 		else
-			echo_err "Update of $CB_JAR is needed."
+			echo_out "Update of $CB_JAR is needed."
 			return 0
 		fi
 	else
@@ -826,12 +826,12 @@ mc_update() {
 			if [ -r "$MCPATH/minecraft_server.jar.update" ]
 			then
 				as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR"
-				echo "Thats it. Update of $MC_JAR done."
+				echo_out "Thats it. Update of $MC_JAR done."
 			else
 				echo_err "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
 			fi
 		else
-			echo "Not updating $MB_JAR. It's not necessary"
+			echo_out "Not updating $MB_JAR. It's not necessary"
 			as_user "rm $MCPATH/minecraft_server.jar.update"
 		fi
 
@@ -840,12 +840,12 @@ mc_update() {
 			if [ -r "$MCPATH/craftbukkit.jar.update" ]
 			then
 				as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR"
-				echo "Thats it. Update of $CB_JAR done."
+				echo_out "Thats it. Update of $CB_JAR done."
 			else
 				echo_err "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
 			fi
 		else
-			echo "Not updating $CB_JAR. It's not necessary"
+			echo_out "Not updating $CB_JAR. It's not necessary"
 			as_user "rm $MCPATH/craftbukkit.jar.update"
 		fi
 	fi
@@ -862,12 +862,12 @@ change_ramdisk_state() {
 	if [ -e $WORLDSTORAGE/$1/ramdisk ]
 	then
 		rm $WORLDSTORAGE/$1/ramdisk
-		echo "Removed ramdisk flag from \"$1\""
+		echo_out "Removed ramdisk flag from \"$1\""
 	else
 		touch $WORLDSTORAGE/$1/ramdisk
-		echo "Added ramdisk flag to \"$1\""
+		echo_out "Added ramdisk flag to \"$1\""
 	fi
-	echo "Changes will only take effect after server is restarted."
+	echo_out "Changes will only take effect after server is restarted."
 }
 
 
@@ -879,7 +879,7 @@ overviewer_start() {
 						echo_err "Minecraft-Overviewer is not installed in \"$OVPATH\""
 						exit 1
 				else
-						echo "Using APT repository installed Minecraft-Overviewer"
+						echo_out "Using APT repository installed Minecraft-Overviewer"
 				fi
 		fi
 		if [ ! -e $OUTPUTMAP ]
@@ -888,28 +888,28 @@ overviewer_start() {
 		fi
 		if [ -e $OVCONFIGPATH/$OVCONFIGNAME ]
 		then
-				echo "Start generating map with Minecraft-Overviewer..."
+				echo_out "Start generating map with Minecraft-Overviewer..."
 				if [ "$OVPATH" == "apt" ]
 				then
 						as_user "overviewer.py --config=$OVCONFIGPATH/$OVCONFIGNAME"
 				else
 						as_user "python $OVPATH/overviewer.py --config=$OVCONFIGPATH/$OVCONFIGNAME"
 				fi
-				echo "Map generated."
+				echo_out "Map generated."
 		else
 				echo_err "No config file found. Start with default config..."
 				if [ -z $1 ] || [ ! -e $OVBACKUP/$1 ]
 				then
-						echo "World \"$1\" not found."
+						echo_err "World \"$1\" not found."
 				else
-						echo "Start generating map with Minecraft-Overviewer..."
+						echo_out "Start generating map with Minecraft-Overviewer..."
 						if [ "$OVPATH" == "apt" ]
 						then
 								as_user "nice overviewer.py $OVBACKUP/$1 $OUTPUTMAP"
 						else
 								as_user "nice python $OVPATH/overviewer.py $OVBACKUP/$1 $OUTPUTMAP"
 						fi
-						echo "Map generated."
+						echo_out "Map generated."
 				fi
 		fi
 }
@@ -923,7 +923,7 @@ overviewer_copy_worlds() {
 	get_worlds
 	for INDEX in ${!WORLDNAME[@]}
 	do
-		echo "Copying minecraft ${WORLDNAME[$INDEX]}."
+		echo_out "Copying minecraft ${WORLDNAME[$INDEX]}."
 		as_user "mkdir -p $OVBACKUP"
 		as_user "rsync -rt --delete $WORLDSTORAGE/${WORLDNAME[$INDEX]} $OVBACKUP/${WORLDNAME[$INDEX]}"
 	done
@@ -935,19 +935,19 @@ whitelist(){
 	sleep 1s
 	whitelist=$(tac $SERVERLOG | grep -m 1 "White-listed players:")
 
-	echo
-	echo "Currently there are the following players on your whitelist:"
-	echo
-	echo ${whitelist:49} | sed 's/, /\n/g'
+	echo_out
+	echo_out "Currently there are the following players on your whitelist:"
+	echo_out
+	echo_quiet ${whitelist:49} | sed 's/, /\n/g'
 }
 
 
 force_exit() {  # Kill the server running (messily) in an emergency
-	echo ""
-	echo "SIGINIT CALLED - FORCE EXITING!"
+	echo_out ""
+	echo_out "SIGINIT CALLED - FORCE EXITING!"
 	pidfile=${MCPATH}/${SCREEN}.pid
 	rm $pidfile
-	echo "KILLING SERVER PROCESSES!!!"
+	echo_out "KILLING SERVER PROCESSES!!!"
 		# Display which processes are being killed
 		ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
 		ps aux | grep -e 'SCREEN -dmS minecraft java' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
@@ -963,7 +963,7 @@ force_exit() {  # Kill the server running (messily) in an emergency
 
 
 get_script_location() {
-	echo $(dirname "$(readlink -e "$0")")
+	echo_quiet $(dirname "$(readlink -e "$0")")
 }
 
 
@@ -999,7 +999,7 @@ function route_command() {
 		start)
 			# Starts the server
 			if is_running; then
-				echo "Server already running."
+				echo_out "Server already running."
 			else
 				check_links
 				to_ram
@@ -1015,7 +1015,7 @@ function route_command() {
 				mc_stop
 				to_disk
 			else
-				echo "No running server."
+				echo_out "No running server."
 			fi
 			;;
 
@@ -1027,7 +1027,7 @@ function route_command() {
 				mc_stop
 				to_disk
 			else
-				echo "No running server, starting it..."
+				echo_out "No running server, starting it..."
 			fi
 			check_links
 			to_ram
@@ -1039,7 +1039,7 @@ function route_command() {
 							mc_say "Reloading server configuration.."
 							mc_reload
 					else
-							echo "No running server."
+							echo_out "No running server."
 					fi
 					;;
 
@@ -1048,7 +1048,7 @@ function route_command() {
 			if is_running; then
 				whitelist
 			else
-				echo "Server not running."
+				echo_out "Server not running."
 			fi
 			;;
 
@@ -1058,7 +1058,7 @@ function route_command() {
 			if is_running; then
 				mc_command "whitelist reload"
 			else
-				echo "No running server."
+				echo_out "No running server."
 			fi
 			;;
 
@@ -1068,7 +1068,7 @@ function route_command() {
 			if is_running; then
 				mc_command "whitelist add $INIT_SUBCOMMAND"
 			else
-				echo "No running server."
+				echo_out "No running server."
 			fi
 			;;
 
@@ -1144,7 +1144,7 @@ function route_command() {
 			if is_running; then
 				mc_saveoff
 			else
-				echo "Server was not running, syncing from ram anyway..."
+				echo_out "Server was not running, syncing from ram anyway..."
 			fi
 			to_disk
 			;;
@@ -1155,7 +1155,7 @@ function route_command() {
 			if is_running; then
 				mc_saveon
 			else
-				echo "No running server."
+				echo_out "No running server."
 			fi
 			;;
 
@@ -1166,7 +1166,7 @@ function route_command() {
 				shift 1
 				mc_say "$INIT_SUBCOMMAND"
 			else
-				echo "No running server to say anything."
+				echo_out "No running server to say anything."
 			fi
 			;;
 
@@ -1175,9 +1175,9 @@ function route_command() {
 			if is_running; then
 				shift 1
 				mc_command "$INIT_SUBCOMMAND"
-				echo "Sent command: \"$INIT_SUBCOMMAND\"";
+				echo_out "Sent command: \"$INIT_SUBCOMMAND\"";
 			else
-				echo "No running server to send a command to."
+				echo_out "No running server to send a command to."
 			fi
 			;;
 
@@ -1236,7 +1236,7 @@ function route_command() {
 
 		last)
 			# Greps for recently logged in users
-			echo Recently logged in users:
+			echo_info "Recently logged in users:";
 			cat $SERVERLOG | awk '/entity|conn/ {sub(/lost/,"disconnected");print $1,$2,$4,$5}'
 			;;
 
@@ -1245,9 +1245,9 @@ function route_command() {
 			# Shows server status
 			if is_running
 			then
-				echo "$SERVICE is running."
+				echo_quiet "$SERVICE is running."
 			else
-				echo "$SERVICE is not running."
+				echo_quiet "$SERVICE is not running."
 			fi
 			;;
 
@@ -1256,7 +1256,7 @@ function route_command() {
 			# Ensures server is still running
 			if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
 			then
-				echo "$SERVICE is running."
+				echo_out "$SERVICE is running."
 			else
 				mc_stop
 				mc_start
@@ -1269,7 +1269,7 @@ function route_command() {
 				mc_command version
 				tac $SERVERLOG | grep -m 1 "This server is running"
 			else
-				echo "The server needs to be running to check version."
+				echo_out "The server needs to be running to check version."
 			fi
 			;;
 
@@ -1290,9 +1290,9 @@ function route_command() {
 			do
 				if ${WORLDRAM[$INDEX]}
 				then
-					echo "${WORLDNAME[$INDEX]} (ramdisk)"
+					echo_quiet "${WORLDNAME[$INDEX]} (ramdisk)"
 				else
-					echo ${WORLDNAME[$INDEX]}
+					echo_quiet ${WORLDNAME[$INDEX]}
 				fi
 			done
 			;;
@@ -1317,8 +1317,8 @@ function route_command() {
 			if is_running; then
 				as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
 			else
-			echo "Server is not running. Do you want to start it?"
-			echo "Please put \"Yes\", or \"No\": "
+			echo_info "Server is not running. Do you want to start it?"
+			echo_quiet "Please put \"Yes\", or \"No\": "
 			read START_SERVER
 			case "$START_SERVER" in
 				[Yy]|[Yy][Ee][Ss])
@@ -1356,8 +1356,8 @@ function route_command() {
 			WIDTH=`stty size | cut -d ' ' -f 2`            # Get terminal's character width
 			pstree | grep MDSImporte | cut -c 1-${WIDTH}   # Chop output after WIDTH chars
 
-			echo "Killing the server is an EMERGENCY procedure, and should not be used to perform a normal shutdown! All changes younger than 15 minutes could be permanantly lost and WORLD CORRUPTION is possible! Are you ABSOLUTELY POSITIVE this is what you want to do?"
-			echo "Please put \"Yes\", or \"No\": "
+			echo_out "Killing the server is an EMERGENCY procedure, and should not be used to perform a normal shutdown! All changes younger than 15 minutes could be permanantly lost and WORLD CORRUPTION is possible! Are you ABSOLUTELY POSITIVE this is what you want to do?"
+			echo_quiet "Please put \"Yes\", or \"No\": "
 			read KILL_SERVER
 			case "$KILL_SERVER" in  # Determine which option was specified
 				[Yy]|[Yy][Ee][Ss])      # If yes, kill the server
