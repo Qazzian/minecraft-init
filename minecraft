@@ -293,7 +293,6 @@ function handle_commandline_options {
 }
 
 
-
 ## output supported commands
 function echo_usage {
 	echo_quiet "Usage: $(basename "$0") [<options>] <command>";
