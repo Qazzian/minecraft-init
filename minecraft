@@ -1412,7 +1412,7 @@ function route_command() {
 
 
 				*)
-					echo_err "No such command as '$SELF $INIT_COMMAND $INIT_SUBCOMMAND'; quitting";
+					echo_err "No such command as '$(basename "$0") $INIT_COMMAND $INIT_SUBCOMMAND'; quitting";
 					echo_out;
 					echo_usage_check;
 					return 1
