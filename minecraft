@@ -178,23 +178,6 @@ function echoerr() {
 
 
 
-## output supported commands
-function echo_usage_check {
-	echo_quiet "Usage: $SELF [options] check <command>";
-	echo_quiet;
-	echo_quiet "Options:";
-	echo_quiet "   Run '$SELF help' for more information";
-	echo_quiet;
-	echo_quiet "Where <command> is one of:";
-	echo_quiet "   config   Tests that the current config is valid, and all files can be reached";
-	echo_quiet "   update   Checks for updates to MineCraft and CraftBukkit";
-	echo_quiet "   help     Shows this text";
-
-	return 0;
-}
-
-
-
 ########
 # Output the given message as appropriate, if appropriate
 #
@@ -351,6 +334,22 @@ function echo_usage {
 	echo_out "   screen \t\t Shows the server screen";
 	echo_out "   script-version        Show this script's version";
 	echo_out "   help \t\t Shows this text";
+
+	return 0;
+}
+
+
+## output supported commands
+function echo_usage_check {
+	echo_quiet "Usage: $(basename "$0") [options] check <command>";
+	echo_quiet;
+	echo_quiet "Options:";
+	echo_quiet "   Run '$(basename "$0") help' for more information";
+	echo_quiet;
+	echo_quiet "Where <command> is one of:";
+	echo_quiet "   config   Tests that the current config is valid, and all files can be reached";
+	echo_quiet "   update   Checks for updates to MineCraft and CraftBukkit";
+	echo_quiet "   help     Shows this text";
 
 	return 0;
 }
