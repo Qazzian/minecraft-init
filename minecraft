@@ -1800,14 +1800,28 @@ function route_command() {
 
 
 
+########
+# Reads commandline parameters, loads the config, and runs the command
+########
+function main() {
+	## read commandline options
+	handle_commandline_options "$@" || return 1;
+
+	## load defaults & user config
+	config_load || return 1;
+
+	## run the command
+	route_command "$@" || return 1;	# need to inject $@ so route_command() can pass it on
+
+	return 0;
+}
+
+
+
 ###############################################################################
 ## Run, tidy, quit
 ###############################################################################
 
 trap force_exit SIGINT
-
-handle_commandline_options "$@" || exit 1;
-config_load || exit 1;
-route_command "$@" || exit 1;	# need to inject $@ so route_command() can pass it on
-
+main "$@" || exit 1;
 exit 0;
