@@ -340,6 +340,13 @@ function handle_commandline_options {
 
 ## load all config files, and test
 function config_load() {
+	## load default config
+	config_load_defaults || {
+		echo_err "Can't load default config; crashing";
+		exit 1;
+	}
+
+
 	## load local config
 	config_load_local || {
 		echo_err "Can't load local config ($CONFIG_FILE); crashing";
@@ -357,6 +364,48 @@ function config_load() {
 	## set dependant vars
 	INVOCATION="java -Xmx$MAXMEM -Xms$INITMEM -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_COUNT -XX:+AggressiveOpts -jar $SERVICE nogui";
 
+
+	return 0;
+}
+
+
+## initialise all configs to default values
+function config_load_defaults() {
+	## config MineCraft
+	MC_JAR="minecraft_server.jar";
+	CB_JAR="craftbukkit.jar";
+	CB_RELEASE="stable";
+	SERVICE="$MC_JAR";
+	MCPATH="/usr/lib/minecraft";
+	SERVERLOG="${MCPATH}/logs/latest.log";
+	WORLDSTORAGE="/var/lib/minecraft/data";
+
+	## config minecraftd
+	SCREEN="server_screen";
+	USERNAME="minecraft";
+
+	## hardware
+	CPU_COUNT=2;
+	INITMEM="2048M";
+	MAXMEM="2048M";
+	RAMDISK="/dev/shm";
+
+	## backups
+	BACKUPPATH="${MCPATH}/backup/world";
+	WHOLEBACKUP="${MCPATH}/backup/server";
+	BACKUPFORMAT="tar";
+	BACKUPSCRIPTCOMPATIBLE=YES;
+	COMPRESS_WHOLEBACKUP=YES;
+
+	## logging
+	LOGPATH="/var/log/minecraft";
+
+	## config MineCraft-Overviewer
+	OUTPUTMAP="/home/${USERNAME}/mc-overviewer/render";
+	OVPATH="/home/${USERNAME}/mc-overviewer/Minecraft-Overviewer";
+	OVCONFIGPATH="/home/${USERNAME}/mc-overviewer";
+	OVCONFIGNAME="config.py";
+	OVBACKUP="/home/${USERNAME}/mc-overviewer/overviewerbackups";
 
 	return 0;
 }
