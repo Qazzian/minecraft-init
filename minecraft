@@ -351,7 +351,21 @@ function handle_commandline_options {
 }
 
 
-## load all config files, and test
+
+########
+# Loads defaults, loads (selected?) config file, and sets derived params
+#
+# Globals
+#	CONFIG_FILE		Location of local config file; used in error message
+#	INVOCATION		Command-string to start the server
+#	SERVICE			Jar to run; used to test config is loaded
+#
+# Arguments
+#	None
+#
+# Returns
+#	None
+########
 function config_load() {
 	## load default config
 	config_load_defaults || {
@@ -382,7 +396,19 @@ function config_load() {
 }
 
 
-## initialise all configs to default values
+
+########
+# Initialises all configs to sensible default values; template for local config file
+#
+# Globals
+#	Lots
+#
+# Arguments
+#	None
+#
+# Returns
+#	None
+########
 function config_load_defaults() {
 	## config MineCraft
 	MC_JAR="minecraft_server.jar";
@@ -424,7 +450,19 @@ function config_load_defaults() {
 }
 
 
-## load ./config
+
+########
+# Loads local config file
+#
+# Globals
+#	CONFIG_FILE		Location of file to load; set at commandline
+#
+# Arguments
+#	None
+#
+# Returns
+#	None
+########
 function config_load_local() {
 	## check file exists
 	if [ ! -f "$CONFIG_FILE" ] || [ ! -r "$CONFIG_FILE" ] ; then
