@@ -85,7 +85,7 @@ VERBOSITY=$VERBOSITY_DEFAULT;
 # Output the current version of MineCraft-Init
 ########
 function echo_mci_version() {
-	echo_quiet '2.7.1';
+	echo_quiet '2.7.2';
 	return 0;
 }
 

@@ -3,18 +3,20 @@ Init script for minecraft/bukkit servers
 A init script that apart from starting and stopping the server correctly also has some extra features
 for running a mincraft/craftbukkit server.
 
+
 Features
 --------
-
  * Utilization of ramdisk for world data, decreases lag when getting world chunks
  * Cleaning of server.log, a big log file slows down the server
  * Backup for worlds
  * Server updating and complete backup
  * Exclude files and directories from full backup by adding them to "exclude.list"
 
+
 Requirements
 ------------
-screen, rsync
+screen, rsync, logrotate
+
 
 Access server console
 =====================
@@ -22,8 +24,9 @@ Access server console
 	screen -r minecraft
 
 Exit the console
-	
+
 	Ctrl+A D
+
 
 Setup
 =====
@@ -41,7 +44,7 @@ Setup
 4. Edit crontab
 
 	As the server user:
-	
+
 		crontab -e
 
 	Add these lines:
@@ -55,7 +58,7 @@ Setup
 5. To load a world from ramdisk run:
 
 		/etc/init.d/minecraft ramdisk WORLDNAME
-	
+
 	to disable ramdisk, run the same command again.
 
 
@@ -63,7 +66,9 @@ For more help with the script, run
 
 	/etc/init.d/minecraft help
 
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=Ahtenus&url=https://github.com/Ahtenus/minecraft-init&title=minecraft-init&language=en_GB&tags=github&category=software) 
+
+[![Flattr the original author!](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=Ahtenus&url=https://github.com/Ahtenus/minecraft-init&title=minecraft-init&language=en_GB&tags=github&category=software) 
+
 
 Good stuff
 ==========
