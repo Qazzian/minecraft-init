@@ -36,6 +36,10 @@ set -e;	# exit on error
 ###############################################################################
 
 
+## name of the current script
+export readonly SELF="$(basename "$0")";
+
+
 ## Quiet		:= no output
 readonly export VERBOSITY_QUIET=-1;
 
@@ -253,7 +257,7 @@ function log_debug()	{ log_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 
 ## output supported commands
 function echo_usage {
-	echo_quiet "Usage: $(basename "$0") [<options>] <command>";
+	echo_quiet "Usage: $SELF [<options>] <command>";
 	echo_out;
 	echo_out "Where <options> is zero or more of:";
 	echo_out "   -c <file>     Config. Loads the given config file. Default is $(dirname "$0")/config";
@@ -1783,7 +1787,7 @@ function route_command() {
 
 
 		*)
-			echo_err "No such command as '$(basename "$0") $INIT_COMMAND'; quitting";
+			echo_err "No such command as '$SELF $INIT_COMMAND'; quitting";
 			echo;
 			echo_usage;
 			exit 1
