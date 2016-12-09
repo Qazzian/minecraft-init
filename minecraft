@@ -23,8 +23,21 @@
 
 
 ###############################################################################
+## Bootstrap
+###############################################################################
+
+set -u;	# error on undeclared var
+set -e;	# exit on error
+
+
+
+###############################################################################
 ## Define constants
 ###############################################################################
+
+
+## name of the current script
+export readonly SELF="$(basename "$0")";
 
 
 ## Quiet		:= no output
@@ -72,7 +85,7 @@ VERBOSITY=$VERBOSITY_DEFAULT;
 # Output the current version of MineCraft-Init
 ########
 function echo_mci_version() {
-	echo_quiet '2.7.0';
+	echo_quiet '2.7.1';
 	return 0;
 }
 
@@ -244,7 +257,7 @@ function log_debug()	{ log_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 
 ## output supported commands
 function echo_usage {
-	echo_quiet "Usage: $(basename "$0") [<options>] <command>";
+	echo_quiet "Usage: $SELF [<options>] <command>";
 	echo_out;
 	echo_out "Where <options> is zero or more of:";
 	echo_out "   -c <file>     Config. Loads the given config file. Default is $(dirname "$0")/config";
@@ -1774,7 +1787,7 @@ function route_command() {
 
 
 		*)
-			echo_err "No such command as '$(basename "$0") $INIT_COMMAND'; quitting";
+			echo_err "No such command as '$SELF $INIT_COMMAND'; quitting";
 			echo;
 			echo_usage;
 			exit 1
@@ -1787,17 +1800,28 @@ function route_command() {
 
 
 
+########
+# Reads commandline parameters, loads the config, and runs the command
+########
+function main() {
+	## read commandline options
+	handle_commandline_options "$@" || return 1;
+
+	## load defaults & user config
+	config_load || return 1;
+
+	## run the command
+	route_command "$@" || return 1;	# need to inject $@ so route_command() can pass it on
+
+	return 0;
+}
+
+
+
 ###############################################################################
 ## Run, tidy, quit
 ###############################################################################
 
-
 trap force_exit SIGINT
-
-
-handle_commandline_options "$@" || exit 1;
-config_load || exit 1;
-route_command "$@" || exit 1;	# need to inject $@ so route_command() can pass it on
-
-
-exit 0
+main "$@" || exit 1;
+exit 0;
