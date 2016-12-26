@@ -1325,21 +1325,22 @@ function mc_update() {
 
 
 function change_ramdisk_state() {
-	if [ ! -e $WORLDSTORAGE/$1 ]
-	then
-		echo_err "World \"$1\" not found."
-		exit 1
+	if [ ! -e "$WORLDSTORAGE/$1" ]; then
+		echo_err "World \"$1\" not found; quitting";
+		return 1;
 	fi
 
-	if [ -e $WORLDSTORAGE/$1/ramdisk ]
-	then
-		rm $WORLDSTORAGE/$1/ramdisk
-		echo_out "Removed ramdisk flag from \"$1\""
+	if [ -e "$WORLDSTORAGE/$1/ramdisk" ]; then
+		rm "$WORLDSTORAGE/$1/ramdisk";
+		echo_out "Removed ramdisk flag from \"$1\"";
 	else
-		touch $WORLDSTORAGE/$1/ramdisk
-		echo_out "Added ramdisk flag to \"$1\""
+		touch "$WORLDSTORAGE/$1/ramdisk";
+		echo_out "Added ramdisk flag to \"$1\"";
 	fi
-	echo_out "Changes will only take effect after server is restarted."
+
+	echo_out "Changes will only take effect after server is restarted";
+
+	return 0;
 }
 
 
