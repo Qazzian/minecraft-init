@@ -1886,6 +1886,12 @@ function route_command() {
 			;;
 
 
+		check-update)
+			echo_err "'$SELF check-update' is deprecated; please call '$SELF check update' instead";
+			return 1;
+			;;
+
+
 		update)
 			#update minecraft_server.jar and craftbukkit.jar (thanks karrth)
 			if is_running; then
