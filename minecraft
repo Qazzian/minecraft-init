@@ -1214,14 +1214,14 @@ function check_update_craftbukkit() {
 mc_update() {
 	if is_running
 	then
-		echo_err "$SERVICE is running! Will not start update."
+		echo_err "$SERVICE is running! Will not start update";
 	else
 		if check_update_vanilla
 		then
 			if [ -r "$MCPATH/minecraft_server.jar.update" ]
 			then
 				as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR"
-				echo_out "Thats it. Update of $MC_JAR done."
+				echo_out "Thats it. Update of $MC_JAR done";
 			else
 				echo_err "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
 			fi
@@ -1235,7 +1235,7 @@ mc_update() {
 			if [ -r "$MCPATH/craftbukkit.jar.update" ]
 			then
 				as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR"
-				echo_out "Thats it. Update of $CB_JAR done."
+				echo_out "Thats it. Update of $CB_JAR done";
 			else
 				echo_err "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
 			fi
