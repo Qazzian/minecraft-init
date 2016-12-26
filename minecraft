@@ -674,6 +674,7 @@ function mc_start() {
 #
 # Globals
 #	SCREEN		Name of Screen session to command
+#	USERNAME	mc_command() will only run for user $USERNAME
 #
 # Arguments
 #	1			String to say
@@ -686,8 +687,8 @@ function mc_command() {
 
 
 	if ! is_running; then
-		echo_out "Server is not running; skipping";
-		return 0;
+		echo_err "Not able to run command as the server is not running; quitting";
+		return 1;
 	fi
 
 
@@ -701,7 +702,10 @@ function mc_command() {
 	fi;
 
 
-	as_user "screen -p 0 -S $SCREEN -X stuff \"$1\"\\\015" || return 1;
+	as_user "screen -p 0 -S $SCREEN -X stuff \"$1\"\\\015" || {
+		echo_err "Daemon returned error #$? when given '$1'; quitting";
+		return 1;
+	}
 
 
 	return 0;
