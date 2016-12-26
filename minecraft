@@ -889,37 +889,85 @@ function check_backup_settings() {
 }
 
 
+
+########
+# Rotates & compresses the server's log (latest.log) to a named directory and rotates older logs
+#
+# Globals
+#	ARCHIVEENDING	What to name the backup-log; should suit $COMPRESSCMD; set from $BACKUPFORMAT
+#	COMPRESSCMD		What to compress the backup-log with; set from $BACKUPFORMAT
+#	LOGPATH			Where to put the backup-log, named logs_*
+#	MCPATH			Where to find the server-log, e.g. $MCPATH/*.log
+#
+# Arguments
+#	None
+#
+# Returns
+#	0				On success
+#	1				On failure
+########
 function log_roll() {
-	# Moves the logfiles and compresses that backup directory
-	check_backup_settings
-	path=`datepath $LOGPATH/logs_ $ARCHIVEENDING`
-	as_user "mkdir -p $path"
+	check_backup_settings || return 1;
 
-	shopt -s extglob
-	for FILE in $(ls $MCPATH/*.log)
-	do
-		as_user "cp $FILE $path"
-		# only if previous command was successful
-		if [ $? -eq 0 ]; then
-			if [[ "$FILE" = @(*-+([0-9]).log) && "$FILE" = !(*-0.log) ]]
-			# some mods already roll logs. remove all but the most recent file
-			# which ends with -0.log
-			then
-				as_user "rm $FILE"
-			else
-			# truncate the existing log without restarting server
-				as_user "cp /dev/null $FILE"
-				as_user "echo \"Previous logs rolled to $path\" > $FILE"
-			fi
-		else
-			echo_err "Failed to rotate log from $FILE into $path"
-		fi
-	done
 
-	as_user "$COMPRESSCMD $path$ARCHIVEENDING $path"
-	if [ $? -eq 0 ]; then
-		as_user "rm -r $path"
-	fi
+	## init vars
+	local path;
+
+
+	## make a dir for the output
+	readonly path="$(datepath "$LOGPATH/logs_" "$ARCHIVEENDING")";
+	if [ ! -d "$path" ]; then
+		as_user "mkdir -p $path";
+	fi;
+	if [ ! -d "$path" ]; then
+		echo_err "Failed to make $path; quitting...";
+		return 1;
+	fi;
+
+
+	## loop over logs in MCPATH/
+	shopt -s extglob;
+	shopt -s nullglob;	# if no files, loop 0 times
+	local file;
+	for file in $MCPATH/*.log; do
+
+
+		## copy
+		as_user "cp $file $path" || {
+			echo_err "Failed to rotate log from $file into $path; quitting";
+			return 1;
+		}
+
+
+		# some mods already roll logs. remove all but the most recent file
+		# which ends with -0.log
+		if [[ "$file" = @(*-+([0-9]).log) && "$file" = !(*-0.log) ]]; then
+			as_user "rm $file";
+			continue;
+		fi;
+
+
+		## truncate the existing log without restarting server
+		as_user "cp /dev/null $file";
+		as_user "echo \"Previous logs rolled to $path\" > $file";
+	done;
+
+
+	## compress
+	as_user "$COMPRESSCMD $path$ARCHIVEENDING $path" || {
+		echo_err "Failed to compress $path; quitting";
+		return 1;
+	}
+
+
+	## tidy
+	as_user "rm -r $path" || {
+		echo_err "Failed to delete old log from $path; quitting";
+		return 1;
+	}
+
+
+	return 0;
 }
 
 
