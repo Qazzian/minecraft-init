@@ -1136,19 +1136,18 @@ function check_links() {
 
 
 function to_ram() {
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		if ${WORLDRAM[$INDEX]}
-		then
-			if [ -L $MCPATH/${WORLDNAME[$INDEX]} ]
-			then
-				as_user "mkdir -p $RAMDISK"
-				as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}/ $RAMDISK/${WORLDNAME[$INDEX]}"
-				echo_out "${WORLDNAME[$INDEX]} copied to ram"
-			fi
+	get_worlds || return 1;
+	for INDEX in "${!WORLDNAME[@]}"; do
+		if ! ( ${WORLDRAM[$INDEX]} && [ -L "$MCPATH/${WORLDNAME[$INDEX]}" ] ); then
+			continue;
 		fi
+
+		as_user "mkdir -p $RAMDISK";
+		as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}/ $RAMDISK/${WORLDNAME[$INDEX]}";
+		echo_out "${WORLDNAME[$INDEX]} copied to ram";
 	done
+
+	return 0;
 }
 
 
