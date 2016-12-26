@@ -832,8 +832,9 @@ function mc_stop() {
 
 
 function mc_reload() {
-        echo_out "$SERVICE is running... reloading."
-        mc_command reload
+	echo_out "$SERVICE is running... reloading";
+	mc_command 'reload' || return 1;
+	return 0;
 }
 
 
