@@ -1741,21 +1741,31 @@ function route_command() {
 	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
+	local i was_running;
+	was_running=false;
 	case "$INIT_COMMAND" in
 		start)
 			# Starts the server
 			if is_running; then
-				echo_out "Server already running."
-			else
-				check_links
-				to_ram
-				mc_start
-			fi
+				echo_out "Server already running";
+				return 0;
+			fi;
+
+			check_links || return 1;
+			to_ram
+
+			mc_start || {
+				echo_err "Failed to start; quitting";
+				return 1;
+			}
 			;;
 
 
 		stop)
-			server_stop || return 1;
+			server_stop || {
+				echo_err "Failed to stop; quitting";
+				return 1;
+			}
 			echo_out 'Server stopped';
 			;;
 
@@ -1763,69 +1773,88 @@ function route_command() {
 		restart)
 			if is_running; then
 				mc_say "SERVER REBOOTING!";
+				server_stop || return 1;
+				echo_out 'Server stopped';
 			fi;
 
-			server_stop || return 1;
-			echo_out 'Server stopped';
+			check_links || return 1;
+			to_ram;
 
-			check_links
-			to_ram
-			mc_start || return 1;
+			mc_start || {
+				echo_err "Failed to restart; quitting";
+				return 1;
+			}
 			echo_out 'Server started';
 			;;
 
 
-			reload)
-					# Reloads server configuration
-					if is_running; then
-							mc_say "Reloading server configuration.."
-							mc_reload
-					else
-							echo_out "No running server."
-					fi
-					;;
+		reload)
+			# Reloads server configuration
+			if ! is_running; then
+				echo_out "No running server; skipping";
+				return 0;
+			fi
+
+			mc_say "Reloading server configuration";
+			mc_reload || {
+				echo_err "Failed to reload config";
+				return 1;
+			}
+			;;
 
 
 		whitelist)
-			if is_running; then
-				echo_whitelist || return 1;
-			else
-				echo_out "Server not running."
+			if ! is_running; then
+				echo_out "Server not running; skipping";
+				return 0;
 			fi
+
+			whitelist || return 1;
 			;;
 
 
 		whitelist-reload)
 			# Reloads the whitelist
-			if is_running; then
-				mc_command "whitelist reload"
-			else
-				echo_out "No running server."
+			if ! is_running; then
+				echo_out "No running server; skipping";
+				return 0;
 			fi
+
+			mc_command "whitelist reload" || {
+				echo_err "Failed to reload whitelist; quitting";
+				return 1;
+			}
 			;;
 
 
 		whitelist-add)
 			# Adds a player to the whitelist
-			if is_running; then
-				mc_command "whitelist add $INIT_SUBCOMMAND"
-			else
-				echo_out "No running server."
-			fi
+			if ! is_running; then
+				echo_out "No running server; skipping";
+				return 0;
+			fi;
+
+			mc_command "whitelist add $INIT_SUBCOMMAND" || {
+				echo_err "Failed to add; quitting";
+				return 1;
+			}
 			;;
 
 
 		backup)
 			# Backups world
 			if is_running; then
-				mc_say "Backing up world."
+				was_running=true;
+				mc_say "Backing up world";
 				mc_saveoff
 				to_disk
-				mc_world_backup
+			fi;
+
+			mc_world_backup
+
+			if $was_running; then
 				mc_saveon
-				mc_say "Backup complete."
-			else
-				mc_world_backup
+				mc_say "Backup complete";
 			fi
 			;;
 
@@ -1833,15 +1862,18 @@ function route_command() {
 		whole-backup)
 			# Backup everything
 			if is_running; then
-				mc_say "COMPLETE SERVER BACKUP IN 10 SECONDS.";
+				was_running=true;
+				mc_say "COMPLETE SERVER BACKUP IN 10 SECONDS";
 				mc_say "WARNING: WILL RESTART SERVER SOFTWARE!"
 				mc_stop
 				to_disk
-				mc_whole_backup
-				check_links
+			fi;
+
+			mc_whole_backup || return 1;
+
+			if $was_running; then
+				check_links || return 1;
 				mc_start
-			else
-				mc_whole_backup
 			fi
 			;;
 
@@ -1862,7 +1894,7 @@ function route_command() {
 			fi
 
 			if ! server_stop ; then
-				echoerr "Can't update a running server; quitting...";
+				echo_err "Can't update a running server; quitting...";
 				return 1;
 			fi
 
@@ -1870,7 +1902,7 @@ function route_command() {
 			mc_update
 
 			if $was_running; then
-				check_links
+				check_links || return 1;
 				mc_start
 			fi
 			;;
@@ -1891,7 +1923,7 @@ function route_command() {
 			if is_running; then
 				mc_saveoff
 			else
-				echo_out "Server was not running, syncing from ram anyway..."
+				echo_out "Server was not running, syncing from ram anyway...";
 			fi
 			to_disk
 			;;
@@ -1899,33 +1931,34 @@ function route_command() {
 
 		save-on)
 			# Re-enables saving if it was disabled by save-off.
-			if is_running; then
-				mc_saveon
-			else
-				echo_out "No running server."
+			if ! is_running; then
+				echo_out "No running server; skipping";
+				return 0;
 			fi
+
+			mc_saveon || return 1;
 			;;
 
 
 		say)
 			# Says something to the ingame chat
-			if is_running; then
-				shift 1
-				mc_say "$INIT_SUBCOMMAND"
-			else
-				echo_out "No running server to say anything."
+			if ! is_running; then
+				echo_out "No running server; skipping";
+				return 0;
 			fi
+
+			mc_say "$INIT_SUBCOMMAND" || return 1;
 			;;
 
 
 		command)
-			if is_running; then
-				shift 1
-				mc_command "$INIT_SUBCOMMAND"
-				echo_out "Sent command: \"$INIT_SUBCOMMAND\"";
-			else
-				echo_out "No running server to send a command to."
-			fi
+			if ! is_running; then
+				echo_out "No running server; skipping";
+				return 0;
+			fi;
+
+			mc_command "$INIT_SUBCOMMAND" || return 1;
+			echo_out "Sent command: \"$INIT_SUBCOMMAND\"";
 			;;
 
 
@@ -1940,13 +1973,13 @@ function route_command() {
 
 
 		log-roll)
-			log_roll
+			log_roll || return 1;
 			;;
 
 
 		log)
 			# Display server log using 'cat'.
-			cat $SERVERLOG
+			cat "$SERVERLOG";
 			;;
 
 
@@ -1957,58 +1990,62 @@ function route_command() {
 
 		status)
 			# Shows server status
-			if is_running
-			then
-				echo_quiet "$SERVICE is running."
+			if is_running; then
+				echo_quiet "$SERVICE is running";
 			else
-				echo_quiet "$SERVICE is not running."
+				echo_quiet "$SERVICE is not running";
 			fi
 			;;
 
 
 		watchdog)
 			# Ensures server is still running
-			if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
-			then
-				echo_out "$SERVICE is running."
-			else
-				mc_stop
-				mc_start
+			if is_running; then
+				echo_out "Server is running";
+				return 0;
 			fi
-			server_stop || return 1;
-			mc_start
+
+			echo_out "Server is stopped; re-starting...";
+			server_stop && mc_start;
+
+			if ! is_running; then
+				echo_err "Failed to restart server; quitting";
+				return 1;
+			fi
+
+			echo_out "Server is running";
 			;;
 
 
 		version)
-			if is_running; then
-				mc_command version
-				tac $SERVERLOG | grep -m 1 "This server is running"
-			else
-				echo_out "The server needs to be running to check version."
-			fi
+			if ! is_running; then
+				echo_out "No running server; skipping";
+				return 0;
+			fi;
+
+			mc_command 'version' || return 1;
+			tac "$SERVERLOG" | grep -m 1 "This server is running"
 			;;
 
 
 		links)
-			check_links
+			check_links || return 1;
 			;;
 
 
 		ramdisk)
-			change_ramdisk_state $INIT_SUBCOMMAND
+			change_ramdisk_state "$INIT_SUBCOMMAND";
 			;;
 
 
 		worlds)
-			get_worlds
-			for INDEX in ${!WORLDNAME[@]}
-			do
-				if ${WORLDRAM[$INDEX]}
-				then
-					echo_quiet "${WORLDNAME[$INDEX]} (ramdisk)"
+			get_worlds || return 1;
+			echo_info "Found ${#WORLDNAME[@]} world(s) in $WORLDSTORAGE:";
+			for i in "${!WORLDNAME[@]}"; do
+				if ${WORLDRAM[$i]}; then
+					echo_quiet "${WORLDNAME[$i]} (ramdisk)"
 				else
-					echo_quiet ${WORLDNAME[$INDEX]}
+					echo_quiet "${WORLDNAME[$i]}";
 				fi
 			done
 			;;
@@ -2016,85 +2053,100 @@ function route_command() {
 
 		overviewer)
 			if is_running; then
-				mc_say "Generating overviewer map."
+				was_running=true;
+				mc_say "Generating overviewer map";
 				mc_saveoff
 				to_disk
-				overviewer_copy_worlds
-				mc_saveon
-				overviewer_start $INIT_SUBCOMMAND
-			else
-				overviewer_copy_worlds
-				overviewer_start $INIT_SUBCOMMAND
 			fi
+
+			overviewer_copy_worlds;
+
+			if $was_running; then
+				mc_saveon;
+			fi
+
+			overviewer_start "$INIT_SUBCOMMAND";
 			;;
 
 
 		screen)
-			if is_running; then
-				as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
-			else
-			echo_info "Server is not running. Do you want to start it?"
-			echo_quiet "Please put \"Yes\", or \"No\": "
-			read START_SERVER
-			case "$START_SERVER" in
-				[Yy]|[Yy][Ee][Ss])
-					check_links
-					to_ram
-					mc_start
-					as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
-					;;
+			if ! is_running; then
+				echo_out "Server is not running. Do you want to start it?";
+				echo_quiet "Please put \"Yes\", or \"No\": ";
+				read START_SERVER
+				case "$START_SERVER" in
+					[Yy]|[Yy][Ee][Ss])
+						check_links || return 1;
+						to_ram
+						mc_start
+						as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
+						;;
 
 
-				[Nn]|[Nn][Oo])
-					clear
-					echo_err "Aborting startup!"
-					sleep 1
-					clear
-					exit 1
-					;;
+					[Nn]|[Nn][Oo])
+						clear
+						echo_err "Aborting startup!"
+						sleep 1
+						clear
+						return 1;
+						;;
 
 
-				*)
-					clear
-					echo_err "Invalid input"
-					sleep 1
-					clear
-					exit 1
-					;;
-
-
-			esac
+					*)
+						clear
+						echo_err "Invalid input"
+						sleep 1
+						clear
+						return 1;
+						;;
+				esac
 			fi
+
+			as_user "script /dev/null -q -c \"screen -rx $SCREEN\"" || return 1;
 			;;
 
 
 		kill)
-			WIDTH=`stty size | cut -d ' ' -f 2`            # Get terminal's character width
-			pstree | grep MDSImporte | cut -c 1-${WIDTH}   # Chop output after WIDTH chars
+			# Get terminal's character width
+			WIDTH="$(stty size | cut -d ' ' -f 2)";
 
-			echo_out "Killing the server is an EMERGENCY procedure, and should not be used to perform a normal shutdown! All changes younger than 15 minutes could be permanantly lost and WORLD CORRUPTION is possible! Are you ABSOLUTELY POSITIVE this is what you want to do?";
+			# Chop output after WIDTH chars
+			pstree | grep MDSImporte | cut -c "1-${WIDTH}";
+
+			echo_quiet "Killing the server is an EMERGENCY procedure, and should not be used to perform a normal shutdown! All changes younger than 15 minutes could be permanantly lost and WORLD CORRUPTION is possible! Are you ABSOLUTELY POSITIVE this is what you want to do?";
 			echo_quiet "Please put \"Yes\", or \"No\": ";
-			read KILL_SERVER;
-			case "$KILL_SERVER" in  	# Determine which option was specified
-				[Yy]|[Yy][Ee][Ss])      # If yes, kill the server
-					force_exit || exit 1;
+
+			# Determine which option was specified
+			read user_input; case "$user_input" in
+				# If yes, kill the server
+				[Yy]|[Yy][Ee][Ss])
+					if ! force_exit ; then
+						echo_err "Failed to kill processes; quitting";
+						return 1;
+					fi;
+					if is_running ; then
+						echo_err "Killing completed okay, but server is still running; quitting";
+						return 1;
+					fi;
 					return 0;
 					;;
 
 
-				[Nn]|[Nn][Oo])  # If no, abort and exit 1
-					echo_out "Aborting";
+				# If no, quit
+				[Nn]|[Nn][Oo])
+					echo_info "Cancelling forced-exit";
 					return 0;
 					;;
 
 
-				*)	# If anything else, quit
-					echo_out "Invalid Input; quitting";
+				# If anything else, quit
+				*)
+					echo_err "Invalid Input; quitting";
 					return 1;
 					;;
 
 
-			esac
+			esac;
 			;;
 
 
@@ -2110,13 +2162,15 @@ function route_command() {
 
 		*)
 			echo_err "No such command as '$SELF $INIT_COMMAND'; quitting";
-			echo;
+			echo_out;
 			echo_usage;
-			exit 1
+			return 1;
 			;;
-	esac
-	
-	
+
+
+	esac;
+
+
 	return 0;
 }
 
