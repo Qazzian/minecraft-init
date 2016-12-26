@@ -1620,23 +1620,66 @@ function echo_whitelist() {
 }
 
 
+
+########
+# (Messily) kill the running server
+#
+# Globals
+#	MCPATH		{ As PID-file
+#	SCREEN		{
+#	USERNAME
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+########
 function force_exit() {
-	echo_out ""
-	echo_out "SIGINIT CALLED - FORCE EXITING!"
-	pidfile=${MCPATH}/${SCREEN}.pid
-	rm $pidfile
-	echo_out "KILLING SERVER PROCESSES!!!"
-	# Display which processes are being killed
-	ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
-	ps aux | grep -e 'SCREEN -dmS minecraft java' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
-	ps aux | grep -e '/etc/init.d/minecraft' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {}
+	## init vars
+	local pid pidfile;
 
-	# Kill the processes
-	ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i kill {}
-	ps aux | grep -e 'SCREEN -dmS minecraft java' | grep -v grep | awk '{print $2}' | xargs -i kill {}
-	ps aux | grep -e '/etc/init.d/minecraft' | grep -v grep | awk '{print $2}' | xargs -i kill {}
 
-	exit 1
+	## find pidfile
+	pidfile="${MCPATH}/${SCREEN}.pid";
+	log_debug "pidfile $pidfile";
+	if [ ! -f "$pidfile" ]; then
+		echo_err "Can't find pidfile ($pidfile); quitting";
+		return 1;
+	fi;
+
+
+	## find pid
+	pid="$(head -1 "$pidfile")";
+	log_debug "pid $pid";
+	if [ -n "$pid" ]; then
+		echo_err "Can't find PID in pidfile ($pidfile); quitting";
+		return 1;
+	fi;
+
+
+	echo_out "KILLING SERVER PROCESSES!!!";
+
+
+	## Display which processes will be killed
+	echo_info "Killing PID: $pid";
+	ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {};
+	ps aux | grep -e 'SCREEN -dmS minecraft java' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {};
+	ps aux | grep -e '/etc/init.d/minecraft' | grep -v grep | awk '{print $2}' | xargs -i echo "Killing PID: " {};
+
+
+	## Kill the processes
+	kill "$pid";
+	ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i kill {};
+	ps aux | grep -e 'SCREEN -dmS minecraft java' | grep -v grep | awk '{print $2}' | xargs -i kill {};
+	ps aux | grep -e '/etc/init.d/minecraft' | grep -v grep | awk '{print $2}' | xargs -i kill {};
+
+
+	## tidy the file
+	rm "$pidfile";
+
+
+	return 0;
 }
 
 
