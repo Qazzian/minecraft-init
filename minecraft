@@ -672,6 +672,18 @@ function mc_start() {
 			continue;
 		fi
 
+
+		# ...dot dot dot...
+		if [ "$VERBOSITY" -ge "$VERBOSITY_DEFAULT" ]; then
+			echo -n '.';	# no newline
+
+			# wrap after 40 cols
+			if [ 0 -eq $((seconds%40)) ]; then
+				echo_out '';
+			fi;
+		fi;
+
+
 		# ...then quit
 		if [[ $seconds -ge 120 ]]; then
 			echo_err "Failed to start; quitting";
