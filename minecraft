@@ -36,6 +36,10 @@ set -e;	# exit on error
 ###############################################################################
 
 
+## how many dots to draw before starting a new line
+export readonly CONSOLE_WIDTH=40;
+
+
 ## name of the current script
 export readonly SELF="$(basename "$0")";
 
@@ -677,8 +681,8 @@ function mc_start() {
 		if [ "$VERBOSITY" -ge "$VERBOSITY_DEFAULT" ]; then
 			echo -n '.';	# no newline
 
-			# wrap after 40 cols
-			if [ 0 -eq $((seconds%40)) ]; then
+			# wrap after CONSOLE_WIDTH dots
+			if [ 0 -eq $((seconds%CONSOLE_WIDTH)) ]; then
 				echo_out '';
 			fi;
 		fi;
