@@ -1684,7 +1684,8 @@ function force_exit() {
 
 
 function get_script_location() {
-	echo_quiet $(dirname "$(readlink -e "$0")")
+	echo_quiet "$(dirname "$(readlink -e "$0")")";
+	return 0;
 }
 
 
