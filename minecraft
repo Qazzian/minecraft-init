@@ -1046,23 +1046,21 @@ function get_worlds() {
 
 function mc_whole_backup() {
 	check_backup_settings
-	echo_out "backing up entire setup into $WHOLEBACKUP"
-	path=`datepath $WHOLEBACKUP/mine_`
-	locationOfScript=$(dirname "$(readlink -e "$0")")
+	echo_out "backing up entire setup into $WHOLEBACKUP";
+	path="$(datepath "$WHOLEBACKUP/mine_")";
+	locationOfScript="$(dirname "$(readlink -e "$0")")";
 	as_user "mkdir -p $path"
 
-	if [ -r "$locationOfScript/exclude.list" ]
-	then
-		echo_out "...except the following files and/or dirs:"
-		cat $locationOfScript/exclude.list
+	if [ -r "$locationOfScript/exclude.list" ]; then
+		echo_out "...except the following files and/or dirs:";
+		cat "$locationOfScript/exclude.list";
 		exclude="$EXCLUDEARG$locationOfScript/exclude.list"
-	fi
-	if [ "$COMPRESS_WHOLEBACKUP" ]
-	then
+	fi;
+	if [ "$COMPRESS_WHOLEBACKUP" ]; then
 		as_user "$COMPRESSCMD $path/whole-backup$ARCHIVEENDING $MCPATH $exclude"
 	else
 		as_user "$STORECMD $path/whole-backup$STOREDENDING $MCPATH $exclude"
-	fi
+	fi;
 }
 
 
