@@ -2071,26 +2071,25 @@ function route_command() {
 			WIDTH=`stty size | cut -d ' ' -f 2`            # Get terminal's character width
 			pstree | grep MDSImporte | cut -c 1-${WIDTH}   # Chop output after WIDTH chars
 
-			echo_out "Killing the server is an EMERGENCY procedure, and should not be used to perform a normal shutdown! All changes younger than 15 minutes could be permanantly lost and WORLD CORRUPTION is possible! Are you ABSOLUTELY POSITIVE this is what you want to do?"
-			echo_quiet "Please put \"Yes\", or \"No\": "
-			read KILL_SERVER
-			case "$KILL_SERVER" in  # Determine which option was specified
+			echo_out "Killing the server is an EMERGENCY procedure, and should not be used to perform a normal shutdown! All changes younger than 15 minutes could be permanantly lost and WORLD CORRUPTION is possible! Are you ABSOLUTELY POSITIVE this is what you want to do?";
+			echo_quiet "Please put \"Yes\", or \"No\": ";
+			read KILL_SERVER;
+			case "$KILL_SERVER" in  	# Determine which option was specified
 				[Yy]|[Yy][Ee][Ss])      # If yes, kill the server
-					echo_err "KILLING SERVER PROCESSES!!!"
-					force_exit
-					exit 1
+					force_exit || exit 1;
+					return 0;
 					;;
 
 
 				[Nn]|[Nn][Oo])  # If no, abort and exit 1
-					echo_err "Aborting!"
-					exit 1
+					echo_out "Aborting";
+					return 0;
 					;;
 
 
-				*)      # If anything else, exit 1
-					echo_err "Error: Invalid Input!"
-					exit 1
+				*)	# If anything else, quit
+					echo_out "Invalid Input; quitting";
+					return 1;
 					;;
 
 
