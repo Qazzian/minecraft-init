@@ -1241,24 +1241,50 @@ function get_cb_release_channel() {
 }
 
 
+
+########
+# Compare the (local) update file to $CB_JAR and report the result
+#
+# Globals
+#	CB_JAR			Name of the Craft Bukkit jar-file
+#	CB_RELEASE		Which channel to follow (e.g. Alpha)
+#	MCPATH			Where to find $CB_JAR and the update on this server
+#
+# Arguments
+#	None
+#
+# Returns
+#	0	Ran okay *and* update available
+#	1	Error *or* no update available
+########
 function check_update_craftbukkit() {
 	echo_info "Checking for update for craftbukkit.jar"
 	echo_info "You are on release channel \"$CB_RELEASE\""
 
-	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.jar.update $(get_cb_release_channel)"
-	if [ -r "$MCPATH/craftbukkit.jar.update" ]
-	then
-		if `diff $MCPATH/$CB_JAR $MCPATH/craftbukkit.jar.update >/dev/null`
-		then
-			echo_info "You are already running the latest version of craftbukkit.jar."
-			return 1
-		else
-			echo_out "Update of $CB_JAR is needed."
-			return 0
-		fi
-	else
-		echo_err "Something went wrong. Couldn't download craftbukkit.jar"
-	fi
+
+	# fetch the JAR from get_cb_release_channel()
+	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.jar.update $(get_cb_release_channel)";
+
+
+	# if no downloaded file, quit
+	if [ ! -r "$MCPATH/craftbukkit.jar.update" ]; then
+		echo_err "Something went wrong. Couldn't download craftbukkit.jar; quitting";
+		return 1;
+	fi;
+
+
+	# if no change, quit
+	if ( diff "$MCPATH/$CB_JAR" "$MCPATH/craftbukkit.jar.update" >/dev/null ); then
+		echo_out "You are already running the latest version of craftbukkit.jar";
+		return 1;
+	fi;
+
+
+	# output
+	echo_out "Update of $CB_JAR is needed";
+
+
+	return 0
 }
 
 
