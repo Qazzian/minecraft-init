@@ -1397,10 +1397,9 @@ function overviewer_copy_worlds() {
 	# Backup the worlds for overviewer
 	#
 
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		echo_out "Copying minecraft ${WORLDNAME[$INDEX]}."
+	get_worlds || return 1;
+	for INDEX in "${!WORLDNAME[@]}"; do
+		echo_out "Copying minecraft ${WORLDNAME[$INDEX]}";
 		as_user "mkdir -p $OVBACKUP"
 		as_user "rsync -rt --delete $WORLDSTORAGE/${WORLDNAME[$INDEX]} $OVBACKUP/${WORLDNAME[$INDEX]}"
 	done
