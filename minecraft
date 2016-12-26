@@ -1107,34 +1107,31 @@ function mc_world_backup() {
 
 
 function check_links() {
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		if [[ -L $MCPATH/${WORLDNAME[$INDEX]} || ! -a $MCPATH/${WORLDNAME[$INDEX]} ]]
-		then
-			link=`ls -l $MCPATH/${WORLDNAME[$INDEX]} | awk '{print $11}'`
-			if ${WORLDRAM[$INDEX]}
-			then
-				if [ "$link" != "$RAMDISK/${WORLDNAME[$INDEX]}" ]
-				then
-					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
-					as_user "ln -s $RAMDISK/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
-					echo_out "Created link for ${WORLDNAME[$INDEX]}"
-				fi
-			else
-				if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$INDEX]}" ]
-				then
-					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
-					as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
-					echo_out "Created link for ${WORLDNAME[$INDEX]}"
-				fi
+	get_worlds || return 1;
+
+	for INDEX in "${!WORLDNAME[@]}"; do
+		if ! [[ -L "$MCPATH/${WORLDNAME[$INDEX]}" || ! -a "$MCPATH/${WORLDNAME[$INDEX]}" ]]; then
+			echo_err "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}; quitting";
+			return 1;
+		fi;
+
+		local link="$(ls -l "$MCPATH/${WORLDNAME[$INDEX]}" | awk '{print $11}')";
+		if ${WORLDRAM[$INDEX]}; then
+			if [ "$link" != "$RAMDISK/${WORLDNAME[$INDEX]}" ]; then
+				as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
+				as_user "ln -s $RAMDISK/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
+				echo_out "Created link for ${WORLDNAME[$INDEX]}"
 			fi
 		else
-			echo_err "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
-
-			exit 1
+			if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$INDEX]}" ]; then
+				as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
+				as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
+				echo_out "Created link for ${WORLDNAME[$INDEX]}"
+			fi
 		fi
 	done
+
+	return 0;
 }
 
 
