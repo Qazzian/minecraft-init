@@ -1532,13 +1532,17 @@ function echo_recent_players() {
 	fi
 
 
+	# init vars
+	local log;
+
+
 	# get the log & filter for player activity
 	echo_debug "SERVERLOG=$SERVERLOG";
 	if [ ! -f "$SERVERLOG" ]; then
 		echo_err "Can't find \$SERVERLOG ($SERVERLOG); quitting";
 		return 1;
 	fi;
-	local log="$(cat $SERVERLOG | grep 'joined the game\|left the game')";
+	log="$(grep 'joined the game\|left the game' "$SERVERLOG")";
 	echo_debug "log=$log";
 
 
