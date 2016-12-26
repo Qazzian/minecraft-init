@@ -523,7 +523,7 @@ function config_load_local() {
 # Returns
 #	0|1
 ########
-function is_running() {
+function as_user() {
 	echo_debug "1=$1";
 
 
@@ -552,6 +552,7 @@ function is_running() {
 }
 
 
+function is_running() {
 	# Checks for the minecraft servers screen session
 	# returns true if it exists.
 	pidfile=${MCPATH}/${SCREEN}.pid
