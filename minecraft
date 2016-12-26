@@ -255,14 +255,26 @@ function log_verbose()	{ log_by_level "$VERBOSITY_VERBOSE" "$1";	return $?; }
 function log_debug()	{ log_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 
 
-## output supported commands
+
+########
+# Output details of supported commands
+#
+# Globals
+#	SELF	Name of this script
+#
+# Arguments
+#	None
+#
+# Returns
+#	0
+########
 function echo_usage() {
 	echo_quiet "Usage: $SELF [<options>] <command>";
 	echo_out;
 	echo_out "Where <options> is zero or more of:";
-	echo_out "   -c <file>     Config. Loads the given config file. Default is $(dirname "$0")/config";
-	echo_out "   -q            Quiet. Decreases the script's verbosity";
-	echo_out "   -v            Verbose. Increases the script's verbosity. May be repeated. Max is three";
+	echo_out "   -c <file>  Config. Loads the given config file. Default is $(dirname "$0")/config";
+	echo_out "   -q	        Quiet. Decreases the script's verbosity";
+	echo_out "   -v	        Verbose. Increases the script's verbosity. May be repeated. Max is three";
 	echo_out;
 	echo_out "Where <command> is one of:";
 	echo_out "   start \t\t Starts the server";
@@ -294,7 +306,7 @@ function echo_usage() {
 	echo_out "   whitelist-add NAME \t Adds the specified player to the server whitelist";
 	echo_out "   whitelist-reload \t Reloads the whitelist";
 	echo_out "   screen \t\t Shows the server screen";
-	echo_out "   script-version        Show this script's version";
+	echo_out "   script-version	Show this script's version";
 	echo_out "   help \t\t Shows this text";
 
 	return 0;
