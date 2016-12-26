@@ -971,27 +971,76 @@ function log_roll() {
 }
 
 
+########
+# Loops through the saved worlds, caching names and ramdisk-status
+#
+# Globals
+#	WORLDNAME		Indexed list of world-names
+#	WORLDRAM		Indexed list of bools
+#	WORLDSTORAGE	Directory holding save-games. From config.
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+########
 function get_worlds() {
-	SAVEIFS=$IFS
-	IFS=$(echo -en "\n\b")
+	log_debug "WORLDSTORAGE=$WORLDSTORAGE";
+	if [ ! -d "$WORLDSTORAGE" ]; then
+		echo_err "Can't find $WORLDSTORAGE; quitting";
+		return 1;
+	fi;
 
-	a=1
-	for NAME in $(ls $WORLDSTORAGE)
-	do
-		if [ -d $WORLDSTORAGE/$NAME ]
-		then
-			WORLDNAME[$a]=$NAME
-			if [ -e $WORLDSTORAGE/$NAME/ramdisk ]
-			then
-				WORLDRAM[$a]=true
-			else
-				WORLDRAM[$a]=false
-			fi
-			a=$a+1
-		fi
-	done
 
-	IFS=$SAVEIFS
+	## init vars
+	local basename name is_ram saveifs;
+
+
+	## reset globals
+	WORLDNAME=();
+	WORLDRAM=();
+
+
+	## handle filenames with spaces
+	readonly saveifs="$IFS";	## cache for later
+	IFS="$(echo -en "\n\b")";
+
+
+	## loop through worlds in WORLDSTORAGE/
+	for name in $WORLDSTORAGE/*; do
+		log_debug "name=$name";
+
+
+		## worlds are dirs, soignore files
+		if [ ! -d "$name" ]; then
+			continue;
+		fi;
+
+
+		# $name is an absolute path, so shorten
+		basename="$(basename "$name")";
+		log_debug "name=$name";
+
+
+		# cache the name
+		WORLDNAME+=("$basename");
+
+
+		# cache the ramdisk-state
+		is_ram=false;
+		if [ -e "$WORLDSTORAGE/$basename/ramdisk" ]; then
+			is_ram=true;
+		fi;
+		WORLDRAM+=($is_ram);
+	done;
+
+
+	## reset IFS
+	IFS="$saveifs";
+
+
+	return 0;
 }
 
 
