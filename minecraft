@@ -1565,21 +1565,27 @@ function echo_recent_players() {
 
 
 ########
-# Queries the Server Jar for the whitelist, then returns it
+# Output the server's current whitelist, by querying the daemon
 #
 # Globals
-#	SERVERLOG	File that holds the server's output
+#	SERVERLOG	File where the daemon will put its response
 #
 # Arguments
 #	None
 #
 # Returns
+#	stdout		List of players
 #	0|1
 ########
 function echo_whitelist() {
-	# query server and wait for reply
-	mc_command "whitelist list" || return 1;
-	sleep 1s;
+	mc_command "whitelist list" || {
+		echo_err "Failed to talk to daemon; quitting";
+		return 1;
+	}
+
+	# wait for reply
+	sleep 1s
+
 
 	local whitelist;
 
@@ -1589,6 +1595,7 @@ function echo_whitelist() {
 	whitelist="${whitelist// and /, }";		# remove ' and '
 	whitelist="${whitelist//, /\\n\\t}";	# change line to list
 
+
 	# Pre MC v1.8.8
 	if [ -z "$whitelist" ]; then
 		whitelist="$(tac "$SERVERLOG" | grep -m 1 'White-listed players:')";
@@ -1596,8 +1603,18 @@ function echo_whitelist() {
 		whitelist="${whitelist//, /\n}";	# change line to list
 	fi;
 
+
+	echo_debug "whitelist=$whitelist";
+	if [ -z "$whitelist" ]; then
+		echo_err "Daemon failed to output the whitelist to log; quitting";
+		return 1;
+	fi;
+	echo_debug "whitelist=$whitelist";
+
+
 	echo_out	"Your whitelist is:"
 	echo_quiet	"\t$whitelist";
+
 
 	return 0;
 }
