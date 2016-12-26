@@ -1209,7 +1209,8 @@ function check_update_vanilla() {
 #	None
 #
 # Returns
-# 	URL of file
+#	0|1
+#	stdout				URL of file
 ########
 function get_cb_release_channel() {
 	local url="$CB_DOWNLOAD_URL";
@@ -1234,7 +1235,7 @@ function get_cb_release_channel() {
 	esac;
 
 
-	echo "$url";
+	echo_quiet "$url";
 
 	return 0;
 }
