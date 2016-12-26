@@ -104,7 +104,7 @@ function echo_mci_version() {
 # Returns
 #	0|1
 ########
-function echo_by_level {
+function echo_by_level() {
 	if [ 2 -ne $# ]; then
 		echo_err "Usage: ${FUNCNAME[0]} <level> <message>";
 		return 1;
@@ -256,7 +256,7 @@ function log_debug()	{ log_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 
 
 ## output supported commands
-function echo_usage {
+function echo_usage() {
 	echo_quiet "Usage: $SELF [<options>] <command>";
 	echo_out;
 	echo_out "Where <options> is zero or more of:";
@@ -317,7 +317,7 @@ function echo_usage {
 # Returns
 #	0|1
 ########
-function handle_commandline_options {
+function handle_commandline_options() {
 	echo_debug "@=$*";
 	echo_debug "#=$#";
 
@@ -511,7 +511,7 @@ function config_load_local() {
 # Returns
 #	0|1
 ########
-as_user() {
+function is_running() {
 	echo_debug "1=$1";
 
 
@@ -540,7 +540,6 @@ as_user() {
 }
 
 
-is_running() {
 	# Checks for the minecraft servers screen session
 	# returns true if it exists.
 	pidfile=${MCPATH}/${SCREEN}.pid
@@ -580,13 +579,13 @@ is_running() {
 }
 
 
-datepath() {
 	# datepath path filending-to-check returned-filending
 
 	# Returns an file path with added date between the filename and file ending.
 	# $1 filepath (not including file ending)
 	# $2 file ending to check for uniqueness
 	# $3 file ending to return
+function datepath() {
 
 	if [ -e $1`date +%F`$2 ]
 	then
@@ -597,7 +596,7 @@ datepath() {
 }
 
 
-mc_start() {
+function mc_start() {
 	servicejar=$MCPATH/$SERVICE
 	if [ ! -f "$servicejar" ]
 	then
@@ -646,7 +645,7 @@ mc_start() {
 # Returns
 #	0|1
 ########
-mc_command() {
+function mc_command() {
 	echo_debug "1=$1";
 
 
@@ -673,7 +672,7 @@ mc_command() {
 }
 
 
-mc_saveoff() {
+function mc_saveoff() {
 	if is_running
 	then
 		echo_out "$SERVICE is running... suspending saves"
@@ -687,7 +686,7 @@ mc_saveoff() {
 }
 
 
-mc_saveon() {
+function mc_saveon() {
 	if is_running
 	then
 		echo_out "$SERVICE is running... re-enabling saves"
@@ -711,7 +710,7 @@ mc_saveon() {
 # Returns
 #	0|1
 ########
-mc_say() {
+function mc_say() {
 	echo_debug "1=$1";
 
 
@@ -735,13 +734,13 @@ mc_say() {
 }
 
 
-mc_stop() {
 	pidfile=${MCPATH}/${SCREEN}.pid
 	#
 	# Stops the server
 	#
 	echo_info "Saving worlds..."
 	mc_command save-all
+function mc_stop() {
 	sleep 10
 	echo_out "Stopping server..."
 	mc_command stop
@@ -773,13 +772,13 @@ mc_stop() {
 }
 
 
-mc_reload() {
+function mc_reload() {
         echo_out "$SERVICE is running... reloading."
         mc_command reload
 }
 
 
-check_backup_settings() {
+function check_backup_settings() {
 	case "$BACKUPFORMAT" in
 		tar)
 			COMPRESSCMD="tar -hcjf"
@@ -809,7 +808,6 @@ check_backup_settings() {
 }
 
 
-log_roll() {
 	# Moves the logfiles and compresses that backup directory
 	check_backup_settings
 	path=`datepath $LOGPATH/logs_ $ARCHIVEENDING`
@@ -834,6 +832,7 @@ log_roll() {
 		else
 			echo_err "Failed to rotate log from $FILE into $path"
 		fi
+function log_roll() {
 	done
 
 	as_user "$COMPRESSCMD $path$ARCHIVEENDING $path"
@@ -843,7 +842,6 @@ log_roll() {
 }
 
 
-get_worlds() {
 	SAVEIFS=$IFS
 	IFS=$(echo -en "\n\b")
 
@@ -860,6 +858,7 @@ get_worlds() {
 				WORLDRAM[$a]=false
 			fi
 			a=$a+1
+function get_worlds() {
 		fi
 	done
 
@@ -867,7 +866,7 @@ get_worlds() {
 }
 
 
-mc_whole_backup() {
+function mc_whole_backup() {
 	check_backup_settings
 	echo_out "backing up entire setup into $WHOLEBACKUP"
 	path=`datepath $WHOLEBACKUP/mine_`
@@ -889,7 +888,7 @@ mc_whole_backup() {
 }
 
 
-mc_world_backup() {
+function mc_world_backup() {
 	#
 	# Backup the worlds and puts them in a folder for each day (unless $BACKUPSCRIPTCOMPATIBLE is set)
 	#
@@ -935,7 +934,7 @@ mc_world_backup() {
 }
 
 
-check_links() {
+function check_links() {
 	get_worlds
 	for INDEX in ${!WORLDNAME[@]}
 	do
@@ -967,7 +966,7 @@ check_links() {
 }
 
 
-to_ram() {
+function to_ram() {
 	get_worlds
 	for INDEX in ${!WORLDNAME[@]}
 	do
@@ -984,7 +983,7 @@ to_ram() {
 }
 
 
-to_disk() {
+function to_disk() {
 	get_worlds
 	for INDEX in ${!WORLDNAME[@]}
 	do
@@ -997,7 +996,7 @@ to_disk() {
 }
 
 
-check_update_vanilla() {
+function check_update_vanilla() {
 	MC_SERVER_URL="$(wget -q -O - "$MC_DOWNLOAD_PAGE" | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")')";
 
 	echo_out "Checking for update for minecraft_server.jar (Vanilla)"
@@ -1033,7 +1032,7 @@ check_update_vanilla() {
 # Returns
 # 	URL of file
 ########
-get_cb_release_channel() {
+function get_cb_release_channel() {
 	local url="$CB_DOWNLOAD_URL";
 
 
@@ -1062,7 +1061,7 @@ get_cb_release_channel() {
 }
 
 
-check_update_craftbukkit() {
+function check_update_craftbukkit() {
 	echo_info "Checking for update for craftbukkit.jar"
 	echo_info "You are on release channel \"$CB_RELEASE\""
 
@@ -1083,7 +1082,7 @@ check_update_craftbukkit() {
 }
 
 
-mc_update() {
+function mc_update() {
 	if is_running
 	then
 		echo_err "$SERVICE is running! Will not start update."
@@ -1119,7 +1118,7 @@ mc_update() {
 }
 
 
-change_ramdisk_state() {
+function change_ramdisk_state() {
 	if [ ! -e $WORLDSTORAGE/$1 ]
 	then
 		echo_err "World \"$1\" not found."
@@ -1138,7 +1137,7 @@ change_ramdisk_state() {
 }
 
 
-overviewer_start() {
+function overviewer_start() {
 		if [ ! -e $OVPATH/overviewer.py ]
 		then
 				if [ ! "$OVPATH" == "apt" ]
@@ -1182,7 +1181,7 @@ overviewer_start() {
 }
 
 
-overviewer_copy_worlds() {
+function overviewer_copy_worlds() {
 	#
 	# Backup the worlds for overviewer
 	#
@@ -1363,7 +1362,7 @@ function echo_recent_players() {
 # Returns
 #	0|1
 ########
-echo_whitelist(){
+function echo_whitelist() {
 	# query server and wait for reply
 	mc_command "whitelist list" || return 1;
 	sleep 1s;
@@ -1390,7 +1389,6 @@ echo_whitelist(){
 }
 
 
-force_exit() {  # Kill the server running (messily) in an emergency
 	echo_out ""
 	echo_out "SIGINIT CALLED - FORCE EXITING!"
 	pidfile=${MCPATH}/${SCREEN}.pid
@@ -1405,17 +1403,18 @@ force_exit() {  # Kill the server running (messily) in an emergency
 		ps aux | grep -e 'java -Xmx' | grep -v grep | awk '{print $2}' | xargs -i kill {}
 		ps aux | grep -e 'SCREEN -dmS minecraft java' | grep -v grep | awk '{print $2}' | xargs -i kill {}
 		ps aux | grep -e '/etc/init.d/minecraft' | grep -v grep | awk '{print $2}' | xargs -i kill {}
+function force_exit() {
 
 	exit 1
 }
 
 
-get_script_location() {
+function get_script_location() {
 	echo_quiet $(dirname "$(readlink -e "$0")")
 }
 
 
-check_permissions() {
+function check_permissions() {
 	as_user "touch $pidfile"
 	if ! as_user "test -w '$pidfile'" ; then
 		echo_err "Check Permissions. Cannot write to $pidfile. Correct the permissions and then excute: $0 status"
