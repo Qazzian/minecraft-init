@@ -67,11 +67,11 @@ readonly export VERBOSITY_DEBUG=3;
 
 
 ## default location of config [same dir as $0]
-CONFIG_FILE="$(dirname "$(readlink -e "$0")")/config";
+export CONFIG_FILE="$(dirname "$(readlink -e "$0")")/config";
 
 
 ## Level of debugging-info to output
-VERBOSITY=$VERBOSITY_DEFAULT;
+export VERBOSITY=$VERBOSITY_DEFAULT;
 
 
 
