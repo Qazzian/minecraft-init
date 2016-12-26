@@ -1069,39 +1069,35 @@ function mc_world_backup() {
 	# Backup the worlds and puts them in a folder for each day (unless $BACKUPSCRIPTCOMPATIBLE is set)
 	#
 
-	check_backup_settings
-	get_worlds
-	today="`date +%F-%H-%M-%S`"
+	check_backup_settings || return 1;
+	get_worlds || return 1;
+	today="$(date +%F-%H-%M-%S)";
 	as_user "mkdir -p $BACKUPPATH"
 
 	# Check if the backup script compatibility is enabled
-	if [ "$BACKUPSCRIPTCOMPATIBLE" ]
-	then
+	if [ "$BACKUPSCRIPTCOMPATIBLE" ]; then
 		# If it is enabled, then delete the old backups to prevent errors
-		echo_out "Detected that backup script compatibility is enabled, deleting old backups that are not necessary."
+		echo_out "Detected that backup script compatibility is enabled, deleting old backups that are not necessary";
 		as_user "rm -r $BACKUPPATH/*"
 	fi
 
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		echo_out "Backing up minecraft ${WORLDNAME[$INDEX]}"
-		if [ "$WORLDEDITCOMPATIBLE" ]
+	for INDEX in "${!WORLDNAME[@]}"; do
+		echo_out "Backing up minecraft ${WORLDNAME[$INDEX]}";
+
 		# If this is set tars will be created compatible to WorldEdit
-		then
+		if [ "$WORLDEDITCOMPATIBLE" ]; then
 			as_user "mkdir -p $BACKUPPATH/${WORLDNAME[$INDEX]}"
-			path=`datepath $BACKUPPATH/${WORLDNAME[$INDEX]}/ $ARCHIVEENDING $ARCHIVEENDING`
-		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]
+			path="$(datepath "$BACKUPPATH/${WORLDNAME[$INDEX]}/" "$ARCHIVEENDING" "$ARCHIVEENDING")";
 		# If is set tars will be put in $BACKUPPATH without any timestamp to be compatible with
 		# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
-		then
-			path=$BACKUPPATH/${WORLDNAME[$INDEX]}$ARCHIVEENDING
+		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]; then
+			path="$BACKUPPATH/${WORLDNAME[$INDEX]}$ARCHIVEENDING";
 		else
-			as_user "mkdir -p $BACKUPPATH/${today}"
-			path=`datepath $BACKUPPATH/${today}/${WORLDNAME[$INDEX]}_ $ARCHIVEENDING $ARCHIVEENDING`
+			as_user "mkdir -p $BACKUPPATH/$today"
+			path="$(datepath "$BACKUPPATH/$today/${WORLDNAME[$INDEX]}_" "$ARCHIVEENDING" "$ARCHIVEENDING")";
 		fi
-		if [ "$WORLDEDITCOMPATIBLE" ]
 		# Don't store the complete path
-		then
+		if [ "$WORLDEDITCOMPATIBLE" ]; then
 			as_user "cd $MCPATH && $COMPRESSCMD $path ${WORLDNAME[$INDEX]}"
 		else
 			as_user "$COMPRESSCMD $path $MCPATH/${WORLDNAME[$INDEX]}"
