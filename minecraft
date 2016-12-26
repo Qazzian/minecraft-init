@@ -2198,6 +2198,6 @@ function main() {
 ## Run, tidy, quit
 ###############################################################################
 
-trap force_exit SIGINT
+trap force_exit SIGINT;
 main "$@" || exit 1;
 exit 0;
