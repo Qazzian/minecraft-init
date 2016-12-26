@@ -821,6 +821,7 @@ function check_backup_settings() {
 }
 
 
+function log_roll() {
 	# Moves the logfiles and compresses that backup directory
 	check_backup_settings
 	path=`datepath $LOGPATH/logs_ $ARCHIVEENDING`
@@ -845,7 +846,6 @@ function check_backup_settings() {
 		else
 			echo_err "Failed to rotate log from $FILE into $path"
 		fi
-function log_roll() {
 	done
 
 	as_user "$COMPRESSCMD $path$ARCHIVEENDING $path"
