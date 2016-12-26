@@ -623,38 +623,48 @@ function datepath() {
 
 
 function mc_start() {
-	servicejar=$MCPATH/$SERVICE
-	if [ ! -f "$servicejar" ]
-	then
+	if is_running; then
+		return 0;
+	fi;
+
+	local servicejar="$MCPATH/$SERVICE";
+	if [ ! -f "$servicejar" ]; then
 		echo_err "Failed to start: Can't find the specified Minecraft jar under $servicejar. Please check your config!"
-		exit 1
+		return 1;
 	fi
 
-	pidfile=${MCPATH}/${SCREEN}.pid
-	check_permissions
+	pidfile="$MCPATH/$SCREEN.pid";
+	check_permissions || return 1;
 
-	as_user "cd $MCPATH && screen -dmS $SCREEN $INVOCATION"
-	as_user "screen -list | grep "\.$SCREEN" | cut -f1 -d'.' | head -n 1 | tr -d -c 0-9 > $pidfile"
+	as_user "cd $MCPATH && screen -dmS $SCREEN $INVOCATION";
+	as_user "screen -list | grep \"\.$SCREEN\" | cut -f1 -d'.' | head -n 1 | tr -d -c 0-9 > $pidfile";
+
+
 
 	#
 	# Waiting for the server to start
 	#
 	seconds=0
-	until is_running
-	do
+	until is_running; do
 		sleep 1
 		seconds=$seconds+1
-		if [[ $seconds -eq 5 ]]
-		then
-			echo_info "Still not running, waiting a while longer..."
+
+		# wait a little longer...
+		if [[ $seconds -eq 5 ]]; then
+			echo_info "Still not running, waiting a while longer...";
+			continue;
 		fi
-		if [[ $seconds -ge 120 ]]
-		then
-			echo_err "Failed to start, aborting."
-			exit 1
+
+		# ...then quit
+		if [[ $seconds -ge 120 ]]; then
+			echo_err "Failed to start; quitting";
+			return 1;
 		fi
 	done
-	echo_out "$SERVICE is running."
+
+	echo_out "Server is running";
+
+	return 0;
 }
 
 
