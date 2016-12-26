@@ -110,7 +110,8 @@ function echo_mci_version() {
 #	2	Message
 #
 # Returns
-#	0|1
+#	0					On success
+#	1					On failure
 ########
 function echo_by_level() {
 	if [ 2 -ne $# ]; then
@@ -214,7 +215,8 @@ function echoerr() {
 #	2	Message
 #
 # Returns
-#	0|1
+#	0					On success
+#	1					On failure
 ########
 function log_by_level() {
 	if [ 2 -ne $# ]; then
@@ -274,7 +276,8 @@ function log_debug()	{ log_by_level "$VERBOSITY_DEBUG" "$1"; 	return $?; }
 #	None
 #
 # Returns
-#	0
+#	0		On success
+#	1		On failure
 ########
 function echo_usage() {
 	echo_quiet "Usage: $SELF [<options>] <command>";
@@ -335,7 +338,8 @@ function echo_usage() {
 #	@					All commandline parameters
 #
 # Returns
-#	0|1
+#	0					On success
+#	1					On failure
 ########
 function handle_commandline_options() {
 	echo_debug "@=$*";
@@ -397,7 +401,8 @@ function handle_commandline_options() {
 #	None
 #
 # Returns
-#	None
+#	0				On success
+#	1				On failure
 ########
 function config_load() {
 	## load default config
@@ -440,7 +445,8 @@ function config_load() {
 #	None
 #
 # Returns
-#	None
+#	0		On success
+#	1		On failure
 ########
 function config_load_defaults() {
 	## config MineCraft
@@ -496,7 +502,8 @@ function config_load_defaults() {
 #	None
 #
 # Returns
-#	None
+#	0		On success
+#	1		On failure
 ########
 function config_load_local() {
 	## check file exists
@@ -529,7 +536,8 @@ function config_load_local() {
 #	1		Command to run
 #
 # Returns
-#	0|1
+#	0					On success
+#	1					On failure
 ########
 function as_user() {
 	echo_debug "1=$1";
@@ -609,13 +617,14 @@ function is_running() {
 #	None
 #
 # Arguments
-#	1	Dir (may include trailing slash)
-#	2	File ending to check for uniqueness
-#	3	File ending to return
+#	1			Dir (may include trailing slash)
+#	2			File ending to check for uniqueness
+#	3			File ending to return
 #
 # Returns
-#	0|1
-#	stdout	The resulting path
+#	0			On success
+#	1			On failure
+#	stdout		The resulting path
 ########
 function datepath() {
 
@@ -688,7 +697,8 @@ function mc_start() {
 #	1			String to say
 #
 # Returns
-#	0|1
+#	0			On success
+#	1			On failure
 ########
 function mc_command() {
 	echo_debug "1=$1";
@@ -761,7 +771,8 @@ function mc_saveon() {
 #	1		String to say
 #
 # Returns
-#	0|1
+#	0		On success
+#	1		On failure
 ########
 function mc_say() {
 	echo_debug "1=$1";
@@ -862,7 +873,8 @@ function mc_reload() {
 #	None
 #
 # Returns
-#	0|1
+#	0				On success
+#	1				On failure
 #######
 function check_backup_settings() {
 	case "$BACKUPFORMAT" in
@@ -991,7 +1003,8 @@ function log_roll() {
 #	None
 #
 # Returns
-#	0|1
+#	0				On success
+#	1				On failure
 ########
 function get_worlds() {
 	log_debug "WORLDSTORAGE=$WORLDSTORAGE";
@@ -1176,15 +1189,15 @@ function to_disk() {
 #
 # Globals
 #	MC_DOWNLOAD_PAGE	Page to scrape
-#	MC_JAR			  File to find
-#	MC_PATH			 Where to put the download
+#	MC_JAR				File to find
+#	MC_PATH				Where to put the download
 #
 # Arguments
 #	None
 #
 # Returns
-#	0				   Checked okay; update found OR error
-#	1				   Checked okay; no update
+#	0					Checked okay; update found OR error
+#	1					Checked okay; no update
 ########
 function check_update_vanilla() {
 	MC_SERVER_URL="$(wget -q -O - "$MC_DOWNLOAD_PAGE" | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")')";
@@ -1217,7 +1230,8 @@ function check_update_vanilla() {
 #	None
 #
 # Returns
-#	0|1
+#	0					On success
+#	1					On failure
 #	stdout				URL of file
 ########
 function get_cb_release_channel() {
@@ -1262,8 +1276,8 @@ function get_cb_release_channel() {
 #	None
 #
 # Returns
-#	0	Ran okay *and* update available
-#	1	Error *or* no update available
+#	0				Ran okay *and* update available
+#	1				Error *or* no update available
 ########
 function check_update_craftbukkit() {
 	echo_info "Checking for update for craftbukkit.jar"
@@ -1425,7 +1439,8 @@ function overviewer_copy_worlds() {
 #	None
 #
 # Returns
-#	0|1
+#	0				On success
+#	1				On failure
 #	stdout			Formated list of users currently connected to the server
 ########
 function echo_connected_players() {
@@ -1486,8 +1501,9 @@ function echo_connected_players() {
 #	None
 #
 # Returns
-#	0|1
-#	stdout			Integer count of players online
+#	0			On success
+#	1			On failure
+#	stdout		Integer count of players online
 ########
 function echo_playercount() {
 	if ! is_running; then
@@ -1530,7 +1546,8 @@ function echo_playercount() {
 #	None
 #
 # Returns
-#	0|1
+#	0			On success
+#	1			On failure
 #	stdout		Formatted list of recent player activity
 ########
 function echo_recent_players() {
@@ -1641,7 +1658,8 @@ function echo_whitelist() {
 #	None
 #
 # Returns
-#	0|1
+#	0			On success
+#	1			On failure
 ########
 function force_exit() {
 	## init vars
@@ -1741,7 +1759,8 @@ function server_stop() {
 #	@					All parameters, to pass to e.g. redirect functions
 #
 # Returns
-#	0|1
+#	0					On success
+#	1					On failure
 ########
 function route_command() {
 	echo_debug "@=$*";
@@ -2192,6 +2211,16 @@ function route_command() {
 
 ########
 # Reads commandline parameters, loads the config, and runs the command
+#
+# Globals
+#	None
+#
+# Arguments
+#	@			Passed to sub-functions
+#
+# Returns
+#	0			On success
+#	1			On failure
 ########
 function main() {
 	## read commandline options
