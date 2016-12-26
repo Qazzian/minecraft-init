@@ -779,41 +779,55 @@ function mc_say() {
 }
 
 
-	pidfile=${MCPATH}/${SCREEN}.pid
-	#
-	# Stops the server
-	#
-	echo_info "Saving worlds..."
-	mc_command save-all
+# Stops the server
 function mc_stop() {
+	local pidfile="$MCPATH/$SCREEN.pid";
+
+
+	# save
+	echo_out "Saving worlds...";
+	mc_command 'save-all' || return 1;
 	sleep 10
-	echo_out "Stopping server..."
-	mc_command stop
+
+
+	# stop
+	echo_out "Stopping server...";
+	mc_command 'stop' || return 1;
 	sleep 0.5
+
+
 	#
 	# Waiting for the server to shut down
 	#
 	seconds=0
 	isInStop=1
-	while is_running
-	do
-		sleep 1
-		seconds=$seconds+1
-		if [[ $seconds -eq 5 ]]
-		then
+	while is_running; do
+		sleep 1;
+		seconds=$seconds+1;
+
+
+		if [ 5 -eq $seconds ]; then
 			echo_info "Still not shut down, waiting a while longer..."
-		fi
-		if [[ $seconds -ge 120 ]]
-		then
-			logger -t minecraft-init "Failed to shut down server, aborting."
-			echo_err "Failed to shut down, aborting."
-			exit 1
+		fi;
+
+
+		if [ 120 -gt $seconds ]; then
+			logger -t minecraft-init "Failed to shut down server, aborting";
+			echo_err "Failed to shut down, quitting";
+			return 1;
 		fi
 	done
+
+
 	as_user "rm $pidfile"
 	unset isInStop
-	is_running
-	echo_out "$SERVICE is now shut down."
+
+
+	is_running && return 1;
+
+
+	echo_out "$SERVICE is now shut down";
+	return 0;
 }
 
 
