@@ -70,6 +70,14 @@ readonly export VERBOSITY_DEBUG=3;
 export CONFIG_FILE="$(dirname "$(readlink -e "$0")")/config";
 
 
+## indexed list of saved worlds
+export WORLDNAME=();
+
+
+## indexed list of bools (ramdisk on|off)
+export WORLDRAM=();
+
+
 ## Level of debugging-info to output
 export VERBOSITY=$VERBOSITY_DEFAULT;
 
