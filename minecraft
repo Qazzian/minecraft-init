@@ -838,6 +838,24 @@ function mc_reload() {
 }
 
 
+
+#######
+# Sets various properties, from $BACKUPFORMAT
+#
+# Globals
+#	ARCHIVEENDING	File-extension for compressed files
+#	BACKUPFORMAT	From ./config
+#	COMPRESSCMD		Shell command to compress files
+#	EXCLUDEARG		Parameter $COMPRESSCMD will use to exclude individual files
+#	STORECMD		Shell command to copy files
+#	STOREDENDING	File-extension for non-compressed files
+#
+# Arguments
+#	None
+#
+# Returns
+#	0|1
+#######
 function check_backup_settings() {
 	case "$BACKUPFORMAT" in
 		tar)
@@ -859,12 +877,15 @@ function check_backup_settings() {
 
 
 		*)
-			echo_err "$BACKUPFORMAT is not a supported backup format"
-			exit 1
+			echo_err "$BACKUPFORMAT is not a supported backup format";
+			return 1;
 			;;
 
 
 	esac
+
+
+	return 0;
 }
 
 
