@@ -713,16 +713,19 @@ function mc_command() {
 
 
 function mc_saveoff() {
-	if is_running
-	then
-		echo_out "$SERVICE is running... suspending saves"
-		mc_command save-off
-		mc_command save-all
-		sync
-		sleep 10
-	else
-		echo_info "$SERVICE was not running. Not suspending saves."
-	fi
+	if ! is_running; then
+		echo_out "Server not running; skipping";
+		return 0;
+	fi;
+
+	echo_info "Suspending saves...";
+	mc_command 'save-off' || return 1;
+	mc_command 'save-all' || return 1;
+	sync;
+	sleep 10;
+	echo_out "Saves suspended";
+
+	return 0;
 }
 
 
