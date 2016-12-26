@@ -1152,11 +1152,9 @@ function to_ram() {
 
 
 function to_disk() {
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		if ${WORLDRAM[$INDEX]}
-		then
+	get_worlds || return 1;
+	for INDEX in "${!WORLDNAME[@]}"; do
+		if ${WORLDRAM[$INDEX]}; then
 			as_user "rsync -rt --exclude 'ramdisk' $MCPATH/${WORLDNAME[$INDEX]}/ ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}"
 			echo_out "${WORLDNAME[$INDEX]} copied to disk"
 		fi
