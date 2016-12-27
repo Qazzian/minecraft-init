@@ -512,6 +512,7 @@ function config_load_local() {
 # Uses the loaded config to set dependant variables
 #
 # Globals
+#	FLAVOUR			Vanilla MineCraft or derived version
 #	INVOCATION		String to pass to Screen to start the server
 #
 # Arguments
@@ -522,7 +523,28 @@ function config_load_local() {
 #	1		Failure
 ########
 function config_set_derived_variables() {
+	## init vars
+	local flavour;
+
+
+	## Java + options
 	readonly INVOCATION="java -Xmx$MAXMEM -Xms$INITMEM -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_COUNT -XX:+AggressiveOpts -jar $SERVICE nogui";
+
+
+	## CraftBukkit or Vanilla?
+	echo_debug "CB_JAR $CB_JAR";
+	echo_debug "MC_JAR $MC_JAR";
+	echo_debug "SERVICE $(basename "$SERVICE")";
+	if [ "$MC_JAR" = "$(basename "$SERVICE")" ]; then
+		flavour='vanilla';
+	elif [ "$CB_JAR" = "$(basename "$SERVICE")" ]; then
+		flavour='bukkit';
+	else
+		echo_err "Failed to find \$FLAVOUR. Have you set \$SERVICE? And \$MC_JAR or \$CB_JAR? Quitting";
+		return 1;
+	fi;
+	readonly FLAVOUR="$flavour";
+
 
 	return 0;
 }
