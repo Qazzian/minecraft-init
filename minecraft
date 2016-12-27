@@ -1103,14 +1103,14 @@ function check_upgrade_vanilla() {
 	url="$(wget -q -O - "$MC_DOWNLOAD_PAGE" | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")')";
 
 	echo_out "Checking for upgrade for minecraft_server.jar (Vanilla)";
-	as_user "cd $MCPATH && wget -q -O $MCPATH/minecraft_server.jar.update $url";
+	as_user "cd $MCPATH && wget -q -O $MCPATH/minecraft_server.latest.jar $url";
 
-	if [ ! -r "$MCPATH/minecraft_server.jar.update" ]; then
+	if [ ! -r "$MCPATH/minecraft_server.latest.jar" ]; then
 		echo_err "Couldn't download minecraft_server.jar; quitting";
 		return 1;
 	fi;
 
-	if ( diff "$MCPATH/$MC_JAR" "$MCPATH/minecraft_server.jar.update" >/dev/null ); then
+	if ( diff "$MCPATH/$MC_JAR" "$MCPATH/minecraft_server.latest.jar" >/dev/null ); then
 		echo_out "You are already running the latest version of minecraft_server.jar";
 		return 1;
 	fi;
@@ -1186,18 +1186,18 @@ function check_upgrade_craftbukkit() {
 
 
 	# fetch the JAR from echo_cb_release_channel()
-	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.jar.update $(echo_cb_release_channel)";
+	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.latest.jar $(echo_cb_release_channel)";
 
 
 	# if no downloaded file, quit
-	if [ ! -r "$MCPATH/craftbukkit.jar.update" ]; then
+	if [ ! -r "$MCPATH/craftbukkit.latest.jar" ]; then
 		echo_err "Something went wrong. Couldn't download craftbukkit.jar; quitting";
 		return 1;
 	fi;
 
 
 	# if no change, quit
-	if ( diff "$MCPATH/$CB_JAR" "$MCPATH/craftbukkit.jar.update" >/dev/null ); then
+	if ( diff "$MCPATH/$CB_JAR" "$MCPATH/craftbukkit.latest.jar" >/dev/null ); then
 		echo_out "You are already running the latest version of craftbukkit.jar";
 		return 1;
 	fi;
@@ -1235,28 +1235,28 @@ function jar_upgrade() {
 
 
 	if check_upgrade_vanilla; then
-		if [ ! -r "$MCPATH/minecraft_server.jar.update" ]; then
+		if [ ! -r "$MCPATH/minecraft_server.latest.jar" ]; then
 			echo_err "Can't find/read downloaded upgrade; quitting";
 			return 1;
 		fi;
-		as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR";
+		as_user "mv $MCPATH/minecraft_server.latest.jar $MCPATH/$MC_JAR";
 		echo_out "Thats it. Upgrade of $MC_JAR done";
 	else
 		echo_out "Not upgrading $MB_JAR; it's not necessary";
-		as_user "rm $MCPATH/minecraft_server.jar.update";
+		as_user "rm $MCPATH/minecraft_server.latest.jar";
 	fi;
 
 
 	if check_upgrade_craftbukkit; then
-		if [ ! -r "$MCPATH/craftbukkit.jar.update" ]; then
+		if [ ! -r "$MCPATH/craftbukkit.latest.jar" ]; then
 			echo_err "Can't find/read downloaded upgrade; quitting";
 			return 1;
 		fi;
-		as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR";
+		as_user "mv $MCPATH/craftbukkit.latest.jar $MCPATH/$CB_JAR";
 		echo_out "Thats it. Upgrade of $CB_JAR done";
 	else
 		echo_out "Not updating $CB_JAR. It's not necessary";
-		as_user "rm $MCPATH/craftbukkit.jar.update";
+		as_user "rm $MCPATH/craftbukkit.latest.jar";
 	fi;
 
 
@@ -1719,8 +1719,8 @@ function route_command() {
 		check-upgrade)
 			check_upgrade_vanilla
 			check_upgrade_craftbukkit
-			as_user "rm $MCPATH/minecraft_server.jar.update"
-			as_user "rm $MCPATH/craftbukkit.jar.update"
+			as_user "rm $MCPATH/minecraft_server.latest.jar"
+			as_user "rm $MCPATH/craftbukkit.latest.jar"
 			;;
 
 
