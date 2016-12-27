@@ -433,7 +433,6 @@ function config_load_defaults() {
 	## config MineCraft
 	MC_JAR="minecraft_server.jar";
 	CB_JAR="craftbukkit.jar";
-	CB_RELEASE="stable";
 	SERVICE="$MC_JAR";
 	MCPATH="/usr/lib/minecraft";
 	SERVERLOG="${MCPATH}/logs/latest.log";
@@ -458,6 +457,9 @@ function config_load_defaults() {
 
 	## logging
 	LOGPATH="/var/log/minecraft";
+
+	## upgrades
+	CB_RELEASE="stable";	# Define the release of CraftBukkit to use (stable or unstable)
 
 	## config MineCraft-Overviewer
 	OUTPUTMAP="/home/${USERNAME}/mc-overviewer/render";
