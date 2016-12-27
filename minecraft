@@ -281,7 +281,7 @@ function echo_usage {
 	echo_out "   backup \t\t Backups the worlds defined in the script";
 	echo_out "   whole-backup \t Backups the entire server folder";
 	echo_out "   check-update \t Checks for updates of $CB_JAR and $MC_JAR";
-	echo_out "   update \t\t Fetches the latest version of minecraft.jar server and Bukkit";
+	echo_out "   upgrade \t\t Fetches the latest version of minecraft.jar server and Bukkit";
 	echo_out "   log-roll \t\t Moves and compresses the logfiles";
 	echo_out "   log \t\t\t Prints the server log";
 	echo_out "   to-disk \t\t Copies the worlds from the ramdisk to worldstorage";
@@ -1719,7 +1719,13 @@ function route_command() {
 
 
 		update)
-			#update minecraft_server.jar and craftbukkit.jar (thanks karrth)
+			echo_err "Deprecated; use '$SELF upgrade' instead";
+			return 1;
+			;;
+
+
+		#update minecraft_server.jar and craftbukkit.jar (thanks karrth)
+		upgrade)
 			if is_running; then
 				mc_say "SERVER UPDATE IN 10 SECONDS."
 				mc_stop
