@@ -459,6 +459,7 @@ function config_load_defaults() {
 	LOGPATH="/var/log/minecraft";
 
 	## upgrades
+	MC_DOWNLOAD_PAGE='https://minecraft.net/download/server';	# Official page containing download link for the current minecraft_server.jar
 	CB_RELEASE="stable";	# Define the release of CraftBukkit to use (stable or unstable)
 	CB_DOWNLOAD_URL='http://dl.bukkit.org/latest-RELEASE/craftbukkit.jar';	# Link to latest $CB_JAR. 'RELEASE', if present, will be replaced with $CB_RELEASE
 
