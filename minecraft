@@ -280,7 +280,7 @@ function echo_usage {
 	echo_out "   reload \t\t Reloads the server configuration";
 	echo_out "   backup \t\t Backups the worlds defined in the script";
 	echo_out "   whole-backup \t Backups the entire server folder";
-	echo_out "   check-update \t Checks for updates of $CB_JAR and $MC_JAR";
+	echo_out "   check-upgrade \t Checks for new versions of $CB_JAR and $MC_JAR";
 	echo_out "   upgrade \t\t Fetches the latest version of minecraft.jar server and Bukkit";
 	echo_out "   log-roll \t\t Moves and compresses the logfiles";
 	echo_out "   log \t\t\t Prints the server log";
@@ -1711,6 +1711,12 @@ function route_command() {
 
 
 		check-update)
+			echo_err "Deprecated; use '$SELF check-upgrade' instead";
+			return 1;
+			;;
+
+
+		check-upgrade)
 			check_update_vanilla
 			check_update_craftbukkit
 			as_user "rm $MCPATH/minecraft_server.jar.update"
