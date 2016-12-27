@@ -1088,21 +1088,21 @@ to_disk() {
 #
 # Globals
 #	MC_DOWNLOAD_PAGE	Page to scrape
-#	MC_JAR			  File to find
-#	MC_PATH			 Where to put the download
+#	MC_JAR				File to find
+#	MC_PATH				Where to find the old, and put the new, Jar
 #
 # Arguments
 #	None
 #
 # Returns
-#	0				   Success; update found
-#	1				   Error; no update
+#	0					Success; upgrade found
+#	1					Error OR no upgrade
 ########
-function check_update_vanilla() {
+function check_upgrade_vanilla() {
 	local url;
 	url="$(wget -q -O - "$MC_DOWNLOAD_PAGE" | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")')";
 
-	echo_out "Checking for update for minecraft_server.jar (Vanilla)";
+	echo_out "Checking for upgrade for minecraft_server.jar (Vanilla)";
 	as_user "cd $MCPATH && wget -q -O $MCPATH/minecraft_server.jar.update $url";
 
 	if [ ! -r "$MCPATH/minecraft_server.jar.update" ]; then
@@ -1115,7 +1115,7 @@ function check_update_vanilla() {
 		return 1;
 	fi;
 
-	echo_out "Update of $MC_JAR is needed."
+	echo_out "Upgrade of $MC_JAR is available";
 	return 0
 }
 
@@ -1171,17 +1171,17 @@ function echo_cb_release_channel() {
 # Globals
 #	CB_JAR			Name of the Craft Bukkit jar-file
 #	CB_RELEASE		Which channel to follow (e.g. Alpha)
-#	MCPATH			Where to find $CB_JAR and the update on this server
+#	MCPATH			Where to find old and new versions of $CB_JAR on this server
 #
 # Arguments
 #	None
 #
 # Returns
-#	0				Update available
-#	1				Failure OR no update available
+#	0				Upgrade available
+#	1				Failure OR no upgrade available
 ########
-function check_update_craftbukkit() {
-	echo_info "Checking for update for craftbukkit.jar";
+function check_upgrade_craftbukkit() {
+	echo_info "Checking for upgrade for craftbukkit.jar";
 	echo_info "You are on release channel \"$CB_RELEASE\"";
 
 
@@ -1204,7 +1204,7 @@ function check_update_craftbukkit() {
 
 
 	# output
-	echo_out "Update of $CB_JAR is needed";
+	echo_out "Upgrade of $CB_JAR is needed";
 
 
 	return 0
@@ -1234,26 +1234,26 @@ function jar_upgrade() {
 	fi;
 
 
-	if check_update_vanilla; then
+	if check_upgrade_vanilla; then
 		if [ ! -r "$MCPATH/minecraft_server.jar.update" ]; then
 			echo_err "Can't find/read downloaded upgrade; quitting";
 			return 1;
 		fi;
 		as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR";
-		echo_out "Thats it. Update of $MC_JAR done";
+		echo_out "Thats it. Upgrade of $MC_JAR done";
 	else
-		echo_out "Not updating $MB_JAR. It's not necessary";
+		echo_out "Not upgrading $MB_JAR; it's not necessary";
 		as_user "rm $MCPATH/minecraft_server.jar.update";
 	fi;
 
 
-	if check_update_craftbukkit; then
+	if check_upgrade_craftbukkit; then
 		if [ ! -r "$MCPATH/craftbukkit.jar.update" ]; then
 			echo_err "Can't find/read downloaded upgrade; quitting";
 			return 1;
 		fi;
 		as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR";
-		echo_out "Thats it. Update of $CB_JAR done";
+		echo_out "Thats it. Upgrade of $CB_JAR done";
 	else
 		echo_out "Not updating $CB_JAR. It's not necessary";
 		as_user "rm $MCPATH/craftbukkit.jar.update";
@@ -1717,8 +1717,8 @@ function route_command() {
 
 
 		check-upgrade)
-			check_update_vanilla
-			check_update_craftbukkit
+			check_upgrade_vanilla
+			check_upgrade_craftbukkit
 			as_user "rm $MCPATH/minecraft_server.jar.update"
 			as_user "rm $MCPATH/craftbukkit.jar.update"
 			;;
@@ -1730,10 +1730,10 @@ function route_command() {
 			;;
 
 
-		#update minecraft_server.jar and craftbukkit.jar (thanks karrth)
+		#upgrade minecraft_server.jar and craftbukkit.jar (thanks karrth)
 		upgrade)
 			if is_running; then
-				mc_say "SERVER UPDATE IN 10 SECONDS."
+				mc_say "SERVER UPGRADE IN 10 SECONDS."
 				mc_stop
 				to_disk
 				mc_whole_backup
