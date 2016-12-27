@@ -1211,39 +1211,56 @@ function check_update_craftbukkit() {
 }
 
 
-function jar_upgrade() {
-	if is_running
-	then
-		echo_err "$SERVICE is running! Will not start update";
-	else
-		if check_update_vanilla
-		then
-			if [ -r "$MCPATH/minecraft_server.jar.update" ]
-			then
-				as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR"
-				echo_out "Thats it. Update of $MC_JAR done";
-			else
-				echo_err "Something went wrong. Couldn't replace your original $MC_JAR with minecraft_server.jar.update"
-			fi
-		else
-			echo_out "Not updating $MB_JAR. It's not necessary"
-			as_user "rm $MCPATH/minecraft_server.jar.update"
-		fi
 
-		if check_update_craftbukkit
-		then
-			if [ -r "$MCPATH/craftbukkit.jar.update" ]
-			then
-				as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR"
-				echo_out "Thats it. Update of $CB_JAR done";
-			else
-				echo_err "Something went wrong. Couldn't replace your original $CB_JAR with craftbukkit.jar.update"
-			fi
-		else
-			echo_out "Not updating $CB_JAR. It's not necessary"
-			as_user "rm $MCPATH/craftbukkit.jar.update"
-		fi
-	fi
+########
+# Upgrades the server-jar to latest version
+#
+# Globals
+#	CB_JAR		Filename of Craftbukkit jar
+#	MCPATH		Where to find/put the Jar
+#	MC_JAR		Filename of Vanilla jar
+#
+# Arguments
+#	None
+#
+# Returns
+#	0			Success
+#	1			Failure
+########
+function jar_upgrade() {
+	if is_running; then
+		echo_err "Server is running! Cannot upgrade; quitting";
+		return 1;
+	fi;
+
+
+	if check_update_vanilla; then
+		if [ ! -r "$MCPATH/minecraft_server.jar.update" ]; then
+			echo_err "Can't find/read downloaded upgrade; quitting";
+			return 1;
+		fi;
+		as_user "mv $MCPATH/minecraft_server.jar.update $MCPATH/$MC_JAR";
+		echo_out "Thats it. Update of $MC_JAR done";
+	else
+		echo_out "Not updating $MB_JAR. It's not necessary";
+		as_user "rm $MCPATH/minecraft_server.jar.update";
+	fi;
+
+
+	if check_update_craftbukkit; then
+		if [ ! -r "$MCPATH/craftbukkit.jar.update" ]; then
+			echo_err "Can't find/read downloaded upgrade; quitting";
+			return 1;
+		fi;
+		as_user "mv $MCPATH/craftbukkit.jar.update $MCPATH/$CB_JAR";
+		echo_out "Thats it. Update of $CB_JAR done";
+	else
+		echo_out "Not updating $CB_JAR. It's not necessary";
+		as_user "rm $MCPATH/craftbukkit.jar.update";
+	fi;
+
+
+	return 0;
 }
 
 
