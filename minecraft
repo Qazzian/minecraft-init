@@ -900,7 +900,7 @@ mc_world_backup() {
 	#
 
 	check_backup_settings
-	get_worlds
+	get_worlds || return 1;
 	today="`date +%F-%H-%M-%S`"
 	as_user "mkdir -p $BACKUPPATH"
 
@@ -912,31 +912,46 @@ mc_world_backup() {
 		as_user "rm -r $BACKUPPATH/*"
 	fi
 
-	for INDEX in ${!WORLD_NAMES[@]}
-	do
-		echo_out "Backing up minecraft ${WORLD_NAMES[$INDEX]}"
-		if [ "$WORLDEDITCOMPATIBLE" ]
+
+	## declare vars
+	local index world_name;
+
+
+	for index in "${!WORLD_NAMES[@]}"; do
+		world_name="${WORLD_NAMES[$INDEX]}";
+
+
+		echo_out "Backing up minecraft $world_name";
+
+
 		# If this is set tars will be created compatible to WorldEdit
-		then
-			as_user "mkdir -p $BACKUPPATH/${WORLD_NAMES[$INDEX]}"
-			path=`datepath $BACKUPPATH/${WORLD_NAMES[$INDEX]}/ $ARCHIVEENDING $ARCHIVEENDING`
-		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]
+		if [ "$WORLDEDITCOMPATIBLE" ]; then
+			as_user "mkdir -p $BACKUPPATH/$world_name";
+			path="$(datepath $BACKUPPATH/$world_name/ $ARCHIVEENDING $ARCHIVEENDING)";
+
+
 		# If is set tars will be put in $BACKUPPATH without any timestamp to be compatible with
 		# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
-		then
-			path=$BACKUPPATH/${WORLD_NAMES[$INDEX]}$ARCHIVEENDING
+		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]; then
+			path="$BACKUPPATH/$world_name$ARCHIVEENDING";
+
+
 		else
-			as_user "mkdir -p $BACKUPPATH/${today}"
-			path=`datepath $BACKUPPATH/${today}/${WORLD_NAMES[$INDEX]}_ $ARCHIVEENDING $ARCHIVEENDING`
-		fi
-		if [ "$WORLDEDITCOMPATIBLE" ]
+			as_user "mkdir -p $BACKUPPATH/${today}";
+			path="$(datepath $BACKUPPATH/${today}/$world_name_ $ARCHIVEENDING $ARCHIVEENDING)";
+		fi;
+
+
 		# Don't store the complete path
-		then
-			as_user "cd $MCPATH && $COMPRESSCMD $path ${WORLD_NAMES[$INDEX]}"
+		if [ "$WORLDEDITCOMPATIBLE" ]; then
+			as_user "cd $MCPATH && $COMPRESSCMD $path $world_name";
 		else
-			as_user "$COMPRESSCMD $path $MCPATH/${WORLD_NAMES[$INDEX]}"
-		fi
-	done
+			as_user "$COMPRESSCMD $path $MCPATH/$world_name";
+		fi;
+	done;
+
+
+	return 0;
 }
 
 
@@ -1012,32 +1027,54 @@ function check_links() {
 
 
 to_ram() {
-	get_worlds
-	for INDEX in ${!WORLD_NAMES[@]}
-	do
-		if ${WORLD_RAM_STATES[$INDEX]}
-		then
-			if [ -L $MCPATH/${WORLD_NAMES[$INDEX]} ]
-			then
-				as_user "mkdir -p $RAMDISK"
-				as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/${WORLD_NAMES[$INDEX]}/ $RAMDISK/${WORLD_NAMES[$INDEX]}"
-				echo_out "${WORLD_NAMES[$INDEX]} copied to ram"
-			fi
-		fi
-	done
+	get_worlds || return 1;
+
+
+	## declare vars
+	local index world_name;
+
+
+	for index in "${!WORLD_NAMES[@]}"; do
+		world_name="${WORLD_NAMES[$INDEX]}";
+
+
+		if ${WORLD_RAM_STATES[$INDEX]}; then
+			if [ ! -L "$MCPATH/$world_name" ]; then
+				continue;
+			fi;
+
+
+			as_user "mkdir -p $RAMDISK"
+			as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/$world_name/ $RAMDISK/$world_name"
+			echo_out "World '$world_name' copied to ram"
+		fi;
+	done;
+
+
+	return 0;
 }
 
 
 to_disk() {
-	get_worlds
-	for INDEX in ${!WORLD_NAMES[@]}
-	do
-		if ${WORLD_RAM_STATES[$INDEX]}
-		then
-			as_user "rsync -rt --exclude 'ramdisk' $MCPATH/${WORLD_NAMES[$INDEX]}/ ${WORLDSTORAGE}/${WORLD_NAMES[$INDEX]}"
-			echo_out "${WORLD_NAMES[$INDEX]} copied to disk"
-		fi
-	done
+	get_worlds || return 1;
+
+
+	## declare vars
+	local index world_name;
+
+
+	for index in "${!WORLD_NAMES[@]}"; do
+		world_name="${WORLD_NAMES[$INDEX]}";
+
+
+		if ${WORLD_RAM_STATES[$INDEX]}; then
+			as_user "rsync -rt --exclude 'ramdisk' $MCPATH/$world_name/ ${WORLDSTORAGE}/$world_name"
+			echo_out "World '$world_name' copied to disk"
+		fi;
+	done;
+
+
+	return 0;
 }
 
 
@@ -1206,18 +1243,27 @@ overviewer_start() {
 }
 
 
-overviewer_copy_worlds() {
-	#
-	# Backup the worlds for overviewer
-	#
 
-	get_worlds
-	for INDEX in ${!WORLD_NAMES[@]}
-	do
-		echo_out "Copying minecraft ${WORLD_NAMES[$INDEX]}."
+########
+# Backup the worlds for overviewer
+########
+overviewer_copy_worlds() {
+	get_worlds || return 1;
+
+
+	## declare vars
+	local index world_name;
+
+
+	for index in "${!WORLD_NAMES[@]}"; do
+		world_name="${WORLD_NAMES[$INDEX]}";
+
+		echo_out "Copying minecraft $world_name."
 		as_user "mkdir -p $OVBACKUP"
-		as_user "rsync -rt --delete $WORLDSTORAGE/${WORLD_NAMES[$INDEX]} $OVBACKUP/${WORLD_NAMES[$INDEX]}"
-	done
+		as_user "rsync -rt --delete $WORLDSTORAGE/$world_name $OVBACKUP/$world_name"
+	done;
+
+	return 0;
 }
 
 
@@ -1465,6 +1511,10 @@ function route_command() {
 	echo_debug "@=$*";
 	echo_debug "INIT_COMMAND=$INIT_COMMAND";
 	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
+
+
+	## declare vars
+	local index;
 
 
 	case "$INIT_COMMAND" in
@@ -1725,16 +1775,14 @@ function route_command() {
 
 
 		worlds)
-			get_worlds
-			for INDEX in ${!WORLD_NAMES[@]}
-			do
-				if ${WORLD_RAM_STATES[$INDEX]}
-				then
-					echo_quiet "${WORLD_NAMES[$INDEX]} (ramdisk)"
+			get_worlds || return 1;
+			for index in "${!WORLD_NAMES[@]}"; do
+				if ${WORLD_RAM_STATES[$index]}; then
+					echo_quiet "${WORLD_NAMES[$index]} (ramdisk)";
 				else
-					echo_quiet ${WORLD_NAMES[$INDEX]}
-				fi
-			done
+					echo_quiet "${WORLD_NAMES[$index]}";
+				fi;
+			done;
 			;;
 
 
