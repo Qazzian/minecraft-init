@@ -962,7 +962,7 @@ function check_links() {
 
 
 	## declare vars
-	local index link world_name;
+	local index link world_name world_ram_state;
 
 
 	echo_debug "WORLD_NAMES ${WORLD_NAMES[*]}";
@@ -970,34 +970,38 @@ function check_links() {
 		echo_debug "index $index";
 		echo_debug "WORLD_NAMES ${WORLD_NAMES[$index]}";
 
+
 		world_name="${WORLD_NAMES[$index]}";
 		echo_debug "world_name $world_name";
 
 
+		## if there's something wrong with the (non-)link, crash
 		## L := symlink
-		## a := exists (deprecated; use -e)
-		if [[ -L "$MCPATH/$world_name" || ! -a "$MCPATH/$world_name" ]]; then
-			link="$(ls -l "$MCPATH/$world_name" | awk '{print $11}')";
-			echo_debug "link $link";
-
-
-			echo_debug "WORLD_RAM_STATES ${WORLD_RAM_STATES[$index]}";
-			if ${WORLD_RAM_STATES[$index]}; then
-				if [ "$link" != "$RAMDISK/$world_name" ]; then
-					as_user "rm -f $MCPATH/$world_name";
-					as_user "ln -s $RAMDISK/$world_name $MCPATH/$world_name";
-					echo_out "Created link for $world_name";
-				fi;
-			else
-				if [ "$link" != "${WORLDSTORAGE}/$world_name" ]; then
-					as_user "rm -f $MCPATH/$world_name";
-					as_user "ln -s ${WORLDSTORAGE}/$world_name $MCPATH/$world_name";
-					echo_out "Created link for $world_name";
-				fi;
-			fi;
-		else
+		## e := exists
+		if [[ -e "$MCPATH/$world_name" && ! -L "$MCPATH/$world_name" ]]; then
 			echo_err "Could not process the world named '$world_name'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
 			exit 1;
+		fi;
+		
+	
+		link="$(ls -l "$MCPATH/$world_name" | awk '{print $11}')";
+		echo_debug "link $link";
+
+
+		world_ram_state="${WORLD_RAM_STATES[$index]}";
+		echo_debug "world_ram_state $world_ram_state";
+		if ${world_ram_state}; then
+			if [ "$link" != "$RAMDISK/$world_name" ]; then
+				as_user "rm -f $MCPATH/$world_name";
+				as_user "ln -s $RAMDISK/$world_name $MCPATH/$world_name";
+				echo_out "Created link for $world_name";
+			fi;
+		else
+			if [ "$link" != "${WORLDSTORAGE}/$world_name" ]; then
+				as_user "rm -f $MCPATH/$world_name";
+				as_user "ln -s ${WORLDSTORAGE}/$world_name $MCPATH/$world_name";
+				echo_out "Created link for $world_name";
+			fi;
 		fi;
 	done;
 
