@@ -972,7 +972,7 @@ mc_world_backup() {
 #	0		Success
 #	1		Failure
 ########
-function check_links() {
+function symlink_worlds_inside_MCPATH() {
 	get_worlds || return 1;
 
 
@@ -1523,7 +1523,7 @@ function route_command() {
 			if is_running; then
 				echo_out "Server already running."
 			else
-				check_links
+				symlink_worlds_inside_MCPATH || return 1;
 				to_ram
 				mc_start
 			fi
@@ -1551,7 +1551,7 @@ function route_command() {
 			else
 				echo_out "No running server, starting it..."
 			fi
-			check_links
+			symlink_worlds_inside_MCPATH || return 1;
 			to_ram
 			mc_start
 			;;
@@ -1618,7 +1618,7 @@ function route_command() {
 				mc_stop
 				to_disk
 				mc_whole_backup
-				check_links
+				symlink_worlds_inside_MCPATH || return 1;
 				mc_start
 			else
 				mc_whole_backup
@@ -1642,7 +1642,7 @@ function route_command() {
 				to_disk
 				mc_whole_backup
 				mc_update
-				check_links
+				symlink_worlds_inside_MCPATH || return 1;
 				mc_start
 			else
 				mc_whole_backup
@@ -1764,7 +1764,7 @@ function route_command() {
 
 
 		links)
-			check_links || return 1;
+			symlink_worlds_inside_MCPATH || return 1;
 			echo_out "Re-built links to saved worlds";
 			;;
 
@@ -1810,7 +1810,7 @@ function route_command() {
 			read START_SERVER
 			case "$START_SERVER" in
 				[Yy]|[Yy][Ee][Ss])
-					check_links
+					symlink_worlds_inside_MCPATH || return 1;
 					to_ram
 					mc_start
 					as_user "script /dev/null -q -c \"screen -rx $SCREEN\""
