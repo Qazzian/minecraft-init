@@ -292,7 +292,7 @@ function echo_usage {
 	echo_out "   playercount \t\t Prints the number of connected users";
 	echo_out "   status \t\t Displays server status";
 	echo_out "   version \t\t Displays Bukkit version and then exits";
-	echo_out "   links \t\t Creates nessesary symlinks";
+	echo_out "   link-worlds \t\t Creates necessary symlinks from your server folder to your saved world";
 	echo_out "   last \t\t Displays recently connected users";
 	echo_out "   worlds \t\t Displays a list of available worlds";
 	echo_out "   ramdisk WORLD \t Toggles ramdisk configuration for WORLD";
@@ -1764,6 +1764,12 @@ function route_command() {
 
 
 		links)
+			echo_err "'$SELF links' is deprecated; use '$SELF link-worlds'; quitting";
+			return 1;
+			;;
+
+
+		'link-worlds')
 			symlink_worlds_inside_MCPATH || return 1;
 			echo_out "Re-built links to saved worlds";
 			;;
