@@ -1010,13 +1010,13 @@ function symlink_worlds_inside_MCPATH() {
 			if [ "$link" != "$RAMDISK/$world_name" ]; then
 				as_user "rm -f $MCPATH/$world_name";
 				as_user "ln -s $RAMDISK/$world_name $MCPATH/$world_name";
-				echo_out "Created link for $world_name";
+				echo_out "Created link for World '$world_name'";
 			fi;
 		else
 			if [ "$link" != "${WORLDSTORAGE}/$world_name" ]; then
 				as_user "rm -f $MCPATH/$world_name";
 				as_user "ln -s ${WORLDSTORAGE}/$world_name $MCPATH/$world_name";
-				echo_out "Created link for $world_name";
+				echo_out "Created link for World '$world_name'";
 			fi;
 		fi;
 	done;
