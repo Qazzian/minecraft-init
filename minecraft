@@ -1142,7 +1142,7 @@ to_disk() {
 #	1		Failure
 #	2		Success; upgrade NOT needed
 ########
-function check_upgrade_vanilla() {
+function is_vanilla_upgrade_available() {
 	local basename url;
 
 
@@ -1296,7 +1296,7 @@ function jar_upgrade() {
 	fi;
 
 
-	if check_upgrade_vanilla; then
+	if is_vanilla_upgrade_available; then
 		if [ ! -r "$MCPATH/minecraft_server.latest.jar" ]; then
 			echo_err "Can't find/read downloaded upgrade; quitting";
 			return 1;
