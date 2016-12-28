@@ -982,9 +982,10 @@ function check_links() {
 			echo_err "Could not process the world named '$world_name'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
 			exit 1;
 		fi;
-		
-	
-		link="$(ls -l "$MCPATH/$world_name" | awk '{print $11}')";
+
+
+		## if we've already got a symlink, see where it points
+		link="$(readlink "$MCPATH/$world_name")";
 		echo_debug "link $link";
 
 
