@@ -857,7 +857,7 @@ get_worlds() {
 	do
 		if [ -d $WORLDSTORAGE/$NAME ]
 		then
-			WORLDNAME[$a]=$NAME
+			WORLD_NAMES[$a]=$NAME
 			if [ -e $WORLDSTORAGE/$NAME/ramdisk ]
 			then
 				WORLD_RAM_STATES[$a]=true
@@ -912,29 +912,29 @@ mc_world_backup() {
 		as_user "rm -r $BACKUPPATH/*"
 	fi
 
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in ${!WORLD_NAMES[@]}
 	do
-		echo_out "Backing up minecraft ${WORLDNAME[$INDEX]}"
+		echo_out "Backing up minecraft ${WORLD_NAMES[$INDEX]}"
 		if [ "$WORLDEDITCOMPATIBLE" ]
 		# If this is set tars will be created compatible to WorldEdit
 		then
-			as_user "mkdir -p $BACKUPPATH/${WORLDNAME[$INDEX]}"
-			path=`datepath $BACKUPPATH/${WORLDNAME[$INDEX]}/ $ARCHIVEENDING $ARCHIVEENDING`
+			as_user "mkdir -p $BACKUPPATH/${WORLD_NAMES[$INDEX]}"
+			path=`datepath $BACKUPPATH/${WORLD_NAMES[$INDEX]}/ $ARCHIVEENDING $ARCHIVEENDING`
 		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]
 		# If is set tars will be put in $BACKUPPATH without any timestamp to be compatible with
 		# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
 		then
-			path=$BACKUPPATH/${WORLDNAME[$INDEX]}$ARCHIVEENDING
+			path=$BACKUPPATH/${WORLD_NAMES[$INDEX]}$ARCHIVEENDING
 		else
 			as_user "mkdir -p $BACKUPPATH/${today}"
-			path=`datepath $BACKUPPATH/${today}/${WORLDNAME[$INDEX]}_ $ARCHIVEENDING $ARCHIVEENDING`
+			path=`datepath $BACKUPPATH/${today}/${WORLD_NAMES[$INDEX]}_ $ARCHIVEENDING $ARCHIVEENDING`
 		fi
 		if [ "$WORLDEDITCOMPATIBLE" ]
 		# Don't store the complete path
 		then
-			as_user "cd $MCPATH && $COMPRESSCMD $path ${WORLDNAME[$INDEX]}"
+			as_user "cd $MCPATH && $COMPRESSCMD $path ${WORLD_NAMES[$INDEX]}"
 		else
-			as_user "$COMPRESSCMD $path $MCPATH/${WORLDNAME[$INDEX]}"
+			as_user "$COMPRESSCMD $path $MCPATH/${WORLD_NAMES[$INDEX]}"
 		fi
 	done
 }
@@ -942,13 +942,13 @@ mc_world_backup() {
 
 
 ########
-# Loops through WORLDNAME, (re)creating a link for each world in $MCPATH
+# Loops through WORLD_NAMES, (re)creating a link for each world in $MCPATH
 #
 # Globals
-#	MCPATH			Path to the server jar; where symlinks-to-worlds should be created
-#	WORLDNAME		List of world-names
-#	WORLD_RAM_STATES		Boolean list of whether each world should use the ram-disk
-#	WORLDSTORAGE	Where, on disk, games are saved
+#	MCPATH				Path to the server jar; where symlinks-to-worlds should be created
+#	WORLD_NAMES			List of world-names
+#	WORLD_RAM_STATES	Boolean list of whether each world should use the ram-disk
+#	WORLDSTORAGE		Where, on disk, games are saved
 #
 # Arguments
 #	None
@@ -965,35 +965,35 @@ function check_links() {
 	local index link;
 
 
-	echo_debug "WORLDNAME ${WORLDNAME[@]}";
-	for index in "${!WORLDNAME[@]}"; do
+	echo_debug "WORLD_NAMES ${WORLD_NAMES[*]}";
+	for index in "${!WORLD_NAMES[@]}"; do
 		echo_debug "index $index";
-		echo_debug "WORLDNAME ${WORLDNAME[$index]}";
+		echo_debug "WORLD_NAMES ${WORLD_NAMES[$index]}";
 
 
 		## L := symlink
 		## a := exists (deprecated; use -e)
-		if [[ -L $MCPATH/${WORLDNAME[$index]} || ! -a $MCPATH/${WORLDNAME[$index]} ]]; then
-			link="$(ls -l $MCPATH/${WORLDNAME[$index]} | awk '{print $11}')";
+		if [[ -L $MCPATH/${WORLD_NAMES[$index]} || ! -a $MCPATH/${WORLD_NAMES[$index]} ]]; then
+			link="$(ls -l $MCPATH/${WORLD_NAMES[$index]} | awk '{print $11}')";
 			echo_debug "link $link";
 
 
 			echo_debug "WORLD_RAM_STATES ${WORLD_RAM_STATES[$index]}";
 			if ${WORLD_RAM_STATES[$index]}; then
-				if [ "$link" != "$RAMDISK/${WORLDNAME[$index]}" ]; then
-					as_user "rm -f $MCPATH/${WORLDNAME[$index]}";
-					as_user "ln -s $RAMDISK/${WORLDNAME[$index]} $MCPATH/${WORLDNAME[$index]}";
-					echo_out "Created link for ${WORLDNAME[$index]}";
+				if [ "$link" != "$RAMDISK/${WORLD_NAMES[$index]}" ]; then
+					as_user "rm -f $MCPATH/${WORLD_NAMES[$index]}";
+					as_user "ln -s $RAMDISK/${WORLD_NAMES[$index]} $MCPATH/${WORLD_NAMES[$index]}";
+					echo_out "Created link for ${WORLD_NAMES[$index]}";
 				fi;
 			else
-				if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$index]}" ]; then
-					as_user "rm -f $MCPATH/${WORLDNAME[$index]}";
-					as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$index]} $MCPATH/${WORLDNAME[$index]}";
-					echo_out "Created link for ${WORLDNAME[$index]}";
+				if [ "$link" != "${WORLDSTORAGE}/${WORLD_NAMES[$index]}" ]; then
+					as_user "rm -f $MCPATH/${WORLD_NAMES[$index]}";
+					as_user "ln -s ${WORLDSTORAGE}/${WORLD_NAMES[$index]} $MCPATH/${WORLD_NAMES[$index]}";
+					echo_out "Created link for ${WORLD_NAMES[$index]}";
 				fi;
 			fi;
 		else
-			echo_err "Could not process the world named '${WORLDNAME[$index]}'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
+			echo_err "Could not process the world named '${WORLD_NAMES[$index]}'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
 			exit 1;
 		fi;
 	done;
@@ -1005,15 +1005,15 @@ function check_links() {
 
 to_ram() {
 	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in ${!WORLD_NAMES[@]}
 	do
 		if ${WORLD_RAM_STATES[$INDEX]}
 		then
-			if [ -L $MCPATH/${WORLDNAME[$INDEX]} ]
+			if [ -L $MCPATH/${WORLD_NAMES[$INDEX]} ]
 			then
 				as_user "mkdir -p $RAMDISK"
-				as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}/ $RAMDISK/${WORLDNAME[$INDEX]}"
-				echo_out "${WORLDNAME[$INDEX]} copied to ram"
+				as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/${WORLD_NAMES[$INDEX]}/ $RAMDISK/${WORLD_NAMES[$INDEX]}"
+				echo_out "${WORLD_NAMES[$INDEX]} copied to ram"
 			fi
 		fi
 	done
@@ -1022,12 +1022,12 @@ to_ram() {
 
 to_disk() {
 	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in ${!WORLD_NAMES[@]}
 	do
 		if ${WORLD_RAM_STATES[$INDEX]}
 		then
-			as_user "rsync -rt --exclude 'ramdisk' $MCPATH/${WORLDNAME[$INDEX]}/ ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}"
-			echo_out "${WORLDNAME[$INDEX]} copied to disk"
+			as_user "rsync -rt --exclude 'ramdisk' $MCPATH/${WORLD_NAMES[$INDEX]}/ ${WORLDSTORAGE}/${WORLD_NAMES[$INDEX]}"
+			echo_out "${WORLD_NAMES[$INDEX]} copied to disk"
 		fi
 	done
 }
@@ -1204,11 +1204,11 @@ overviewer_copy_worlds() {
 	#
 
 	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
+	for INDEX in ${!WORLD_NAMES[@]}
 	do
-		echo_out "Copying minecraft ${WORLDNAME[$INDEX]}."
+		echo_out "Copying minecraft ${WORLD_NAMES[$INDEX]}."
 		as_user "mkdir -p $OVBACKUP"
-		as_user "rsync -rt --delete $WORLDSTORAGE/${WORLDNAME[$INDEX]} $OVBACKUP/${WORLDNAME[$INDEX]}"
+		as_user "rsync -rt --delete $WORLDSTORAGE/${WORLD_NAMES[$INDEX]} $OVBACKUP/${WORLD_NAMES[$INDEX]}"
 	done
 }
 
@@ -1718,13 +1718,13 @@ function route_command() {
 
 		worlds)
 			get_worlds
-			for INDEX in ${!WORLDNAME[@]}
+			for INDEX in ${!WORLD_NAMES[@]}
 			do
 				if ${WORLD_RAM_STATES[$INDEX]}
 				then
-					echo_quiet "${WORLDNAME[$INDEX]} (ramdisk)"
+					echo_quiet "${WORLD_NAMES[$INDEX]} (ramdisk)"
 				else
-					echo_quiet ${WORLDNAME[$INDEX]}
+					echo_quiet ${WORLD_NAMES[$INDEX]}
 				fi
 			done
 			;;
