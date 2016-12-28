@@ -1273,6 +1273,11 @@ function echo_cb_release_channel() {
 
 
 ########
+# CraftBukkit is dead; throw an error
+#
+# See
+#	https://bukkit.org/threads/bukkit-is-permanently-dead-heres-why.312799/
+########
 # Fetch the current Jar, compare to $CB_JAR, and report the result
 #
 # Globals
@@ -1286,35 +1291,42 @@ function echo_cb_release_channel() {
 # Returns
 #	0				Upgrade available
 #	1				Failure OR no upgrade available
+#
+# ToDo
+#	Return as per is_upgrade_available()
 ########
 function is_craftbukkit_upgrade_available() {
-	echo_info "Checking for upgrade for craftbukkit.jar";
-	echo_info "You are on release channel \"$CB_RELEASE\"";
+	echo_err "The CraftBukkit project is dead, as of 2014; upgrades are no longer supported. Crashing";
+	exit 1;
 
 
-	# fetch the JAR from echo_cb_release_channel()
-	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.latest.jar $(echo_cb_release_channel)";
-
-
-	# if no downloaded file, quit
-	if [ ! -r "$MCPATH/craftbukkit.latest.jar" ]; then
-		echo_err "Something went wrong. Couldn't download craftbukkit.jar; quitting";
-		return 1;
-	fi;
-
-
-	# if no change, quit
-	if ( diff "$MCPATH/$CB_JAR" "$MCPATH/craftbukkit.latest.jar" >/dev/null ); then
-		echo_out "You are already running the latest version of craftbukkit.jar";
-		return 1;
-	fi;
-
-
-	# output
-	echo_out "Upgrade of $CB_JAR is needed";
-
-
-	return 0
+#	echo_info "Checking for upgrade for craftbukkit.jar";
+#	echo_info "You are on release channel \"$CB_RELEASE\"";
+#
+#
+#	# fetch the JAR from echo_cb_release_channel()
+#	as_user "cd $MCPATH && wget -q -O $MCPATH/craftbukkit.latest.jar $(echo_cb_release_channel)";
+#
+#
+#	# if no downloaded file, quit
+#	if [ ! -r "$MCPATH/craftbukkit.latest.jar" ]; then
+#		echo_err "Something went wrong. Couldn't download craftbukkit.jar; quitting";
+#		return 1;
+#	fi;
+#
+#
+#	# if no change, quit
+#	if ( diff "$MCPATH/$CB_JAR" "$MCPATH/craftbukkit.latest.jar" >/dev/null ); then
+#		echo_out "You are already running the latest version of craftbukkit.jar";
+#		return 1;
+#	fi;
+#
+#
+#	# output
+#	echo_out "Upgrade of $CB_JAR is needed";
+#
+#
+#	return 0
 }
 
 
