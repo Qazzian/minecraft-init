@@ -962,7 +962,7 @@ function check_links() {
 
 
 	## declare vars
-	local index link;
+	local index link world_name;
 
 
 	echo_debug "WORLD_NAMES ${WORLD_NAMES[*]}";
@@ -970,30 +970,33 @@ function check_links() {
 		echo_debug "index $index";
 		echo_debug "WORLD_NAMES ${WORLD_NAMES[$index]}";
 
+		world_name="${WORLD_NAMES[$index]}";
+		echo_debug "world_name $world_name";
+
 
 		## L := symlink
 		## a := exists (deprecated; use -e)
-		if [[ -L $MCPATH/${WORLD_NAMES[$index]} || ! -a $MCPATH/${WORLD_NAMES[$index]} ]]; then
-			link="$(ls -l $MCPATH/${WORLD_NAMES[$index]} | awk '{print $11}')";
+		if [[ -L "$MCPATH/$world_name" || ! -a "$MCPATH/$world_name" ]]; then
+			link="$(ls -l "$MCPATH/$world_name" | awk '{print $11}')";
 			echo_debug "link $link";
 
 
 			echo_debug "WORLD_RAM_STATES ${WORLD_RAM_STATES[$index]}";
 			if ${WORLD_RAM_STATES[$index]}; then
-				if [ "$link" != "$RAMDISK/${WORLD_NAMES[$index]}" ]; then
-					as_user "rm -f $MCPATH/${WORLD_NAMES[$index]}";
-					as_user "ln -s $RAMDISK/${WORLD_NAMES[$index]} $MCPATH/${WORLD_NAMES[$index]}";
-					echo_out "Created link for ${WORLD_NAMES[$index]}";
+				if [ "$link" != "$RAMDISK/$world_name" ]; then
+					as_user "rm -f $MCPATH/$world_name";
+					as_user "ln -s $RAMDISK/$world_name $MCPATH/$world_name";
+					echo_out "Created link for $world_name";
 				fi;
 			else
-				if [ "$link" != "${WORLDSTORAGE}/${WORLD_NAMES[$index]}" ]; then
-					as_user "rm -f $MCPATH/${WORLD_NAMES[$index]}";
-					as_user "ln -s ${WORLDSTORAGE}/${WORLD_NAMES[$index]} $MCPATH/${WORLD_NAMES[$index]}";
-					echo_out "Created link for ${WORLD_NAMES[$index]}";
+				if [ "$link" != "${WORLDSTORAGE}/$world_name" ]; then
+					as_user "rm -f $MCPATH/$world_name";
+					as_user "ln -s ${WORLDSTORAGE}/$world_name $MCPATH/$world_name";
+					echo_out "Created link for $world_name";
 				fi;
 			fi;
 		else
-			echo_err "Could not process the world named '${WORLD_NAMES[$index]}'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
+			echo_err "Could not process the world named '$world_name'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
 			exit 1;
 		fi;
 	done;
