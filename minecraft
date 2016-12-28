@@ -940,35 +940,66 @@ mc_world_backup() {
 }
 
 
-check_links() {
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		if [[ -L $MCPATH/${WORLDNAME[$INDEX]} || ! -a $MCPATH/${WORLDNAME[$INDEX]} ]]
-		then
-			link=`ls -l $MCPATH/${WORLDNAME[$INDEX]} | awk '{print $11}'`
-			if ${WORLDRAM[$INDEX]}
-			then
-				if [ "$link" != "$RAMDISK/${WORLDNAME[$INDEX]}" ]
-				then
-					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
-					as_user "ln -s $RAMDISK/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
-					echo_out "Created link for ${WORLDNAME[$INDEX]}"
-				fi
-			else
-				if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$INDEX]}" ]
-				then
-					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
-					as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
-					echo_out "Created link for ${WORLDNAME[$INDEX]}"
-				fi
-			fi
-		else
-			echo_err "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
 
-			exit 1
-		fi
-	done
+########
+# Loops through WORLDNAME, (re)creating a link for each world in $MCPATH
+#
+# Globals
+#	MCPATH			Path to the server jar; where symlinks-to-worlds should be created
+#	WORLDNAME		List of world-names
+#	WORLDRAM		Boolean list of whether each world should use the ram-disk
+#	WORLDSTORAGE	Where, on disk, games are saved
+#
+# Arguments
+#	None
+#
+# Returns
+#	0		Success
+#	1		Failure
+########
+function check_links() {
+	get_worlds || return 1;
+
+
+	## declare vars
+	local link;
+
+
+	echo_debug "WORLDNAME ${WORLDNAME[@]}";
+	for INDEX in "${!WORLDNAME[@]}"; do
+		echo_debug "INDEX $INDEX";
+		echo_debug "WORLDNAME ${WORLDNAME[$INDEX]}";
+
+
+		## L := symlink
+		## a := exists (deprecated; use -e)
+		if [[ -L $MCPATH/${WORLDNAME[$INDEX]} || ! -a $MCPATH/${WORLDNAME[$INDEX]} ]]; then
+			link="$(ls -l $MCPATH/${WORLDNAME[$INDEX]} | awk '{print $11}')";
+			echo_debug "link $link";
+
+
+			echo_debug "WORLDRAM ${WORLDRAM[$INDEX]}";
+			if ${WORLDRAM[$INDEX]}; then
+				if [ "$link" != "$RAMDISK/${WORLDNAME[$INDEX]}" ]; then
+					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}";
+					as_user "ln -s $RAMDISK/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}";
+					echo_out "Created link for ${WORLDNAME[$INDEX]}";
+				fi;
+			else
+				if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$INDEX]}" ]; then
+					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}";
+					as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}";
+					echo_out "Created link for ${WORLDNAME[$INDEX]}";
+				fi;
+			fi;
+		else
+			echo_err "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
+			exit 1;
+		fi;
+	done;
+
+
+	return 0;
 }
 
 
@@ -1675,7 +1706,8 @@ function route_command() {
 
 
 		links)
-			check_links
+			check_links || return 1;
+			echo_out "Re-built links to saved worlds";
 			;;
 
 
