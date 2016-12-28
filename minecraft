@@ -962,38 +962,38 @@ function check_links() {
 
 
 	## declare vars
-	local link;
+	local index link;
 
 
 	echo_debug "WORLDNAME ${WORLDNAME[@]}";
-	for INDEX in "${!WORLDNAME[@]}"; do
-		echo_debug "INDEX $INDEX";
-		echo_debug "WORLDNAME ${WORLDNAME[$INDEX]}";
+	for index in "${!WORLDNAME[@]}"; do
+		echo_debug "index $index";
+		echo_debug "WORLDNAME ${WORLDNAME[$index]}";
 
 
 		## L := symlink
 		## a := exists (deprecated; use -e)
-		if [[ -L $MCPATH/${WORLDNAME[$INDEX]} || ! -a $MCPATH/${WORLDNAME[$INDEX]} ]]; then
-			link="$(ls -l $MCPATH/${WORLDNAME[$INDEX]} | awk '{print $11}')";
+		if [[ -L $MCPATH/${WORLDNAME[$index]} || ! -a $MCPATH/${WORLDNAME[$index]} ]]; then
+			link="$(ls -l $MCPATH/${WORLDNAME[$index]} | awk '{print $11}')";
 			echo_debug "link $link";
 
 
-			echo_debug "WORLDRAM ${WORLDRAM[$INDEX]}";
-			if ${WORLDRAM[$INDEX]}; then
-				if [ "$link" != "$RAMDISK/${WORLDNAME[$INDEX]}" ]; then
-					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}";
-					as_user "ln -s $RAMDISK/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}";
-					echo_out "Created link for ${WORLDNAME[$INDEX]}";
+			echo_debug "WORLDRAM ${WORLDRAM[$index]}";
+			if ${WORLDRAM[$index]}; then
+				if [ "$link" != "$RAMDISK/${WORLDNAME[$index]}" ]; then
+					as_user "rm -f $MCPATH/${WORLDNAME[$index]}";
+					as_user "ln -s $RAMDISK/${WORLDNAME[$index]} $MCPATH/${WORLDNAME[$index]}";
+					echo_out "Created link for ${WORLDNAME[$index]}";
 				fi;
 			else
-				if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$INDEX]}" ]; then
-					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}";
-					as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}";
-					echo_out "Created link for ${WORLDNAME[$INDEX]}";
+				if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$index]}" ]; then
+					as_user "rm -f $MCPATH/${WORLDNAME[$index]}";
+					as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$index]} $MCPATH/${WORLDNAME[$index]}";
+					echo_out "Created link for ${WORLDNAME[$index]}";
 				fi;
 			fi;
 		else
-			echo_err "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
+			echo_err "Could not process the world named '${WORLDNAME[$index]}'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
 			exit 1;
 		fi;
 	done;
