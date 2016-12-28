@@ -1152,7 +1152,7 @@ function check_upgrade() {
 
 
 		'bukkit')
-			check_upgrade_craftbukkit;
+			is_craftbukkit_upgrade_available;
 			return $?;
 			;;
 
@@ -1287,7 +1287,7 @@ function echo_cb_release_channel() {
 #	0				Upgrade available
 #	1				Failure OR no upgrade available
 ########
-function check_upgrade_craftbukkit() {
+function is_craftbukkit_upgrade_available() {
 	echo_info "Checking for upgrade for craftbukkit.jar";
 	echo_info "You are on release channel \"$CB_RELEASE\"";
 
@@ -1354,7 +1354,7 @@ function jar_upgrade() {
 	fi;
 
 
-	if check_upgrade_craftbukkit; then
+	if is_craftbukkit_upgrade_available; then
 		if [ ! -r "$MCPATH/craftbukkit.latest.jar" ]; then
 			echo_err "Can't find/read downloaded upgrade; quitting";
 			return 1;
