@@ -1138,27 +1138,44 @@ to_disk() {
 #	None
 #
 # Returns
-#	0					Success; upgrade found
-#	1					Error OR no upgrade
+#	0		Success; upgrade needed
+#	1		Failure
+#	2		Success; upgrade NOT needed
 ########
 function check_upgrade_vanilla() {
-	local url;
+	local basename url;
+
+
+	## find the name of the latest version
+	echo_out "Scraping official page for download link...";
 	url="$(wget -q -O - "$MC_DOWNLOAD_PAGE" | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")')";
+	echo_out "...done";
+	echo_debug "url $url";
 
-	echo_out "Checking for upgrade for minecraft_server.jar (Vanilla)";
-	as_user "cd $MCPATH && wget -q -O $MCPATH/minecraft_server.latest.jar $url";
+	basename="$(basename "$url")";
+	echo_debug "basename $basename";
 
-	if [ ! -r "$MCPATH/minecraft_server.latest.jar" ]; then
-		echo_err "Couldn't download minecraft_server.jar; quitting";
+
+	## if we've not got the latest version, fetch
+	if [ ! -f "$MCPATH/$basename" ]; then
+		echo_out "Fetching Jar from official page...";
+		wget -q -O "$MCPATH/$basename" "$url" >/dev/null;
+		echo_out "...done";
+	fi;
+	if [ ! -f "$MCPATH/$basename" ]; then
+		echo_err "Failed to fetch latest Jar; quitting";
 		return 1;
 	fi;
 
-	if ( diff "$MCPATH/$MC_JAR" "$MCPATH/minecraft_server.latest.jar" >/dev/null ); then
-		echo_out "You are already running the latest version of minecraft_server.jar";
-		return 1;
+
+	## if running latest, no upgrade needed
+	if ( diff "$MCPATH/$MC_JAR" "$MCPATH/$basename" >/dev/null ); then
+		echo_info "You are already running the latest version of $MC_JAR";
+		return 2;
 	fi;
 
-	echo_out "Upgrade of $MC_JAR is available";
+
+	echo_out "Upgrade available";
 	return 0
 }
 
