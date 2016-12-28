@@ -1148,6 +1148,7 @@ function check_upgrade_vanilla() {
 
 	## find the name of the latest version
 	echo_out "Scraping official page for download link...";
+	echo_debug "MC_DOWNLOAD_PAGE $MC_DOWNLOAD_PAGE";
 	url="$(wget -q -O - "$MC_DOWNLOAD_PAGE" | grep --perl-regexp --only-matching --regexp='(?<=href=")http[^"]*minecraft_server[^"]*\.jar(?=")')";
 	echo_out "...done";
 	echo_debug "url $url";
@@ -1157,9 +1158,10 @@ function check_upgrade_vanilla() {
 
 
 	## if we've not got the latest version, fetch
+	echo_debug "MCPATH $MCPATH";
 	if [ ! -f "$MCPATH/$basename" ]; then
 		echo_out "Fetching Jar from official page...";
-		wget -q -O "$MCPATH/$basename" "$url" >/dev/null;
+		as_user "wget -q -O \"$MCPATH/$basename\" \"$url\" >/dev/null";
 		echo_out "...done";
 	fi;
 	if [ ! -f "$MCPATH/$basename" ]; then
