@@ -1127,6 +1127,51 @@ to_disk() {
 
 
 ########
+# Fetches the appropriate Jar and compares it to the current one
+#
+# Globals
+#	FLAVOUR		Are we running vanilla MineCraft? Other?
+#
+# Arguments
+#	None
+#
+# Returns
+#	0			Success; upgrade needed
+#	1			Failure
+#	2			Success; upgrade NOT needed
+########
+function check_upgrade() {
+
+	## check Flavour; call sub-function; return from sub-function
+	echo_debug "FLAVOUR $FLAVOUR";
+	case "$FLAVOUR" in
+		'vanilla')
+			is_vanilla_upgrade_available;
+			return $?;
+			;;
+
+
+		'bukkit')
+			check_upgrade_craftbukkit;
+			return $?;
+			;;
+
+
+		## handle unrecognised Flavour
+		*)
+			echo_err "Flavour ('$FLAVOUR') should be 'vanilla' or 'bukkit'; quitting";
+			return 1;
+			;;
+	esac;
+
+
+	## we should never reach here
+	return 1;
+}
+
+
+
+########
 # Scrape the official download page, looking for $MC_JAR. If found, check version.
 #
 # Globals
@@ -1779,10 +1824,7 @@ function route_command() {
 
 
 		check-upgrade)
-			check_upgrade_vanilla
-			check_upgrade_craftbukkit
-			as_user "rm $MCPATH/minecraft_server.latest.jar"
-			as_user "rm $MCPATH/craftbukkit.latest.jar"
+			check_upgrade || return 1;
 			;;
 
 
