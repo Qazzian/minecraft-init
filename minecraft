@@ -85,7 +85,7 @@ VERBOSITY=$VERBOSITY_DEFAULT;
 # Output the current version of MineCraft-Init
 ########
 function echo_mci_version() {
-	echo_quiet '2.7.2';
+	echo_quiet '2.7.3';
 	return 0;
 }
 
@@ -292,7 +292,7 @@ function echo_usage {
 	echo_out "   playercount \t\t Prints the number of connected users";
 	echo_out "   status \t\t Displays server status";
 	echo_out "   version \t\t Displays Bukkit version and then exits";
-	echo_out "   links \t\t Creates nessesary symlinks";
+	echo_out "   link-worlds \t\t Creates necessary symlinks from your server folder to your saved world";
 	echo_out "   last \t\t Displays recently connected users";
 	echo_out "   worlds \t\t Displays a list of available worlds";
 	echo_out "   ramdisk WORLD \t Toggles ramdisk configuration for WORLD";
@@ -857,12 +857,12 @@ get_worlds() {
 	do
 		if [ -d $WORLDSTORAGE/$NAME ]
 		then
-			WORLDNAME[$a]=$NAME
+			WORLD_NAMES[$a]=$NAME
 			if [ -e $WORLDSTORAGE/$NAME/ramdisk ]
 			then
-				WORLDRAM[$a]=true
+				WORLD_RAM_STATES[$a]=true
 			else
-				WORLDRAM[$a]=false
+				WORLD_RAM_STATES[$a]=false
 			fi
 			a=$a+1
 		fi
@@ -900,7 +900,7 @@ mc_world_backup() {
 	#
 
 	check_backup_settings
-	get_worlds
+	get_worlds || return 1;
 	today="`date +%F-%H-%M-%S`"
 	as_user "mkdir -p $BACKUPPATH"
 
@@ -912,93 +912,169 @@ mc_world_backup() {
 		as_user "rm -r $BACKUPPATH/*"
 	fi
 
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		echo_out "Backing up minecraft ${WORLDNAME[$INDEX]}"
-		if [ "$WORLDEDITCOMPATIBLE" ]
+
+	## declare vars
+	local index world_name;
+
+
+	for index in "${!WORLD_NAMES[@]}"; do
+		world_name="${WORLD_NAMES[$INDEX]}";
+
+
+		echo_out "Backing up minecraft $world_name";
+
+
 		# If this is set tars will be created compatible to WorldEdit
-		then
-			as_user "mkdir -p $BACKUPPATH/${WORLDNAME[$INDEX]}"
-			path=`datepath $BACKUPPATH/${WORLDNAME[$INDEX]}/ $ARCHIVEENDING $ARCHIVEENDING`
-		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]
+		if [ "$WORLDEDITCOMPATIBLE" ]; then
+			as_user "mkdir -p $BACKUPPATH/$world_name";
+			path="$(datepath $BACKUPPATH/$world_name/ $ARCHIVEENDING $ARCHIVEENDING)";
+
+
 		# If is set tars will be put in $BACKUPPATH without any timestamp to be compatible with
 		# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
-		then
-			path=$BACKUPPATH/${WORLDNAME[$INDEX]}$ARCHIVEENDING
+		elif [ "$BACKUPSCRIPTCOMPATIBLE" ]; then
+			path="$BACKUPPATH/$world_name$ARCHIVEENDING";
+
+
 		else
-			as_user "mkdir -p $BACKUPPATH/${today}"
-			path=`datepath $BACKUPPATH/${today}/${WORLDNAME[$INDEX]}_ $ARCHIVEENDING $ARCHIVEENDING`
-		fi
-		if [ "$WORLDEDITCOMPATIBLE" ]
+			as_user "mkdir -p $BACKUPPATH/${today}";
+			path="$(datepath $BACKUPPATH/${today}/$world_name_ $ARCHIVEENDING $ARCHIVEENDING)";
+		fi;
+
+
 		# Don't store the complete path
-		then
-			as_user "cd $MCPATH && $COMPRESSCMD $path ${WORLDNAME[$INDEX]}"
+		if [ "$WORLDEDITCOMPATIBLE" ]; then
+			as_user "cd $MCPATH && $COMPRESSCMD $path $world_name";
 		else
-			as_user "$COMPRESSCMD $path $MCPATH/${WORLDNAME[$INDEX]}"
-		fi
-	done
+			as_user "$COMPRESSCMD $path $MCPATH/$world_name";
+		fi;
+	done;
+
+
+	return 0;
 }
 
 
-check_links() {
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		if [[ -L $MCPATH/${WORLDNAME[$INDEX]} || ! -a $MCPATH/${WORLDNAME[$INDEX]} ]]
-		then
-			link=`ls -l $MCPATH/${WORLDNAME[$INDEX]} | awk '{print $11}'`
-			if ${WORLDRAM[$INDEX]}
-			then
-				if [ "$link" != "$RAMDISK/${WORLDNAME[$INDEX]}" ]
-				then
-					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
-					as_user "ln -s $RAMDISK/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
-					echo_out "Created link for ${WORLDNAME[$INDEX]}"
-				fi
-			else
-				if [ "$link" != "${WORLDSTORAGE}/${WORLDNAME[$INDEX]}" ]
-				then
-					as_user "rm -f $MCPATH/${WORLDNAME[$INDEX]}"
-					as_user "ln -s ${WORLDSTORAGE}/${WORLDNAME[$INDEX]} $MCPATH/${WORLDNAME[$INDEX]}"
-					echo_out "Created link for ${WORLDNAME[$INDEX]}"
-				fi
-			fi
-		else
-			echo_err "Could not process the world named '${WORLDNAME[$INDEX]}'. Please move all worlds to ${WORLDSTORAGE}."
 
-			exit 1
-		fi
-	done
+########
+# Loops through WORLD_NAMES, (re)creating a link for each world in $MCPATH
+#
+# Globals
+#	MCPATH				Path to the server jar; where symlinks-to-worlds should be created
+#	WORLD_NAMES			List of world-names
+#	WORLD_RAM_STATES	Boolean list of whether each world should use the ram-disk
+#	WORLDSTORAGE		Where, on disk, games are saved
+#
+# Arguments
+#	None
+#
+# Returns
+#	0		Success
+#	1		Failure
+########
+function symlink_worlds_inside_MCPATH() {
+	get_worlds || return 1;
+
+
+	## declare vars
+	local index link world_name world_ram_state;
+
+
+	echo_debug "WORLD_NAMES ${WORLD_NAMES[*]}";
+	for index in "${!WORLD_NAMES[@]}"; do
+		echo_debug "index $index";
+		echo_debug "WORLD_NAMES ${WORLD_NAMES[$index]}";
+
+
+		world_name="${WORLD_NAMES[$index]}";
+		echo_debug "world_name $world_name";
+
+
+		## if there's something wrong with the (non-)link, crash
+		## L := symlink
+		## e := exists
+		if [[ -e "$MCPATH/$world_name" && ! -L "$MCPATH/$world_name" ]]; then
+			echo_err "Could not process the world named '$world_name'. Please move all worlds to ${WORLDSTORAGE}. Crashing";
+			exit 1;
+		fi;
+
+
+		## if we've already got a symlink, see where it points
+		link="$(readlink "$MCPATH/$world_name")";
+		echo_debug "link $link";
+
+
+		world_ram_state="${WORLD_RAM_STATES[$index]}";
+		echo_debug "world_ram_state $world_ram_state";
+		if ${world_ram_state}; then
+			if [ "$link" != "$RAMDISK/$world_name" ]; then
+				as_user "rm -f $MCPATH/$world_name";
+				as_user "ln -s $RAMDISK/$world_name $MCPATH/$world_name";
+				echo_out "Created link for World '$world_name'";
+			fi;
+		else
+			if [ "$link" != "${WORLDSTORAGE}/$world_name" ]; then
+				as_user "rm -f $MCPATH/$world_name";
+				as_user "ln -s ${WORLDSTORAGE}/$world_name $MCPATH/$world_name";
+				echo_out "Created link for World '$world_name'";
+			fi;
+		fi;
+	done;
+
+
+	return 0;
 }
 
 
 to_ram() {
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		if ${WORLDRAM[$INDEX]}
-		then
-			if [ -L $MCPATH/${WORLDNAME[$INDEX]} ]
-			then
-				as_user "mkdir -p $RAMDISK"
-				as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}/ $RAMDISK/${WORLDNAME[$INDEX]}"
-				echo_out "${WORLDNAME[$INDEX]} copied to ram"
-			fi
-		fi
-	done
+	get_worlds || return 1;
+
+
+	## declare vars
+	local index world_name;
+
+
+	for index in "${!WORLD_NAMES[@]}"; do
+		world_name="${WORLD_NAMES[$INDEX]}";
+
+
+		if ${WORLD_RAM_STATES[$INDEX]}; then
+			if [ ! -L "$MCPATH/$world_name" ]; then
+				continue;
+			fi;
+
+
+			as_user "mkdir -p $RAMDISK"
+			as_user "rsync -rt --exclude 'ramdisk' ${WORLDSTORAGE}/$world_name/ $RAMDISK/$world_name"
+			echo_out "World '$world_name' copied to ram"
+		fi;
+	done;
+
+
+	return 0;
 }
 
 
 to_disk() {
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		if ${WORLDRAM[$INDEX]}
-		then
-			as_user "rsync -rt --exclude 'ramdisk' $MCPATH/${WORLDNAME[$INDEX]}/ ${WORLDSTORAGE}/${WORLDNAME[$INDEX]}"
-			echo_out "${WORLDNAME[$INDEX]} copied to disk"
-		fi
-	done
+	get_worlds || return 1;
+
+
+	## declare vars
+	local index world_name;
+
+
+	for index in "${!WORLD_NAMES[@]}"; do
+		world_name="${WORLD_NAMES[$INDEX]}";
+
+
+		if ${WORLD_RAM_STATES[$INDEX]}; then
+			as_user "rsync -rt --exclude 'ramdisk' $MCPATH/$world_name/ ${WORLDSTORAGE}/$world_name"
+			echo_out "World '$world_name' copied to disk"
+		fi;
+	done;
+
+
+	return 0;
 }
 
 
@@ -1167,18 +1243,27 @@ overviewer_start() {
 }
 
 
-overviewer_copy_worlds() {
-	#
-	# Backup the worlds for overviewer
-	#
 
-	get_worlds
-	for INDEX in ${!WORLDNAME[@]}
-	do
-		echo_out "Copying minecraft ${WORLDNAME[$INDEX]}."
+########
+# Backup the worlds for overviewer
+########
+overviewer_copy_worlds() {
+	get_worlds || return 1;
+
+
+	## declare vars
+	local index world_name;
+
+
+	for index in "${!WORLD_NAMES[@]}"; do
+		world_name="${WORLD_NAMES[$INDEX]}";
+
+		echo_out "Copying minecraft $world_name."
 		as_user "mkdir -p $OVBACKUP"
-		as_user "rsync -rt --delete $WORLDSTORAGE/${WORLDNAME[$INDEX]} $OVBACKUP/${WORLDNAME[$INDEX]}"
-	done
+		as_user "rsync -rt --delete $WORLDSTORAGE/$world_name $OVBACKUP/$world_name"
+	done;
+
+	return 0;
 }
 
 
@@ -1428,13 +1513,17 @@ function route_command() {
 	echo_debug "INIT_SUBCOMMAND=$INIT_SUBCOMMAND";
 
 
+	## declare vars
+	local index;
+
+
 	case "$INIT_COMMAND" in
 		start)
 			# Starts the server
 			if is_running; then
 				echo_out "Server already running."
 			else
-				check_links
+				symlink_worlds_inside_MCPATH || return 1;
 				to_ram
 				mc_start
 			fi
@@ -1462,7 +1551,7 @@ function route_command() {
 			else
 				echo_out "No running server, starting it..."
 			fi
-			check_links
+			symlink_worlds_inside_MCPATH || return 1;
 			to_ram
 			mc_start
 			;;
@@ -1529,7 +1618,7 @@ function route_command() {
 				mc_stop
 				to_disk
 				mc_whole_backup
-				check_links
+				symlink_worlds_inside_MCPATH || return 1;
 				mc_start
 			else
 				mc_whole_backup
@@ -1553,7 +1642,7 @@ function route_command() {
 				to_disk
 				mc_whole_backup
 				mc_update
-				check_links
+				symlink_worlds_inside_MCPATH || return 1;
 				mc_start
 			else
 				mc_whole_backup
@@ -1675,7 +1764,14 @@ function route_command() {
 
 
 		links)
-			check_links
+			echo_err "'$SELF links' is deprecated; use '$SELF link-worlds'; quitting";
+			return 1;
+			;;
+
+
+		'link-worlds')
+			symlink_worlds_inside_MCPATH || return 1;
+			echo_out "Re-built links to saved worlds";
 			;;
 
 
@@ -1685,16 +1781,14 @@ function route_command() {
 
 
 		worlds)
-			get_worlds
-			for INDEX in ${!WORLDNAME[@]}
-			do
-				if ${WORLDRAM[$INDEX]}
-				then
-					echo_quiet "${WORLDNAME[$INDEX]} (ramdisk)"
+			get_worlds || return 1;
+			for index in "${!WORLD_NAMES[@]}"; do
+				if ${WORLD_RAM_STATES[$index]}; then
+					echo_quiet "${WORLD_NAMES[$index]} (ramdisk)";
 				else
-					echo_quiet ${WORLDNAME[$INDEX]}
-				fi
-			done
+					echo_quiet "${WORLD_NAMES[$index]}";
+				fi;
+			done;
 			;;
 
 
@@ -1722,7 +1816,7 @@ function route_command() {
 			read START_SERVER
 			case "$START_SERVER" in
 				[Yy]|[Yy][Ee][Ss])
-					check_links
+					symlink_worlds_inside_MCPATH || return 1;
 					to_ram
 					mc_start
 					as_user "script /dev/null -q -c \"screen -rx $SCREEN\""

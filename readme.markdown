@@ -57,7 +57,7 @@ Setup
 
 5. To load a world from ramdisk run:
 
-		/etc/init.d/minecraft ramdisk WORLDNAME
+		/etc/init.d/minecraft ramdisk <world-name>
 
 	to disable ramdisk, run the same command again.
 
