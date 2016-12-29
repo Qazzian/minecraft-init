@@ -1211,7 +1211,7 @@ function check_update_craftbukkit() {
 }
 
 
-mc_update() {
+function jar_upgrade() {
 	if is_running
 	then
 		echo_err "$SERVICE is running! Will not start update";
@@ -1708,12 +1708,12 @@ function route_command() {
 				mc_stop
 				to_disk
 				mc_whole_backup
-				mc_update
+				jar_upgrade
 				symlink_worlds_inside_MCPATH || return 1;
 				mc_start
 			else
 				mc_whole_backup
-				mc_update
+				jar_upgrade
 			fi
 			;;
 
