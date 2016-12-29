@@ -225,6 +225,13 @@ function log_by_level() {
 	if [ "$1" -gt "$VERBOSITY" ]; then return 0; fi
 
 
+	## if we haven't loaded the config yet, echo to stdout
+	if [ -z "${MCPATH-}" ]; then
+		echo -e "$2" >&2;
+		return 0;
+	fi;
+
+
 	# if can't write to file, crash
 	if [ ! -f "$MCPATH/logs/latest.log" ]; then
 		echo_err "Can't find latest.log in $MCPATH/logs/; crashing";
